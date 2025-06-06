@@ -1,15 +1,24 @@
+import { signInWithPopup } from "firebase/auth";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
+import { auth, googleProvider } from "../../configs/firebase";
 
 const GoogleLoginButton = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const handleGoogleLogin = async () => {
+    
     try {
       setIsLoading(true);
       setError(null);
-      // Simulate authentication delay
+      // Simulate authentication delay\
+      const result = await signInWithPopup(auth, googleProvider);
+
+      // The signed-in user info.
+      const token = result.user.accessToken;
+      console.log(token);
+
       await new Promise((resolve) => setTimeout(resolve, 1500));
       // Add your actual Google authentication logic here
     } catch (err) {
