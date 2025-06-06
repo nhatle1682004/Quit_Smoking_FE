@@ -169,7 +169,7 @@ function HomePage() {
         <div className="services-section">
           <div className="service-block">
             <div className="service-icon support-icon"></div>
-            <h3>DƯỢC PHẨM HỖ TRỢ CAI THUỐC LÁ</h3>
+            <h3>DƯỢC PHẨM HỖ TRỢ CAI THUỐC LÁ AN TOÀN VÀ HIỆU QUẢ</h3>
             <div className="service-image">
               <img src="https://via.placeholder.com/300x200" alt="Quitting support products" />
             </div>
@@ -194,6 +194,69 @@ function HomePage() {
       </div>
       
       {/* Footer would go here */}
+
+      <footer className="bg-gray-900 text-white py-8">
+        <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Quick Links */}
+          <div>
+            <h3 className="font-semibold mb-3">Liên kết nhanh</h3>
+            <ul className="space-y-2 text-gray-300">
+              <li><a href="/" className="hover:text-white transition-colors">Trang chủ</a></li>
+              <li><a href="/about-us" className="hover:text-white transition-colors">Về chúng tôi</a></li>
+              <li><a href="/services-products" className="hover:text-white transition-colors">Dịch vụ & Sản phẩm</a></li>
+              <li><a href="/contact" className="hover:text-white transition-colors">Liên hệ</a></li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h3 className="font-semibold mb-3">Liên hệ</h3>
+            <p className="text-gray-300 text-sm">
+              Địa chỉ: 123 Đường ABC, Quận 1, TP.HCM <br />
+              Điện thoại: 0123 456 789 <br />
+              Email: cainghienthuocla64@gmail.com
+            </p>
+          </div>
+
+          {/* Newsletter */}
+          <div>
+            <h3 className="font-semibold mb-3">Liên Hệ Với Chúng Tôi</h3>
+            <form className="space-y-3">
+              <div>
+                <input
+                  type="text"
+                  placeholder="Họ và tên"
+                  className="w-full px-3 py-2 bg-gray-800 rounded text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <input
+                  type="email"
+                  placeholder="Email của bạn"
+                  className="w-full px-3 py-2 bg-gray-800 rounded text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <textarea
+                  placeholder="Nội dung tin nhắn"
+                  rows="3"
+                  className="w-full px-3 py-2 bg-gray-800 rounded text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                ></textarea>
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors"
+              >
+                Gửi tin nhắn
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div className="border-t border-gray-700 mt-8 pt-4 text-center text-sm text-gray-500">
+          © {new Date().getFullYear()} Quit Smoking Platform. All rights reserved.
+        </div>
+      </footer>
     </div>
   );
 }

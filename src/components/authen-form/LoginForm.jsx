@@ -32,7 +32,7 @@ function LoginForm() {
       console.log(e);
       toast.error("Login failed!");
       // show ra màn hình cho người dùng biết lỗi
-      // toast.error(e.data.data);
+       toast.error(e.data.data);
     }
   };
   const onFinishFailed = (errorInfo) => {
@@ -69,11 +69,16 @@ function LoginForm() {
         </Form.Item>
 
         <Form.Item label={null}>
-          <Button type="primary" htmlType="submit">
+          <Button  type="primary" htmlType="submit" >
             Submit
           </Button>
         </Form.Item>
       </Form>
+
+      <div className="divider">
+        <span>or</span>
+      </div>
+
       <GoogleLoginButton />
     </div>
   );
