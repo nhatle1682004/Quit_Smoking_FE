@@ -1,0 +1,121 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+header {
+    background-color: #f8f8f8; /* Adjust as needed */
+    padding: 10px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.logo {
+    height: 50px; /* Adjust as needed */
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+}
+
+.header-actions a {
+    margin-right: 15px;
+    text-decoration: none;
+    color: #333;
+}
+
+.flag {
+    height: 20px; /* Adjust as needed */
+    margin-left: 5px;
+}
+
+.search-box input {
+    padding: 5px;
+    border: 1px solid #ccc;
+}
+
+.search-box button {
+    padding: 5px 10px;
+    background-color: #d9534f; /* Adjust to match image */
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    background-color: #a94442; /* Adjust to match image */
+}
+
+nav ul li {
+    margin-right: 20px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: white;
+    padding: 10px 0;
+    display: block;
+}
+
+.breadcrumbs {
+    padding: 10px 20px;
+    background-color: #f0f0f0;
+    font-size: 0.9em;
+}
+
+main {
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.stories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.story-item {
+    text-align: center;
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.story-image {
+    width: 150px; /* Adjust size as needed */
+    height: 150px; /* Adjust size as needed */
+    border-radius: 50%; /* Makes the image circular */
+    object-fit: cover; /* Ensures the image covers the area without distortion */
+    margin-bottom: 15px;
+    border: 3px solid #d9534f; /* Add a border like in the image */
+}
+
+.story-item h3 {
+    color: #d9534f; /* Adjust to match image */
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.story-item p {
+    color: #555;
+    font-size: 0.9em;
+} 

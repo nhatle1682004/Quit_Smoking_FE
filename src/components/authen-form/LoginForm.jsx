@@ -27,7 +27,7 @@ function LoginForm() {
       // type: la ten cua action
       dispatch(login(response.data.data));
       localStorage.setItem("token", response.data.data.token);
-      navigate("/dashboard");
+      navigate("/");
     } catch (e) {
       console.log(e);
       toast.error("Login failed!");
