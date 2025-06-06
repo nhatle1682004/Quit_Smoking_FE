@@ -1,0 +1,9 @@
+.register-form {
+  width: 100%;
+  padding: 0px 30px;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: gray;
+}
