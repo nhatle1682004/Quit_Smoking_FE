@@ -8,3 +8,8 @@ h1 {
   color: gray;
   font-size: 30px;
 }
+
+/* Thêm CSS cho nút submit */
+.register-form .ant-form-item-control-input-content button {
+  width: 100%;
+}

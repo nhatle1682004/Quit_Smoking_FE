@@ -8,3 +8,29 @@ h1 {
   color: gray;
   font-size: 30px;
 }
+
+/* Thêm CSS cho nút submit */
+.login-form .ant-form-item-control-input-content button {
+  width: 100%;
+}
+
+/* CSS cho đường phân cách */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 30px 0;
+  color: #999;
+  font-size: 14px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e1e5e9;
+}
+
+.divider span {
+  padding: 0 15px;
+}
