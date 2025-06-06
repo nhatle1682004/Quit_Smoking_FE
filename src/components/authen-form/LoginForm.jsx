@@ -6,12 +6,13 @@ import api from "../../configs/axios";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { login } from "../../redux/features/userSlice";
+import GoogleLoginButton from "../authen-button/GoogleLoginButton";
 
 function LoginForm() {
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
-  const onFinish =   async (values) => {
+  const onFinish = async (values) => {
     console.log("Success:", values);
     try {
       // values: thông tin người dùng nhập
@@ -25,7 +26,7 @@ function LoginForm() {
       // action: la 1 object co 2 thuoc tinh la type va payload
       // type: la ten cua action
       dispatch(login(response.data.data));
-      localStorage.setItem("token",response.data.data.token);
+      localStorage.setItem("token", response.data.data.token);
       navigate("/dashboard");
     } catch (e) {
       console.log(e);
@@ -77,6 +78,7 @@ function LoginForm() {
           </Button>
         </Form.Item>
       </Form>
+      <GoogleLoginButton />
     </div>
   );
 }

@@ -8,7 +8,7 @@ function HomePage() {
 
   return (
     <div>
-      <h1 >Hello {user?.fullName}!</h1>
+      <h1>Hello {user?.fullName}!</h1>
     </div>
   );
 }
