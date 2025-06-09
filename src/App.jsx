@@ -1,5 +1,7 @@
 import React from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
+import Header from "./header";
+import Footer from "./footer";
 
 import LoginPage from "./pages/login";
 import RegisterPage from "./pages/register";
@@ -19,15 +21,19 @@ function App() {
       path: "/",
       element: (
         <>
-          {/* <Navbar /> */}
+          <Header />
           <Outlet />
-          {/* <Footer /> */}
+          <Footer/>
         </>
       ),
       children: [
         {
           path: "/",
           element: <HomePage />,
+        },
+        {
+          path: "about",
+          element: <div>about</div>,
         },
       ],
     },
@@ -66,7 +72,6 @@ function App() {
           <RouterProvider router={router} />
         </PersistGate>
       </Provider>
-      
     </>
   );
 }

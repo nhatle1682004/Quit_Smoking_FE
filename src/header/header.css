@@ -1,0 +1,309 @@
+/* Header Styles */
+.header {
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 5px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Logo styles */
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 80px;
+  width: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Search styles */
+.search-container {
+  flex: 0 1 400px;
+  margin: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.search-container form {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.header .search-container input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #b71c1c;
+  border-radius: 3px 0 0 3px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  height: 40px;
+  box-sizing: border-box;
+  width: 180px;
+}
+
+.search-container input:focus {
+  outline: none;
+  border-color: #b71c1c;
+  box-shadow: 0 0 0 2px rgba(183, 28, 28, 0.1);
+}
+
+.search-btn {
+  padding: 10px 20px;
+  background-color: #b71c1c;
+  color: white;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
+  min-width: 100px;
+  text-align: center;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.search-btn:hover {
+  background-color: #8b0000;
+}
+
+/* Auth buttons */
+.auth-language-container {
+  display: flex;
+  align-items: center;
+  height: 40px;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  height: 100%;
+}
+
+.auth-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  text-align: center;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.login-btn {
+  background-color: transparent;
+  color: #b71c1c;
+  border: 1px solid #b71c1c;
+}
+
+.login-btn:hover {
+  background-color: #b71c1c;
+  color: red;
+}
+
+.register-auth-btn {
+  background-color: #b71c1c;
+  color: white;
+  border: 1px solid #b71c1c;
+}
+
+.register-auth-btn:hover {
+  background-color: #8b0000;
+  border-color: #8b0000;
+}
+
+/* Main navigation */
+.main-navbar {
+  background-color: #b71c1c;
+  margin-top: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  border-bottom: 1px solid orange;
+  margin-bottom: 0;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* Styles for the <li> element (the actual menu item container) */
+.nav-item {
+  background-color: #b71c1c;
+  transition: background-color 0.3s ease;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+  padding: 1.2rem 1rem;
+}
+
+.nav-item:first-child {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-item:hover {
+  background-color: #8b0000;
+}
+
+/* Styles for the <a> element (the clickable link inside the menu item) */
+.nav-button {
+  color: #FFFFFF;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: normal;
+  background-color: transparent;
+  transition: none;
+}
+
+/* Remove right border for the very last item in the grid */
+.nav-item:last-child {
+  border-right: none;
+}
+
+/* Removed styles for empty frames as they are no longer in index.jsx */
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .header-container {
+    padding: 0 15px;
+  }
+
+  .search-container {
+    flex: 0 1 300px;
+    margin: 0;
+  }
+
+  .nav-menu {
+    grid-template-columns: repeat(3, 1fr); /* Example: 3 columns on tablet */
+  }
+
+  /* Hide empty frames on smaller screens */
+  .nav-item:first-child,
+  .nav-item:last-child {
+    display: none;
+  }
+
+  .nav-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Thin white bottom border */
+    border-right: 1px solid rgba(255, 255, 255, 0.2); /* Thin white right border for 3-column layout */
+    box-sizing: border-box; /* Ensures padding/border is included in total size */
+  }
+
+  .nav-item:nth-child(3n) {
+    border-right: none; /* Remove right border for every 3rd item */
+  }
+
+  .nav-item:last-child {
+    border-bottom: none; /* Ensure no bottom border for the very last item in 3-column layout */
+  }
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .header-right {
+    flex-direction: column;
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .search-container {
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  .auth-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .auth-language-container {
+    margin-top: 10px;
+  }
+
+  .main-navbar {
+    padding: 0;
+  }
+
+  .nav-menu {
+    grid-template-columns: 1fr; /* Single column on mobile */
+  }
+
+  .nav-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Thin white bottom border */
+    border-right: none; /* No right border in single column layout */
+    box-sizing: border-box; /* Ensures padding/border is included in total size */
+  }
+
+  .nav-item:last-child {
+    border-bottom: none;
+  }
+
+  .nav-button {
+    padding: 15px 10px;
+    box-sizing: border-box; /* Ensures padding/border is included in total size */
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 10px 0;
+  }
+
+  .logo {
+    height: 50px;
+  }
+
+  .auth-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
