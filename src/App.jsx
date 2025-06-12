@@ -9,10 +9,11 @@ import Dashboard from "./components/dashboard";
 import { Provider } from "react-redux";
 import { persistor, store } from "./redux/store";
 import { PersistGate } from "redux-persist/integration/react";
-import Notifications from './pages/dashboard-admin/notifications/index';
+import Notifications from "./pages/dashboard-admin/notifications/index";
 import BlogModeration from "./pages/dashboard-admin/blog-moderation";
 import UpgradeSuggestions from "./pages/dashboard-admin/upgrade-suggestions/index";
 import UserManagement from "./pages/dashboard-admin/user-management";
+import Footer from "./components/footer";
 
 function App() {
   const router = createBrowserRouter([
@@ -22,7 +23,7 @@ function App() {
         <>
           <Header />
           <Outlet />
-          {/* <Footer/> */}
+          <Footer />
         </>
       ),
       children: [
@@ -63,20 +64,12 @@ function App() {
     {
       path: "/dashboard",
       element: <Dashboard />,
-      children:[
-        {path:"notifications",
-          element:<Notifications/> 
-        },
-        {path:"blogModeration",
-          element:<BlogModeration/> 
-        },
-        {path:"upgradeSuggestions",
-          element:<UpgradeSuggestions/> 
-        },
-        {path:"userManagement",
-          element:<UserManagement/> 
-        },
-      ]
+      children: [
+        { path: "notifications", element: <Notifications /> },
+        { path: "blogModeration", element: <BlogModeration /> },
+        { path: "upgradeSuggestions", element: <UpgradeSuggestions /> },
+        { path: "userManagement", element: <UserManagement /> },
+      ],
     },
   ]);
 
