@@ -1,125 +1,128 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { FaPhone, FaEnvelope, FaComments, FaAmbulance, FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaHeart, FaMedal, FaDownload, FaMobileAlt } from "react-icons/fa";
 
-function Footer() {
-  const navigate = useNavigate();
+const Footer = () => {
+  const [email, setEmail] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setEmail("");
+  };
+
+  const menuItems = [
+    { id: 1, label: "Trang chủ", href: "/home" },
+    { id: 2, label: "Giới thiệu", href: "/about" },
+    { id: 3, label: "Kiến thức chung", href: "/services" },
+    { id: 4, label: "Dịch vụ & Sản phẩm", href: "/product" },
+    { id: 5, label: "Gương cai thuốc thành công", href: "/news" },
+    { id: 6, label: "Liên hệ", href: "/contact" },
+  ];
 
   return (
-    <footer className="bg-[#3498db] text-white py-6">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Cột 1: Về chúng tôi */}
-          <div>
-            <h3 className="text-base font-bold mb-2">Về chúng tôi</h3>
-            <ul className="space-y-1 text-sm">
-              <li>
-                <button
-                  onClick={() => navigate("/")}
-                  className="hover:text-gray-200 transition-colors"
-                >
-                  Trang chủ
-                </button>
+    <footer className="bg-gradient-to-r from-blue-50 to-green-50">
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-blue-700">Liên Kết Nhanh</h3>
+            <ul className="space-y-2">
+              {menuItems.map((item) => (
+                <li key={item.id}>
+                  <a 
+                    href={item.href} 
+                    className="text-gray-600 hover:text-blue-600 transition duration-300"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-blue-700">Liên Hệ Hỗ Trợ</h3>
+            <ul className="space-y-3">
+              <li className="flex items-center space-x-2">
+                <FaPhone className="text-green-600" />
+                <span className="text-gray-600">1900-1234</span>
               </li>
-              <li>
-                <button
-                  onClick={() => navigate("/services")}
-                  className="hover:text-gray-200 transition-colors"
-                >
-                  Dịch vụ
-                </button>
+              <li className="flex items-center space-x-2">
+                <FaEnvelope className="text-green-600" />
+                <span className="text-gray-600">hotro@caithuoc.vn</span>
               </li>
-              <li>
-                <button
-                  onClick={() => navigate("/blog")}
-                  className="hover:text-gray-200 transition-colors"
-                >
-                  Blog
-                </button>
+              <li className="flex items-center space-x-2">
+                <FaComments className="text-green-600" />
+                <span className="text-gray-600">Hỗ Trợ Trực Tuyến 24/7</span>
               </li>
-              <li>
-                <button
-                  onClick={() => navigate("/contact")}
-                  className="hover:text-gray-200 transition-colors"
-                >
-                  Liên hệ
-                </button>
+              <li className="flex items-center space-x-2">
+                <FaAmbulance className="text-green-600" />
+                <span className="text-gray-600">Cấp Cứu: 115</span>
               </li>
             </ul>
           </div>
 
-          {/* Cột 2: Liên kết nhanh */}
-          <div>
-            <h3 className="text-base font-bold mb-2">Liên kết nhanh</h3>
-            <ul className="space-y-1 text-sm">
-              <li>
-                <button
-                  onClick={() => navigate("/news")}
-                  className="hover:text-gray-200 transition-colors"
-                >
-                  Tin tức
-                </button>
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-blue-700">Tài Nguyên</h3>
+            <ul className="space-y-2">
+              <li className="flex items-center space-x-2">
+                <FaHeart className="text-green-600" />
+                <a href="#" className="text-gray-600 hover:text-blue-600 transition duration-300">Động Lực Hàng Ngày</a>
               </li>
-              <li>
-                <button
-                  onClick={() => navigate("/success-stories")}
-                  className="hover:text-gray-200 transition-colors"
-                >
-                  Gương thành công
-                </button>
+              <li className="flex items-center space-x-2">
+                <FaDownload className="text-green-600" />
+                <a href="#" className="text-gray-600 hover:text-blue-600 transition duration-300">Kế Hoạch Cai Thuốc</a>
               </li>
-              <li>
-                <button
-                  onClick={() => navigate("/faqs")}
-                  className="hover:text-gray-200 transition-colors"
-                >
-                  Câu hỏi thường gặp
-                </button>
+              <li className="flex items-center space-x-2">
+                <FaMedal className="text-green-600" />
+                <a href="#" className="text-gray-600 hover:text-blue-600 transition duration-300">Câu Chuyện Thành Công</a>
+              </li>
+              <li className="flex items-center space-x-2">
+                <FaMobileAlt className="text-green-600" />
+                <a href="#" className="text-gray-600 hover:text-blue-600 transition duration-300">Ứng Dụng Di Động</a>
               </li>
             </ul>
           </div>
 
-          {/* Cột 3: Liên hệ */}
-          <div>
-            <h3 className="text-base font-bold mb-2">Liên hệ</h3>
-            <p className="mb-1 text-sm">Địa chỉ: 123 Đường Sức Khỏe, TP. HCM</p>
-            <p className="mb-1 text-sm">Điện thoại: 0123 456 789</p>
-            <p className="text-sm">Email: support@cainghienthuocla.vn</p>
-          </div>
-
-          {/* Cột 4: Gửi câu hỏi */}
-          <div>
-            <h3 className="text-base font-bold mb-2">
-              Gửi câu hỏi cho chúng tôi
-            </h3>
-            <form>
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-blue-700">Kết Nối</h3>
+            <p className="text-gray-600">Tham gia cộng đồng của chúng tôi để nhận hỗ trợ và động lực hàng ngày.</p>
+            <form onSubmit={handleSubmit} className="space-y-2">
               <input
                 type="email"
-                placeholder="Email của bạn"
-                className="w-full p-1.5 mb-1.5 text-sm rounded bg-white/20 text-white placeholder:text-white/70 border border-white/30"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Nhập email của bạn"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
-              <textarea
-                placeholder="Câu hỏi..."
-                className="w-full p-1.5 mb-1.5 text-sm rounded bg-white/20 text-white placeholder:text-white/70 border border-white/30 h-12"
-                required
-              ></textarea>
               <button
                 type="submit"
-                className="bg-white text-[#3498db] px-3 py-1.5 rounded text-sm hover:bg-gray-100 transition-colors font-medium"
+                className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition duration-300"
               >
-                Gửi
+                Đăng Ký
               </button>
             </form>
           </div>
         </div>
-      </div>
 
-      <div className="text-center text-sm pt-4 mt-4 border-t border-white/20">
-        &copy; {new Date().getFullYear()} Cai Nghiện Thuốc Lá. All rights
-        reserved.
+        <div className="mt-12 pt-8 border-t border-gray-200">
+          <div className="text-center">
+            <p className="text-green-600 font-medium mb-2">Bạn Có Thể Làm Được! Mỗi Ngày Không Hút Thuốc Là Một Chiến Thắng.</p>
+            <p className="text-sm text-gray-500 mb-4">Hãy nhớ rằng, bạn không đơn độc trong hành trình này. Chúng tôi luôn ở đây để hỗ trợ bạn 24/7.</p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500">
+            <a href="#" className="hover:text-blue-600 transition duration-300">Chính Sách Bảo Mật</a>
+            <span>|</span>
+            <a href="#" className="hover:text-blue-600 transition duration-300">Điều Khoản Sử Dụng</a>
+            <span>|</span>
+            <a href="#" className="hover:text-blue-600 transition duration-300">Tuyên Bố Y Tế</a>
+            <span>|</span>
+            <a href="#" className="hover:text-blue-600 transition duration-300">Bảo Mật Thông Tin</a>
+          </div>
+          <p className="text-center text-sm text-gray-500 mt-4">&copy; {new Date().getFullYear()} Hỗ Trợ Cai Thuốc Lá. Bảo lưu mọi quyền.</p>
+        </div>
       </div>
     </footer>
   );
-}
+};
 
 export default Footer;
