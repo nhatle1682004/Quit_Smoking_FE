@@ -1,7 +1,6 @@
 import React from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
-import Header from "./header";
-import Footer from "./footer";
+import Header from "./components/header";
 
 import LoginPage from "./pages/login";
 import RegisterPage from "./pages/register";
@@ -23,7 +22,7 @@ function App() {
         <>
           <Header />
           <Outlet />
-          <Footer/>
+          {/* <Footer/> */}
         </>
       ),
       children: [
@@ -32,7 +31,23 @@ function App() {
           element: <HomePage />,
         },
         {
+          path: "home",
+          element: <div>about</div>,
+        },
+        {
           path: "about",
+          element: <div>about</div>,
+        },
+        {
+          path: "services",
+          element: <div>about</div>,
+        },
+        {
+          path: "news",
+          element: <div>about</div>,
+        },
+        {
+          path: "contact",
           element: <div>about</div>,
         },
       ],
