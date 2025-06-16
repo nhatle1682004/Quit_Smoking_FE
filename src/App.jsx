@@ -14,8 +14,22 @@ import BlogModeration from "./pages/dashboard-admin/blog-moderation";
 import UpgradeSuggestions from "./pages/dashboard-admin/upgrade-suggestions/index";
 import UserManagement from "./pages/dashboard-admin/user-management";
 import Footer from "./components/footer";
+import InformationPage from "./pages/navbar-page/about";
+import ContactPage from './pages/navbar-page/contact/index';
+import ProductPage from "./pages/navbar-page/product";
+import KnowledgePage from './pages/navbar-page/knowledge/index';
+import BlogPage from "./pages/navbar-page/blog";
+import SuccessStories from "./pages/navbar-page/success/index";
+import SuccessStoryHoChiMinh from "./components/success-story-details/successStoryHoChiMinh";
+import SuccessStoryNguyenVanNgu from "./components/success-story-details/successStoryNguyenVanNgu";
+import SuccessStoryNguyenHieu from "./components/success-story-details/successStoryNguyenHieu";
+import Profile from "./pages/navbar-page/profile";
+// import InitialSurvey from "./pages/initial-survey";
+
+
 
 function App() {
+  // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
   const router = createBrowserRouter([
     {
       path: "/",
@@ -32,24 +46,44 @@ function App() {
           element: <HomePage />,
         },
         {
-          path: "home",
-          element: <div>about</div>,
-        },
-        {
           path: "about",
-          element: <div>about</div>,
+          element: <InformationPage/>,
         },
         {
-          path: "services",
-          element: <div>about</div>,
+          path: "knowledge",
+          element: <KnowledgePage/>,
         },
         {
-          path: "news",
-          element: <div>about</div>,
+          path: "product",
+          element: <ProductPage/>,
+        },
+        {
+          path: "success",
+          element: <SuccessStories/>,
+        },
+        {
+          path: "blog",
+          element: <BlogPage/>,
         },
         {
           path: "contact",
-          element: <div>about</div>,
+          element: <ContactPage/>,
+        },
+        {
+          path: "success-story-details/1",
+          element: <SuccessStoryHoChiMinh/>,
+        },
+        {
+          path: "success-story-details/2",
+          element: <SuccessStoryNguyenVanNgu/>,
+        },
+        {
+          path: "success-story-details/3",
+          element: <SuccessStoryNguyenHieu/>,
+        },
+        {
+          path: "profile",
+          element: <Profile/>,
         },
       ],
     },

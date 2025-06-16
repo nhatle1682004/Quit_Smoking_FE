@@ -4,6 +4,7 @@ import { Button, Checkbox, Form, Input } from "antd";
 import api from "../../configs/axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { UserOutlined, LockOutlined, MailOutlined, IdcardOutlined } from '@ant-design/icons';
 
 function RegisterForm() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ function RegisterForm() {
     try {
       // values: thông tin người dùng nhập
       await api.post("register", values);
-      toast.success("Successfully create new account!");
+      toast.success("Tạo tài khoản thành công!");
       navigate("/login");
     } catch (e) {
       console.log(e);
@@ -30,7 +31,7 @@ function RegisterForm() {
 
   return (
     <div className="register-form">
-      <h1>Register</h1>
+      <h1> Tạo tài khoản mới</h1>
       <Form
         name="basic"
         layout="vertical"
@@ -41,69 +42,69 @@ function RegisterForm() {
         autoComplete="off"
       >
         <Form.Item
-          label="Full Name"
+          label="Họ và tên"
           name="fullName"
-          rules={[{ required: true, message: "Please input your full name!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
         >
-          <Input />
+          <Input prefix={<IdcardOutlined className="text-gray-400" />} placeholder="Nhập họ và tên của bạn" />
         </Form.Item>
 
         <Form.Item
           label="Email"
           name="email"
           rules={[
-            { required: true, message: "Please input your email!" },
-            { type: "email", message: "The input is not valid email!" },
+            { required: true, message: "Vui lòng nhập email!" },
+            { type: "email", message: "Email không hợp lệ!" },
           ]}
         >
-          <Input />
+          <Input prefix={<MailOutlined className="text-gray-400" />} placeholder="Nhập email của bạn" />
         </Form.Item>
 
         <Form.Item
-          label="Username"
+          label="Tên đăng nhập"
           name="username"
-          rules={[{ required: true, message: "Please input your username!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập!" }]}
         >
-          <Input />
+          <Input prefix={<UserOutlined className="text-gray-400" />} placeholder="Nhập tên đăng nhập" />
         </Form.Item>
 
         <Form.Item
-          label="Password"
+          label="Mật khẩu"
           name="password"
           rules={[
-            { required: true, message: "Please input your password!" },
-            { min: 6, message: "Password must be at least 6 characters." },
+            { required: true, message: "Vui lòng nhập mật khẩu!" },
+            { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự." },
           ]}
           hasFeedback
         >
-          <Input.Password />
+          <Input.Password prefix={<LockOutlined className="text-gray-400" />} placeholder="Nhập mật khẩu" />
         </Form.Item>
 
         <Form.Item
-          label="Confirm Password"
+          label="Xác nhận mật khẩu"
           name="confirm"
           dependencies={["password"]}
           hasFeedback
           rules={[
-            { required: true, message: "Please confirm your password!" },
+            { required: true, message: "Vui lòng xác nhận mật khẩu!" },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 if (!value || getFieldValue("password") === value) {
                   return Promise.resolve();
                 }
                 return Promise.reject(
-                  new Error("The two passwords do not match!")
+                  new Error("Mật khẩu không khớp!")
                 );
               },
             }),
           ]}
         >
-          <Input.Password />
+          <Input.Password prefix={<LockOutlined className="text-gray-400" />} placeholder="Nhập lại mật khẩu" />
         </Form.Item>
         
         <Form.Item>
           <Button type="primary" htmlType="submit">
-            Submit
+            Đăng Ký
           </Button>
         </Form.Item>
       </Form>

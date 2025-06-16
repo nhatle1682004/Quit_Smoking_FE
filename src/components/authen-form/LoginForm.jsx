@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { login } from "../../redux/features/userSlice";
 import GoogleLoginButton from "../authen-button/GoogleLoginButton";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
 
 function LoginForm() {
   const navigate = useNavigate();
@@ -15,24 +16,20 @@ function LoginForm() {
   const onFinish = async (values) => {
     console.log("Success:", values);
     try {
-      // values: thông tin người dùng nhập
       const response = await api.post("login", values);
       console.log(response.data);
-      //lưu thông tin đăng nhập của người dùng vào 1 chỗ nào đó mà bất kỳ đâu cũng có thể use được
-      // cái đó gọi là redux == session bên môn prj
-      toast.success("Login successful!");
+      const { role, fullName } = response.data;
+      console.log(role, fullName);
 
-      //dispatch: gui action den redux den redux store
-      // action: la 1 object co 2 thuoc tinh la type va payload
-      // type: la ten cua action
-      dispatch(login(response.data.data));
-      localStorage.setItem("token", response.data.data.token);
-      navigate("/");
+      dispatch(login(response.data));
+      localStorage.setItem("token", response.data.token);
+      toast.success("Đăng nhập thành công!");
+      if (role === "ADMIN") navigate("/dashboard");
+      else if (role === "CUSTOMER") navigate("/");
+
     } catch (e) {
       console.log(e);
-      toast.error("Login failed!");
-      // show ra màn hình cho người dùng biết lỗi
-       toast.error(e.data.data);
+      toast.error(e.response.data);
     }
   };
   const onFinishFailed = (errorInfo) => {
@@ -41,45 +38,60 @@ function LoginForm() {
 
   return (
     <div className="login-form">
-      <h1>Login</h1>
+      <h1>Đăng Nhập</h1>
       <Form
         name="basic"
         layout="vertical"
         labelCol={{ span: 24 }}
-        // wrapperCol={{ span: 16 }}
         initialValues={{ remember: true }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
         autoComplete="off"
       >
         <Form.Item
-          label="Username"
+          label="Tên đăng nhập"
           name="username"
-          rules={[{ required: true, message: "Please input your username!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập!" }]}
         >
-          <Input />
+          <Input
+            prefix={<UserOutlined className="text-gray-400" />}
+            placeholder="Nhập tên đăng nhập"
+          />
         </Form.Item>
 
         <Form.Item
-          label="Password"
+          label="Mật khẩu"
           name="password"
-          rules={[{ required: true, message: "Please input your password!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
         >
-          <Input.Password />
+          <Input.Password
+            prefix={<LockOutlined className="text-gray-400" />}
+            placeholder="Nhập mật khẩu"
+          />
         </Form.Item>
 
         <Form.Item label={null}>
-          <Button  type="primary" htmlType="submit" >
-            Submit
+          <Button type="primary" htmlType="submit">
+            Đăng Nhập
           </Button>
         </Form.Item>
       </Form>
 
       <div className="divider">
-        <span>or</span>
+        <span>hoặc</span>
       </div>
 
       <GoogleLoginButton />
+
+      <p className="mt-4 text-center text-sm">
+        Nếu chưa có tài khoản?{" "}
+        <span
+          className="text-blue-500 cursor-pointer hover:underline"
+          onClick={() => navigate("/register")}
+        >
+          Đăng ký
+        </span>
+      </p>
     </div>
   );
 }
