@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaPhone, FaEnvelope, FaComments, FaAmbulance, FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaHeart, FaMedal, FaDownload, FaMobileAlt } from "react-icons/fa";
+import { FaPhone, FaEnvelope, FaComments, FaAmbulance } from "react-icons/fa";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -10,9 +10,9 @@ const Footer = () => {
   };
 
   const menuItems = [
-    { id: 1, label: "Trang chủ", href: "/home" },
+    { id: 1, label: "Trang chủ", href: "/" },
     { id: 2, label: "Giới thiệu", href: "/about" },
-    { id: 3, label: "Kiến thức chung", href: "/services" },
+    { id: 3, label: "Kiến thức chung", href: "/knowledge" },
     { id: 4, label: "Dịch vụ & Sản phẩm", href: "/product" },
     { id: 5, label: "Gương cai thuốc thành công", href: "/news" },
     { id: 6, label: "Liên hệ", href: "/contact" },
@@ -21,7 +21,7 @@ const Footer = () => {
   return (
     <footer className="bg-gradient-to-r from-blue-50 to-green-50">
       <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-4">
             <h3 className="text-xl font-semibold text-blue-700">Liên Kết Nhanh</h3>
             <ul className="space-y-2">
@@ -42,42 +42,20 @@ const Footer = () => {
             <h3 className="text-xl font-semibold text-blue-700">Liên Hệ Hỗ Trợ</h3>
             <ul className="space-y-3">
               <li className="flex items-center space-x-2">
-                <FaPhone className="text-green-600" />
+                <FaPhone className="text-blue-600" />
                 <span className="text-gray-600">1900-1234</span>
               </li>
               <li className="flex items-center space-x-2">
-                <FaEnvelope className="text-green-600" />
-                <span className="text-gray-600">hotro@caithuoc.vn</span>
+                <FaEnvelope className="text-blue-600" />
+                <span className="text-gray-600">cainghienthuocla64@mail.com</span>
               </li>
               <li className="flex items-center space-x-2">
-                <FaComments className="text-green-600" />
+                <FaComments className="text-blue-600" />
                 <span className="text-gray-600">Hỗ Trợ Trực Tuyến 24/7</span>
               </li>
               <li className="flex items-center space-x-2">
-                <FaAmbulance className="text-green-600" />
+                <FaAmbulance className="text-blue-600" />
                 <span className="text-gray-600">Cấp Cứu: 115</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-blue-700">Tài Nguyên</h3>
-            <ul className="space-y-2">
-              <li className="flex items-center space-x-2">
-                <FaHeart className="text-green-600" />
-                <a href="#" className="text-gray-600 hover:text-blue-600 transition duration-300">Động Lực Hàng Ngày</a>
-              </li>
-              <li className="flex items-center space-x-2">
-                <FaDownload className="text-green-600" />
-                <a href="#" className="text-gray-600 hover:text-blue-600 transition duration-300">Kế Hoạch Cai Thuốc</a>
-              </li>
-              <li className="flex items-center space-x-2">
-                <FaMedal className="text-green-600" />
-                <a href="#" className="text-gray-600 hover:text-blue-600 transition duration-300">Câu Chuyện Thành Công</a>
-              </li>
-              <li className="flex items-center space-x-2">
-                <FaMobileAlt className="text-green-600" />
-                <a href="#" className="text-gray-600 hover:text-blue-600 transition duration-300">Ứng Dụng Di Động</a>
               </li>
             </ul>
           </div>
@@ -96,7 +74,7 @@ const Footer = () => {
               />
               <button
                 type="submit"
-                className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition duration-300"
+                className="cursor-pointer w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-green-700 transition duration-300"
               >
                 Đăng Ký
               </button>
@@ -106,7 +84,7 @@ const Footer = () => {
 
         <div className="mt-12 pt-8 border-t border-gray-200">
           <div className="text-center">
-            <p className="text-green-600 font-medium mb-2">Bạn Có Thể Làm Được! Mỗi Ngày Không Hút Thuốc Là Một Chiến Thắng.</p>
+            <p className="text-blue-600 font-medium mb-2">Bạn Có Thể Làm Được! Mỗi Ngày Không Hút Thuốc Là Một Chiến Thắng.</p>
             <p className="text-sm text-gray-500 mb-4">Hãy nhớ rằng, bạn không đơn độc trong hành trình này. Chúng tôi luôn ở đây để hỗ trợ bạn 24/7.</p>
           </div>
           <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500">

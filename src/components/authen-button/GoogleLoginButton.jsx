@@ -8,21 +8,15 @@ const GoogleLoginButton = () => {
   const [error, setError] = useState(null);
 
   const handleGoogleLogin = async () => {
-    
     try {
       setIsLoading(true);
       setError(null);
-      // Simulate authentication delay\
       const result = await signInWithPopup(auth, googleProvider);
-
-      // The signed-in user info.
       const token = result.user.accessToken;
       console.log(token);
-
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      // Add your actual Google authentication logic here
     } catch (err) {
-      setError("Authentication failed. Please try again." + err);
+      setError("Đăng nhập thất bại. Vui lòng thử lại." + err);
     } finally {
       setIsLoading(false);
     }
@@ -36,11 +30,11 @@ const GoogleLoginButton = () => {
         className={`flex items-center justify-center w-full max-w-md px-6 py-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 ease-in-out ${
           isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-gray-50"
         }`}
-        aria-label="Sign in with Google"
+        aria-label="Đăng nhập bằng Google"
       >
         <FcGoogle className="w-6 h-6 mr-3" aria-hidden="true" />
         <span className="mr-2">
-          {isLoading ? "Signing in..." : "Sign in with Google"}
+          {isLoading ? "Đang đăng nhập..." : "Đăng nhập bằng Google"}
         </span>
         {isLoading && (
           <svg
@@ -75,7 +69,7 @@ const GoogleLoginButton = () => {
             onClick={() => setError(null)}
             className="ml-2 font-medium underline hover:text-red-800"
           >
-            Dismiss
+            Đóng
           </button>
         </div>
       )}
