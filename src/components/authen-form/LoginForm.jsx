@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Checkbox, Form, Input } from "antd";
+import { Button, Checkbox, Form, Input, Select } from "antd";
 import "./login.css";
 import { toast } from "react-toastify";
 import api from "../../configs/axios";
@@ -77,17 +77,7 @@ function LoginForm() {
           />
         </Form.Item>
 
-        <Form.Item
-          label="Giới tính"
-          name="gender"
-          rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
-        >
-          <Select placeholder="Chọn giới tính">
-            <Select.Option value="male">Nam</Select.Option>
-            <Select.Option value="female">Nữ</Select.Option>
-            <Select.Option value="other">Khác</Select.Option>
-          </Select>
-        </Form.Item>
+
 
         <Form.Item label={null}>
           <Button type="primary" htmlType="submit">
