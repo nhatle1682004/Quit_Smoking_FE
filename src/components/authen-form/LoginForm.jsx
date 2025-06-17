@@ -16,20 +16,27 @@ function LoginForm() {
   const onFinish = async (values) => {
     console.log("Success:", values);
     try {
+      // values nguoi dung nhap
       const response = await api.post("login", values);
       console.log(response.data);
-      const { role, fullName } = response.data;
-      console.log(role, fullName);
+      // luu thong tin nguoi dung nhap vao 1 cho nao do ma bat ky dau cung su dung duoc
+      // cai do goi la redux === session ben mon prj
+      const { role, token } = response.data;
+      console.log(role, token);
 
+      //Gửi một action có tên login đến Redux store để cập nhật trạng thái đăng nhập.
+      // action la 1 doi tuong co 2 thuoc tinh la type va payload
+      // type: la ten cua action
+      //payload: Là dữ liệu bạn muốn gửi kèm hành động, dùng để cập nhật vào state
       dispatch(login(response.data));
       localStorage.setItem("token", response.data.token);
       toast.success("Đăng nhập thành công!");
       if (role === "ADMIN") navigate("/dashboard");
       else if (role === "CUSTOMER") navigate("/");
-
+      else if (role === "COACH") navigate("/dashboard");
     } catch (e) {
       console.log(e);
-      toast.error(e.response.data);
+      toast.error(e.response.data); //show ra man hinh cho nguoi dung biet loi
     }
   };
   const onFinishFailed = (errorInfo) => {
@@ -70,6 +77,18 @@ function LoginForm() {
           />
         </Form.Item>
 
+        <Form.Item
+          label="Giới tính"
+          name="gender"
+          rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
+        >
+          <Select placeholder="Chọn giới tính">
+            <Select.Option value="male">Nam</Select.Option>
+            <Select.Option value="female">Nữ</Select.Option>
+            <Select.Option value="other">Khác</Select.Option>
+          </Select>
+        </Form.Item>
+
         <Form.Item label={null}>
           <Button type="primary" htmlType="submit">
             Đăng Nhập
@@ -95,6 +114,5 @@ function LoginForm() {
     </div>
   );
 }
-/*******  e13bf13f-099f-463c-ae63-6c0288d5afe7  *******/
 
 export default LoginForm;
