@@ -1,10 +1,15 @@
 import React from "react";
 import "./register.css";
-import { Button, Checkbox, Form, Input } from "antd";
+import { Button, Checkbox, Form, Input, Radio } from "antd";
 import api from "../../configs/axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { UserOutlined, LockOutlined, MailOutlined, IdcardOutlined } from '@ant-design/icons';
+import {
+  UserOutlined,
+  LockOutlined,
+  MailOutlined,
+  IdcardOutlined,
+} from "@ant-design/icons";
 
 function RegisterForm() {
   const navigate = useNavigate();
@@ -46,7 +51,10 @@ function RegisterForm() {
           name="fullName"
           rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
         >
-          <Input prefix={<IdcardOutlined className="text-gray-400" />} placeholder="Nhập họ và tên của bạn" />
+          <Input
+            prefix={<IdcardOutlined className="text-gray-400" />}
+            placeholder="Nhập họ và tên của bạn"
+          />
         </Form.Item>
 
         <Form.Item
@@ -57,7 +65,10 @@ function RegisterForm() {
             { type: "email", message: "Email không hợp lệ!" },
           ]}
         >
-          <Input prefix={<MailOutlined className="text-gray-400" />} placeholder="Nhập email của bạn" />
+          <Input
+            prefix={<MailOutlined className="text-gray-400" />}
+            placeholder="Nhập email của bạn"
+          />
         </Form.Item>
 
         <Form.Item
@@ -65,7 +76,10 @@ function RegisterForm() {
           name="username"
           rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập!" }]}
         >
-          <Input prefix={<UserOutlined className="text-gray-400" />} placeholder="Nhập tên đăng nhập" />
+          <Input
+            prefix={<UserOutlined className="text-gray-400" />}
+            placeholder="Nhập tên đăng nhập"
+          />
         </Form.Item>
 
         <Form.Item
@@ -77,7 +91,10 @@ function RegisterForm() {
           ]}
           hasFeedback
         >
-          <Input.Password prefix={<LockOutlined className="text-gray-400" />} placeholder="Nhập mật khẩu" />
+          <Input.Password
+            prefix={<LockOutlined className="text-gray-400" />}
+            placeholder="Nhập mật khẩu"
+          />
         </Form.Item>
 
         <Form.Item
@@ -92,23 +109,35 @@ function RegisterForm() {
                 if (!value || getFieldValue("password") === value) {
                   return Promise.resolve();
                 }
-                return Promise.reject(
-                  new Error("Mật khẩu không khớp!")
-                );
+                return Promise.reject(new Error("Mật khẩu không khớp!"));
               },
             }),
           ]}
         >
-          <Input.Password prefix={<LockOutlined className="text-gray-400" />} placeholder="Nhập lại mật khẩu" />
+          <Input.Password
+            prefix={<LockOutlined className="text-gray-400" />}
+            placeholder="Nhập lại mật khẩu"
+          />
         </Form.Item>
-        
+
+        <Form.Item
+          label="Giới tính"
+          name="gender"
+          rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
+        >
+          <Radio.Group>
+            <Radio value="male">Nam</Radio>
+            <Radio value="female">Nữ</Radio>
+            <Radio value="other">Khác</Radio>
+          </Radio.Group>
+        </Form.Item>
+
         <Form.Item>
           <Button type="primary" htmlType="submit">
             Đăng Ký
           </Button>
         </Form.Item>
       </Form>
-
     </div>
   );
 }

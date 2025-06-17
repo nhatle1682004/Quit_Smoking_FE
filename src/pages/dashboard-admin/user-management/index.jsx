@@ -70,6 +70,30 @@ function UserManagement() {
     }
   };
 
+  const handleDeleteUser = async (id) => {
+    try {
+      await api.put(`/user/${id}`, { active: false });
+      toast.success("Đã chuyển user sang inactive!");
+      fetchUser(); // cập nhật lại danh sách user nếu cần
+    } catch (error) {
+      toast.error("Có lỗi khi chuyển trạng thái user!");
+    }
+  };
+
+  const handleRestoreUser = async (user) => {
+    if (!user.active) {
+      try {
+        await api.put(`/user/${user.id}/restore`);
+        toast.success("Khôi phục tài khoản thành công!");
+        fetchUser(); // cập nhật lại danh sách user nếu cần
+      } catch (error) {
+        toast.error("Khôi phục tài khoản thất bại!");
+      }
+    } else {
+      toast.info("Tài khoản này đang hoạt động, không cần khôi phục.");
+    }
+  };
+
   const columns = [
     {
       title: "ID",
@@ -149,11 +173,12 @@ function UserManagement() {
       render: (text, record) => (
         <Space>
           <Button type="primary" onClick={() => handleUpdate(record)}>
-            Update
+            Edit
           </Button>
           <Button type="primary" danger onClick={() => handleDelete(record.id)}>
             Delete
           </Button>
+          <Button onClick={() => handleRestoreUser(record)}>Khôi phục</Button>
         </Space>
       ),
     },
