@@ -30,26 +30,31 @@ function UserManagement() {
     try {
       if (editingUserId) {
         await api.put(`/user/${editingUserId}`, values);
-        toast.success("User updated successfully");
+        toast.success("User updated successfully!");
       } else {
         await api.post("user", values);
-        toast.success("User created successfully");
+        toast.success("New user created successfully!");
       }
+
       setOpen(false);
+      fetchUser();
       form.resetFields();
       setEditingUserId(null);
-      fetchUser();
-    } catch (error) {
-      toast.error(error.response?.data || "An error occurred.");
+    } catch (err) {
+      toast.error(err.response?.data || "An error occurred");
     }
   };
 
   const fetchUser = async () => {
     try {
       const response = await api.get("user");
-      setDatas(response.data);
+      const users = response.data.map((user) => ({
+        ...user,
+        active: user.active === true || user.active === "true",
+      }));
+      setDatas(users);
     } catch (error) {
-      toast.error(error.response?.data || "Failed to fetch users.");
+      toast.error(error.response?.data || "Failed to load users");
     }
   };
 
@@ -59,7 +64,7 @@ function UserManagement() {
       toast.success("User deleted successfully");
       fetchUser();
     } catch (error) {
-      toast.error(error.response?.data || "Failed to delete user.");
+      toast.error(error.response?.data || "Delete failed");
     }
   };
 
@@ -67,10 +72,10 @@ function UserManagement() {
     if (!user.active) {
       try {
         await api.put(`/user/${user.id}/restore`);
-        toast.success("Account restored successfully");
+        toast.success("User restored successfully!");
         fetchUser();
       } catch (error) {
-        toast.error("Failed to restore account");
+        toast.error("Restore failed!");
       }
     } else {
       toast.info("This account is already active.");
@@ -78,7 +83,11 @@ function UserManagement() {
   };
 
   const columns = [
-    { title: "ID", dataIndex: "id", key: "id" },
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+    },
     {
       title: "Avatar",
       dataIndex: "avatarUrl",
@@ -94,9 +103,21 @@ function UserManagement() {
         />
       ),
     },
-    { title: "Full Name", dataIndex: "fullName", key: "fullName" },
-    { title: "Username", dataIndex: "username", key: "username" },
-    { title: "Email", dataIndex: "email", key: "email" },
+    {
+      title: "Full Name",
+      dataIndex: "fullName",
+      key: "fullName",
+    },
+    {
+      title: "Username",
+      dataIndex: "username",
+      key: "username",
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
     {
       title: "Role",
       dataIndex: "role",
@@ -134,8 +155,9 @@ function UserManagement() {
     },
     {
       title: "Action",
-      key: "action",
-      render: (text, record) => (
+      dataIndex: "id",
+      key: "id",
+      render: (id, record) => (
         <Space>
           <Button
             type="primary"
@@ -149,12 +171,12 @@ function UserManagement() {
             Edit
           </Button>
           <Popconfirm
-            title="Delete account"
-            description="Are you sure to delete this user?"
+            title="Delete the user"
+            description="Are you sure you want to delete this user?"
             onConfirm={() => handleDelete(record.id)}
             disabled={!record.active}
           >
-            <Button type="primary" danger>
+            <Button type="primary" danger disabled={!record.active}>
               Delete
             </Button>
           </Popconfirm>
@@ -170,6 +192,7 @@ function UserManagement() {
 
   return (
     <div>
+      {/* Nút thêm người dùng */}
       <Button
         type="primary"
         onClick={() => {
@@ -178,42 +201,51 @@ function UserManagement() {
           form.resetFields();
         }}
       >
-        Add new User
+        Add New User
       </Button>
+
+      {/* Bảng dữ liệu người dùng */}
       <Table columns={columns} dataSource={datas} rowKey="id" />
 
+      {/* Modal thêm/sửa người dùng */}
       <Modal
         title={editingUserId ? "Edit User" : "Add New User"}
         open={open}
         onCancel={() => {
           setOpen(false);
-          setEditingUserId(null);
           form.resetFields();
+          setEditingUserId(null);
         }}
-        onOk={() => form.submit()}
-        okText={editingUserId ? "Save" : "Create"}
+        footer={null}
       >
-        <Form labelCol={{ span: 24 }} onFinish={handleSubmit} form={form}>
+        <Form
+          form={form}
+          labelCol={{ span: 24 }}
+          onFinish={handleSubmit}
+          layout="vertical"
+        >
+          {/* Họ và tên */}
           <Form.Item
             label="Full Name"
             name="fullName"
             rules={[
-              { required: true, message: "Please enter your full name!" },
-              { min: 5, message: "Name must be at least 5 characters long." },
+              { required: true, message: "Please enter full name!" },
+              { min: 5, message: "Name must be at least 5 characters." },
               {
                 pattern: /^(?!\s).+$/,
-                message: "Name cannot start with whitespace!",
+                message: "Name cannot start with a space!",
               },
             ]}
           >
-            <Input placeholder="Enter your full name" />
+            <Input placeholder="Enter full name" />
           </Form.Item>
 
+          {/* Tên đăng nhập */}
           <Form.Item
             label="Username"
             name="username"
             rules={[
-              { required: true, message: "Please enter a username!" },
+              { required: true, message: "Please enter username!" },
               { min: 4, message: "Username must be at least 4 characters!" },
               {
                 pattern: /^[a-zA-Z0-9_]+$/,
@@ -221,37 +253,25 @@ function UserManagement() {
               },
             ]}
           >
-            <Input placeholder="Enter username" />
+            <Input
+              placeholder="Enter username"
+              readOnly={!!editingUserId} // Nếu đang sửa thì không cho chỉnh username
+            />
           </Form.Item>
 
+          {/* Email */}
           <Form.Item
             label="Email"
             name="email"
             rules={[
               { required: true, message: "Please enter your email" },
-              { type: "email", message: "Invalid email format!" },
+              { type: "email", message: "Invalid email format" },
             ]}
           >
             <Input placeholder="Enter email address" />
           </Form.Item>
 
-          {!editingUserId && (
-            <Form.Item
-              label="Password"
-              name="password"
-              rules={[
-                { required: true, message: "Please enter your password" },
-                { min: 6, message: "Password must be at least 6 characters!" },
-                {
-                  pattern: /^\S+$/,
-                  message: "Password cannot contain spaces!",
-                },
-              ]}
-            >
-              <Input.Password placeholder="Enter your password" />
-            </Form.Item>
-          )}
-
+          {/* Giới tính */}
           <Form.Item
             label="Gender"
             name="gender"
@@ -260,10 +280,37 @@ function UserManagement() {
             <Radio.Group>
               <Radio value="MALE">Male</Radio>
               <Radio value="FEMALE">Female</Radio>
-              
             </Radio.Group>
           </Form.Item>
 
+          {/* Mật khẩu - chỉ hiển thị khi tạo mới */}
+          {!editingUserId && (
+            <Form.Item
+              label="Password"
+              name="password"
+              rules={[
+                { required: true, message: "Please enter password!" },
+                { min: 6, message: "Password must be at least 6 characters." },
+                {
+                  pattern: /^\S+$/,
+                  message: "Password cannot contain spaces!",
+                },
+              ]}
+            >
+              <Input.Password placeholder="Enter password" />
+            </Form.Item>
+          )}
+
+          {/* Tài khoản Premium */}
+          <Form.Item
+            label="Premium Account"
+            name="premium"
+            valuePropName="checked"
+          >
+            <Checkbox>Enable Premium</Checkbox>
+          </Form.Item>
+
+          {/* Vai trò */}
           <Form.Item label="Role" name="role" rules={[{ required: true }]}>
             <Select placeholder="Select role">
               <Select.Option value="ADMIN">Admin</Select.Option>
@@ -272,12 +319,11 @@ function UserManagement() {
             </Select>
           </Form.Item>
 
-          <Form.Item
-            label="Premium Account"
-            name="premium"
-            valuePropName="checked"
-          >
-            <Checkbox>Enable Premium</Checkbox>
+          {/* Nút submit */}
+          <Form.Item>
+            <Button type="primary" htmlType="submit" block>
+              {editingUserId ? "Update User" : "Create New User"}
+            </Button>
           </Form.Item>
         </Form>
       </Modal>
