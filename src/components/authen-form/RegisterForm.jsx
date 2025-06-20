@@ -49,7 +49,14 @@ function RegisterForm() {
         <Form.Item
           label="Họ và tên"
           name="fullName"
-          rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
+          rules={[
+            { required: true, message: "Vui lòng nhập họ và tên!" },
+            { min: 5, message: "Mật khẩu phải có ít nhất 5 ký tự." },
+            {
+              pattern: /^(?!\s).+$/,
+              message: "Họ và tên không được bắt đầu bằng khoảng trắng!",
+            },
+          ]}
         >
           <Input
             prefix={<IdcardOutlined className="text-gray-400" />}
@@ -74,7 +81,14 @@ function RegisterForm() {
         <Form.Item
           label="Tên đăng nhập"
           name="username"
-          rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập!" }]}
+          rules={[
+            { required: true, message: "Vui lòng nhập tên đăng nhập!" },
+            { min: 4, message: "Tên đăng nhập phải có ít nhất 4 ký tự!" },
+            {
+              pattern: /^[a-zA-Z0-9_]+$/,
+              message: "Không được chứa khoảng trắng hoặc ký tự đặc biệt!",
+            },
+          ]}
         >
           <Input
             prefix={<UserOutlined className="text-gray-400" />}
@@ -88,6 +102,10 @@ function RegisterForm() {
           rules={[
             { required: true, message: "Vui lòng nhập mật khẩu!" },
             { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự." },
+            {
+              pattern: /^\S+$/,
+              message: "Mật khẩu không được chứa khoảng trắng!",
+            },
           ]}
           hasFeedback
         >

@@ -47,43 +47,43 @@ function App() {
         },
         {
           path: "about",
-          element: <InformationPage/>,
+          element: <InformationPage />,
         },
         {
           path: "knowledge",
-          element: <KnowledgePage/>,
+          element: <KnowledgePage />,
         },
         {
           path: "product",
-          element: <ProductPage/>,
+          element: <ProductPage />,
         },
         {
           path: "success",
-          element: <SuccessStories/>,
+          element: <SuccessStories />,
         },
         {
           path: "blog",
-          element: <BlogPage/>,
+          element: <BlogPage />,
         },
         {
           path: "contact",
-          element: <ContactPage/>,
+          element: <ContactPage />,
         },
         {
           path: "success-story-details/1",
-          element: <SuccessStoryHoChiMinh/>,
+          element: <SuccessStoryHoChiMinh />,
         },
         {
           path: "success-story-details/2",
-          element: <SuccessStoryNguyenVanNgu/>,
+          element: <SuccessStoryNguyenVanNgu />,
         },
         {
           path: "success-story-details/3",
-          element: <SuccessStoryNguyenHieu/>,
+          element: <SuccessStoryNguyenHieu />,
         },
         {
           path: "profile",
-          element: <Profile/>,
+          element: <Profile />,
         },
       ],
     },
@@ -106,7 +106,6 @@ function App() {
       ],
     },
   ]);
-
   return (
     <>
       <Provider store={store}>

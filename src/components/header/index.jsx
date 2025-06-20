@@ -30,7 +30,7 @@ const Header = () => {
     { id: 4, label: "Dịch vụ & Sản phẩm", href: "/product" },
     { id: 5, label: "Gương cai thuốc thành công", href: "/success" },
     { id: 6, label: "Blog", href: "/blog" },
-    { id: 6, label: "Liên hệ", href: "/contact" },
+    { id: 7, label: "Liên hệ", href: "/contact" },
   ];
 
   useEffect(() => {

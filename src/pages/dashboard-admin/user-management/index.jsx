@@ -5,6 +5,8 @@ import {
   Image,
   Input,
   Modal,
+  Popconfirm,
+  Radio,
   Select,
   Space,
   Table,
@@ -15,68 +17,49 @@ import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import api from "./../../../configs/axios";
 import { toast } from "react-toastify";
+import { useForm } from "antd/es/form/Form";
 
 function UserManagement() {
   const { Text } = Typography;
   const [open, setOpen] = useState(false);
   const [datas, setDatas] = useState([]);
-  // lấy dữ liệu gửi xuống back-end
+  const [form] = useForm();
+  const [editingUserId, setEditingUserId] = useState(null);
+
   const handleSubmit = async (values) => {
-    //value giá trị người dùng nhập trên form
-    // nhiệm vụ: cầm cục data chuyển xuống cho back-end
     try {
-      const token = localStorage.getItem("token");
-      console.log("Token hiện tại:", token);
-      const response = await api.post("user", values, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      toast.success("Thêm user thành công");
+      if (editingUserId) {
+        await api.put(`/user/${editingUserId}`, values);
+        toast.success("User updated successfully");
+      } else {
+        await api.post("user", values);
+        toast.success("User created successfully");
+      }
       setOpen(false);
+      form.resetFields();
+      setEditingUserId(null);
       fetchUser();
     } catch (error) {
-      toast.error(error.response.data);
+      toast.error(error.response?.data || "An error occurred.");
     }
   };
-  // lay du lieu
+
   const fetchUser = async () => {
     try {
       const response = await api.get("user");
       setDatas(response.data);
     } catch (error) {
-      toast.error(error.response.data);
-    }
-  };
-  // xoa du lieu nguoi dung
-  const handleDelete = async (id) => {
-    try {
-      const response = await api.delete(`/user/${id}`);
-      toast.success("Xóa người dùng thành công");
-      fetchUser(); // load lại danh sách
-    } catch (error) {
-      toast.error(error.response.data);
-    }
-  };
-  // cap nhat du lieu nguoi dung
-  const handleUpdate = async (id, values) => {
-    try {
-      const response = await api.put(`/user/${id}`, { active: false });
-      toast.success("Cập nhật thành công");
-      fetchUser(); // cập nhật lại danh sách
-      setOpen(false); // đóng modal nếu cần
-    } catch (error) {
-      toast.error(error.response.data);
+      toast.error(error.response?.data || "Failed to fetch users.");
     }
   };
 
-  const handleDeleteUser = async (id) => {
+  const handleDelete = async (id) => {
     try {
-      await api.put(`/user/${id}`, { active: false });
-      toast.success("Đã chuyển user sang inactive!");
-      fetchUser(); // cập nhật lại danh sách user nếu cần
+      await api.delete(`/user/${id}`);
+      toast.success("User deleted successfully");
+      fetchUser();
     } catch (error) {
-      toast.error("Có lỗi khi chuyển trạng thái user!");
+      toast.error(error.response?.data || "Failed to delete user.");
     }
   };
 
@@ -84,22 +67,18 @@ function UserManagement() {
     if (!user.active) {
       try {
         await api.put(`/user/${user.id}/restore`);
-        toast.success("Khôi phục tài khoản thành công!");
-        fetchUser(); // cập nhật lại danh sách user nếu cần
+        toast.success("Account restored successfully");
+        fetchUser();
       } catch (error) {
-        toast.error("Khôi phục tài khoản thất bại!");
+        toast.error("Failed to restore account");
       }
     } else {
-      toast.info("Tài khoản này đang hoạt động, không cần khôi phục.");
+      toast.info("This account is already active.");
     }
   };
 
   const columns = [
-    {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-    },
+    { title: "ID", dataIndex: "id", key: "id" },
     {
       title: "Avatar",
       dataIndex: "avatarUrl",
@@ -115,23 +94,9 @@ function UserManagement() {
         />
       ),
     },
-    {
-      title: "Full Name",
-      dataIndex: "fullName",
-      key: "fullName",
-    },
-    {
-      title: "Username",
-      dataIndex: "username",
-      key: "username",
-    },
-
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-
+    { title: "Full Name", dataIndex: "fullName", key: "fullName" },
+    { title: "Username", dataIndex: "username", key: "username" },
+    { title: "Email", dataIndex: "email", key: "email" },
     {
       title: "Role",
       dataIndex: "role",
@@ -172,46 +137,89 @@ function UserManagement() {
       key: "action",
       render: (text, record) => (
         <Space>
-          <Button type="primary" onClick={() => handleUpdate(record)}>
+          <Button
+            type="primary"
+            onClick={() => {
+              setOpen(true);
+              setEditingUserId(record.id);
+              form.setFieldsValue(record);
+            }}
+            disabled={!record.active}
+          >
             Edit
           </Button>
-          <Button type="primary" danger onClick={() => handleDelete(record.id)}>
-            Delete
-          </Button>
-          <Button onClick={() => handleRestoreUser(record)}>Khôi phục</Button>
+          <Popconfirm
+            title="Delete account"
+            description="Are you sure to delete this user?"
+            onConfirm={() => handleDelete(record.id)}
+            disabled={!record.active}
+          >
+            <Button type="primary" danger>
+              Delete
+            </Button>
+          </Popconfirm>
+          <Button onClick={() => handleRestoreUser(record)}>Restore</Button>
         </Space>
       ),
     },
   ];
 
-  // useEffect(d/n hanh dong,[]: d/n dependency list: khi nao thi hanh dong trc dc chay)
-  // [] => chay 1 lan duy nhat khi load page
-  // () => {} : goi la anonymous function vi la ham ko co ten
-  // [name]: chay moi khi ma bien name thay doi
   useEffect(() => {
     fetchUser();
   }, []);
 
   return (
     <div>
-      <Button type="primary" onClick={() => setOpen(true)}>
+      <Button
+        type="primary"
+        onClick={() => {
+          setOpen(true);
+          setEditingUserId(null);
+          form.resetFields();
+        }}
+      >
         Add new User
       </Button>
-      <Table columns={columns} dataSource={datas} />
-      <Modal title="Add new User" open={open} onCancel={() => setOpen(false)}>
-        <Form labelCol={{ span: 24 }} onFinish={handleSubmit}>
+      <Table columns={columns} dataSource={datas} rowKey="id" />
+
+      <Modal
+        title={editingUserId ? "Edit User" : "Add New User"}
+        open={open}
+        onCancel={() => {
+          setOpen(false);
+          setEditingUserId(null);
+          form.resetFields();
+        }}
+        onOk={() => form.submit()}
+        okText={editingUserId ? "Save" : "Create"}
+      >
+        <Form labelCol={{ span: 24 }} onFinish={handleSubmit} form={form}>
           <Form.Item
             label="Full Name"
             name="fullName"
-            rules={[{ required: true }]}
+            rules={[
+              { required: true, message: "Please enter your full name!" },
+              { min: 5, message: "Name must be at least 5 characters long." },
+              {
+                pattern: /^(?!\s).+$/,
+                message: "Name cannot start with whitespace!",
+              },
+            ]}
           >
-            <Input placeholder="Enter full name" />
+            <Input placeholder="Enter your full name" />
           </Form.Item>
 
           <Form.Item
             label="Username"
             name="username"
-            rules={[{ required: true }]}
+            rules={[
+              { required: true, message: "Please enter a username!" },
+              { min: 4, message: "Username must be at least 4 characters!" },
+              {
+                pattern: /^[a-zA-Z0-9_]+$/,
+                message: "No spaces or special characters allowed!",
+              },
+            ]}
           >
             <Input placeholder="Enter username" />
           </Form.Item>
@@ -221,26 +229,39 @@ function UserManagement() {
             name="email"
             rules={[
               { required: true, message: "Please enter your email" },
-              { type: "email", message: "Invalid email format" },
+              { type: "email", message: "Invalid email format!" },
             ]}
           >
             <Input placeholder="Enter email address" />
           </Form.Item>
 
-          <Form.Item
-            label="Password"
-            name="password"
-            rules={[{ required: true, message: "Please enter your password" }]}
-          >
-            <Input.Password placeholder="Enter password" />
-          </Form.Item>
+          {!editingUserId && (
+            <Form.Item
+              label="Password"
+              name="password"
+              rules={[
+                { required: true, message: "Please enter your password" },
+                { min: 6, message: "Password must be at least 6 characters!" },
+                {
+                  pattern: /^\S+$/,
+                  message: "Password cannot contain spaces!",
+                },
+              ]}
+            >
+              <Input.Password placeholder="Enter your password" />
+            </Form.Item>
+          )}
 
           <Form.Item
-            label="Premium Account"
-            name="premium"
-            valuePropName="checked"
+            label="Gender"
+            name="gender"
+            rules={[{ required: true, message: "Please select gender!" }]}
           >
-            <Checkbox>Enable Premium</Checkbox>
+            <Radio.Group>
+              <Radio value="MALE">Male</Radio>
+              <Radio value="FEMALE">Female</Radio>
+              
+            </Radio.Group>
           </Form.Item>
 
           <Form.Item label="Role" name="role" rules={[{ required: true }]}>
@@ -251,16 +272,12 @@ function UserManagement() {
             </Select>
           </Form.Item>
 
-          {/* Nếu muốn thêm avatar URL:
-  <Form.Item label="Avatar URL" name="avatarUrl">
-    <Input placeholder="Paste avatar image URL (optional)" />
-  </Form.Item>
-  */}
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block>
-              Create New User
-            </Button>
+          <Form.Item
+            label="Premium Account"
+            name="premium"
+            valuePropName="checked"
+          >
+            <Checkbox>Enable Premium</Checkbox>
           </Form.Item>
         </Form>
       </Modal>
