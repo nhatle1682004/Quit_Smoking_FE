@@ -180,7 +180,7 @@ function UserManagement() {
               Delete
             </Button>
           </Popconfirm>
-          <Button onClick={() => handleRestoreUser(record)}>Khôi phục</Button>
+          <Button onClick={() => handleRestoreUser(record)}>Restore</Button>
         </Space>
       ),
     },
@@ -234,7 +234,7 @@ function UserManagement() {
             name="username"
             rules={[{ required: true }]}
           >
-            <Input placeholder="Enter username" />
+            <Input placeholder="Enter username" readOnly={!!editingUserId} />
           </Form.Item>
 
           <Form.Item
@@ -254,9 +254,8 @@ function UserManagement() {
             rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
           >
             <Radio.Group>
-              <Radio value="male">Nam</Radio>
-              <Radio value="female">Nữ</Radio>
-              <Radio value="other">Khác</Radio>
+              <Radio value="MALE">Nam</Radio>
+              <Radio value="FEMALE">Nữ</Radio>
             </Radio.Group>
           </Form.Item>
 
