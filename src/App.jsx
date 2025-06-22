@@ -15,18 +15,18 @@ import UpgradeSuggestions from "./pages/dashboard-admin/upgrade-suggestions/inde
 import UserManagement from "./pages/dashboard-admin/user-management";
 import Footer from "./components/footer";
 import InformationPage from "./pages/navbar-page/about";
-import ContactPage from './pages/navbar-page/contact/index';
+import ContactPage from "./pages/navbar-page/contact/index";
 import ProductPage from "./pages/navbar-page/product";
-import KnowledgePage from './pages/navbar-page/knowledge/index';
+import KnowledgePage from "./pages/navbar-page/knowledge/index";
 import BlogPage from "./pages/navbar-page/blog";
 import SuccessStories from "./pages/navbar-page/success/index";
 import SuccessStoryHoChiMinh from "./components/success-story-details/successStoryHoChiMinh";
 import SuccessStoryNguyenVanNgu from "./components/success-story-details/successStoryNguyenVanNgu";
 import SuccessStoryNguyenHieu from "./components/success-story-details/successStoryNguyenHieu";
 import Profile from "./pages/navbar-page/profile";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 // import InitialSurvey from "./pages/initial-survey";
-
-
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -47,43 +47,43 @@ function App() {
         },
         {
           path: "about",
-          element: <InformationPage/>,
+          element: <InformationPage />,
         },
         {
           path: "knowledge",
-          element: <KnowledgePage/>,
+          element: <KnowledgePage />,
         },
         {
           path: "product",
-          element: <ProductPage/>,
+          element: <ProductPage />,
         },
         {
           path: "success",
-          element: <SuccessStories/>,
+          element: <SuccessStories />,
         },
         {
           path: "blog",
-          element: <BlogPage/>,
+          element: <BlogPage />,
         },
         {
           path: "contact",
-          element: <ContactPage/>,
+          element: <ContactPage />,
         },
         {
           path: "success-story-details/1",
-          element: <SuccessStoryHoChiMinh/>,
+          element: <SuccessStoryHoChiMinh />,
         },
         {
           path: "success-story-details/2",
-          element: <SuccessStoryNguyenVanNgu/>,
+          element: <SuccessStoryNguyenVanNgu />,
         },
         {
           path: "success-story-details/3",
-          element: <SuccessStoryNguyenHieu/>,
+          element: <SuccessStoryNguyenHieu />,
         },
         {
           path: "profile",
-          element: <Profile/>,
+          element: <Profile />,
         },
       ],
     },
@@ -105,8 +105,15 @@ function App() {
         { path: "userManagement", element: <UserManagement /> },
       ],
     },
+    {
+      path: "/forgot-password",
+      element: <ForgotPassword />,
+    },
+    {
+      path: "/reset-password",
+      element: <ResetPassword />,
+    },
   ]);
-
   return (
     <>
       <Provider store={store}>
