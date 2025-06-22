@@ -18,13 +18,19 @@ const Header = () => {
 
   const user = useSelector((state) => state.user);
 
+  const handleHomeClick = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigate('/');
+  };
+
   const menuItems = [
     { id: 1, label: "Trang chủ", href: "/" },
     { id: 2, label: "Giới thiệu", href: "/about" },
-    { id: 3, label: "Kiến thức chung", href: "/services" },
-    { id: 4, label: "Dịch vụ & Sản phẩm", href: "/news" },
-    { id: 5, label: "Gương cai thuốc thành công", href: "/news" },
-    { id: 6, label: "Liên hệ", href: "/contact" },
+    { id: 3, label: "Kiến thức chung", href: "/knowledge" },
+    { id: 4, label: "Dịch vụ & Sản phẩm", href: "/product" },
+    { id: 5, label: "Gương cai thuốc thành công", href: "/success" },
+    { id: 6, label: "Blog", href: "/blog" },
+    { id: 7, label: "Liên hệ", href: "/contact" },
   ];
 
   useEffect(() => {
@@ -68,11 +74,11 @@ const Header = () => {
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-20">
-            {/* Logo - sử dụng navigate */}
+            {/* Logo */}
             <div className="flex-shrink-0">
               <button
-                onClick={() => navigate("/")}
-                className="border-0 bg-transparent p-0"
+                onClick={handleHomeClick}
+                className="cursor-pointer border-0 bg-transparent p-0"
               >
                 <img
                   src={logo}
@@ -86,13 +92,13 @@ const Header = () => {
               </button>
             </div>
 
-            {/* Desktop Navigation - sử dụng navigate */}
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-8">
               {menuItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => navigate(item.href)}
-                  className="text-white hover:text-gray-200 transition-colors duration-300 bg-transparent border-0"
+                  onClick={() => item.id === 1 ? handleHomeClick() : navigate(item.href)}
+                  className="cursor-pointer text-white hover:text-gray-200 transition-colors duration-300 bg-transparent border-0"
                 >
                   {item.label}
                 </button>
@@ -113,7 +119,7 @@ const Header = () => {
                     <img
                       src={avatarUrl}
                       alt="User Avatar"
-                      className="w-8 h-8 rounded-full object-cover"
+                      className="cursor-pointer w-8 h-8 rounded-full object-cover"
                     />
                   </button>
 
@@ -124,13 +130,13 @@ const Header = () => {
                           setShowDropdown(false);
                           navigate("/profile");
                         }}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="cursor-pointer block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         Hồ sơ cá nhân
                       </button>
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="cursor-pointer block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         Đăng xuất
                       </button>
@@ -177,7 +183,7 @@ const Header = () => {
                   <button
                     key={item.id}
                     onClick={() => {
-                      navigate(item.href);
+                      item.id === 1 ? handleHomeClick() : navigate(item.href);
                       toggleMenu();
                     }}
                     className="text-white hover:text-gray-200 transition-colors duration-300 text-left bg-transparent border-0"
