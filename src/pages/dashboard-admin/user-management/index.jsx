@@ -246,13 +246,14 @@ function UserManagement() {
             name="username"
             rules={[
               { required: true, message: "Please enter username!" },
-              { min: 4, message: "Username must be at least 4 characters!" },
+              { min: 3, message: "Username must be at least 3 characters!" },
               {
                 pattern: /^[a-zA-Z0-9_]+$/,
                 message: "No spaces or special characters allowed!",
               },
             ]}
           >
+            {/* <Input placeholder="Enter username" readOnly={!!editingUserId} /> */}
             <Input
               placeholder="Enter username"
               readOnly={!!editingUserId} // Nếu đang sửa thì không cho chỉnh username
@@ -332,4 +333,3 @@ function UserManagement() {
 }
 
 export default UserManagement;
-

@@ -77,7 +77,17 @@ function LoginForm() {
           />
         </Form.Item>
 
-
+        {/* Thêm liên kết Quên mật khẩu */}
+        <Form.Item>
+          <div className="flex justify-end">
+            <span
+              className="text-blue-500 cursor-pointer hover:underline text-sm"
+              onClick={() => navigate("/forgot-password")}
+            >
+              Quên mật khẩu?
+            </span>
+          </div>
+        </Form.Item>
 
         <Form.Item label={null}>
           <Button type="primary" htmlType="submit">

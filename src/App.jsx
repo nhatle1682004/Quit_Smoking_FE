@@ -15,18 +15,18 @@ import UpgradeSuggestions from "./pages/dashboard-admin/upgrade-suggestions/inde
 import UserManagement from "./pages/dashboard-admin/user-management";
 import Footer from "./components/footer";
 import InformationPage from "./pages/navbar-page/about";
-import ContactPage from './pages/navbar-page/contact/index';
+import ContactPage from "./pages/navbar-page/contact/index";
 import ProductPage from "./pages/navbar-page/product";
-import KnowledgePage from './pages/navbar-page/knowledge/index';
+import KnowledgePage from "./pages/navbar-page/knowledge/index";
 import BlogPage from "./pages/navbar-page/blog";
 import SuccessStories from "./pages/navbar-page/success/index";
 import SuccessStoryHoChiMinh from "./components/success-story-details/successStoryHoChiMinh";
 import SuccessStoryNguyenVanNgu from "./components/success-story-details/successStoryNguyenVanNgu";
 import SuccessStoryNguyenHieu from "./components/success-story-details/successStoryNguyenHieu";
 import Profile from "./pages/navbar-page/profile";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 // import InitialSurvey from "./pages/initial-survey";
-
-
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -104,6 +104,14 @@ function App() {
         { path: "upgradeSuggestions", element: <UpgradeSuggestions /> },
         { path: "userManagement", element: <UserManagement /> },
       ],
+    },
+    {
+      path: "/forgot-password",
+      element: <ForgotPassword />,
+    },
+    {
+      path: "/reset-password",
+      element: <ResetPassword />,
     },
   ]);
   return (
