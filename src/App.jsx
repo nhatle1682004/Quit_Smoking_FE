@@ -26,6 +26,7 @@ import SuccessStoryNguyenHieu from "./components/success-story-details/successSt
 import Profile from "./pages/navbar-page/profile";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
+import QuitPlanForm from "./pages/navbar-page/quit-plan";
 // import InitialSurvey from "./pages/initial-survey";
 
 function App() {
@@ -84,6 +85,10 @@ function App() {
         {
           path: "profile",
           element: <Profile />,
+        },
+        {
+          path: "/quit-plan",
+          element: <QuitPlanForm />,
         },
       ],
     },
