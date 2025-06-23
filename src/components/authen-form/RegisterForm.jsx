@@ -17,17 +17,16 @@ function RegisterForm() {
   const onFinish = async (values) => {
     console.log("Success:", values);
 
-    // 400: bad request
-    // 200: success
+    // Loại bỏ trường confirm khỏi dữ liệu gửi đi
+    const { confirm, ...registerData } = values;
+
     try {
-      // values: thông tin người dùng nhập
-      await api.post("register", values);
+      await api.post("register", registerData);
       toast.success("Tạo tài khoản thành công!");
       navigate("/login");
     } catch (e) {
       console.log(e);
-      // show ra màn hình cho người dùng biết lỗi
-      toast.error(e.response.data);
+      toast.error(e.response?.data || "Đăng ký thất bại");
     }
   };
   const onFinishFailed = (errorInfo) => {
@@ -144,9 +143,8 @@ function RegisterForm() {
           rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
         >
           <Radio.Group>
-            <Radio value="male">Nam</Radio>
-            <Radio value="female">Nữ</Radio>
-            <Radio value="other">Khác</Radio>
+            <Radio value="MALE">Nam</Radio>
+            <Radio value="FEMALE">Nữ</Radio>
           </Radio.Group>
         </Form.Item>
 
