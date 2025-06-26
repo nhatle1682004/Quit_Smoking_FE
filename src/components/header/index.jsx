@@ -5,8 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import logo from "../../assets/image/logo.jpg";
 import UserAvatar from "../avatar"; // avatar user
 import { logout } from "../../redux/features/userSlice"; // dropdown tách riêng
-import UserProfileDropdown from "../user-profile-dropdown";
 import { FaBell, FaMedal } from "react-icons/fa";
+import UserProfileDropdown from "../user-profile-dropdown";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,9 +39,7 @@ const Header = () => {
     { id: 7, label: "Kế hoạch của bạn", href: "/plan" },
     { id: 8, label: "Blog", href: "/blog" },
     { id: 9, label: "Liên hệ", href: "/contact" },
-
   ];
-
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -87,7 +85,7 @@ const Header = () => {
                   className="h-18 w-18 rounded-full object-cover"
                   onError={(e) => {
                     e.target.src =
-                      "https://png.pngtree.com/png-clipart/20190904/original/pngtree-user-cartoon-avatar-pattern-flat-avatar-png-image_4492883.jpg";
+                      "https://via.placeholder.com/80x80.png?text=Logo";
                   }}
                 />
               </button>
@@ -160,7 +158,11 @@ const Header = () => {
               className="md:hidden p-2 rounded-lg hover:bg-[#2980b9] transition-colors duration-300 text-white"
               aria-label="Toggle menu"
             >
-              {isOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
+              {isOpen ? (
+                <FiX className="w-6 h-6" />
+              ) : (
+                <FiMenu className="w-6 h-6" />
+              )}
             </button>
           </div>
 
