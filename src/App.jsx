@@ -17,6 +17,7 @@ import Footer from "./components/footer";
 import InformationPage from "./pages/navbar-page/about";
 import ContactPage from './pages/navbar-page/contact/index';
 import KnowledgePage from './pages/navbar-page/knowledge/index';
+
 import BlogPage from "./pages/navbar-page/blog";
 import SuccessStories from "./pages/navbar-page/success/index";
 import SuccessStoryHoChiMinh from "./components/success-story-details/successStoryHoChiMinh";
@@ -32,9 +33,8 @@ import AchievementsPage from "./pages/navbar-page/achievements";
 import PlanFree from "./pages/navbar-page/planFree";
 import Payment from "./pages/payment";
 import ForgotPassword from "./pages/auth/forgotPassword";
+
 // import InitialSurvey from "./pages/initial-survey";
-
-
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -112,6 +112,7 @@ function App() {
         {
           path: "plan",
           element: <PlanFree />,
+
         },
       ],
     },
@@ -141,6 +142,7 @@ function App() {
       path: "/forgot-password",
       element: <ForgotPassword />,
     }
+
   ]);
   return (
     <>

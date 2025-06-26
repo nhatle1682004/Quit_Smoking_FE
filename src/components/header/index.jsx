@@ -31,6 +31,7 @@ const Header = () => {
   const menuItems = [
     { id: 1, label: "Trang chủ", href: "/" },
     { id: 2, label: "Giới thiệu", href: "/about" },
+
     { id: 3, label: "Đặt lịch tư vấn chuyên gia", href: "/knowledge" },
     { id: 4, label: "Dịch vụ", href: "/service" },
     { id: 5, label: "Nhật ký", href: "/journal" },
@@ -38,6 +39,7 @@ const Header = () => {
     { id: 7, label: "Kế hoạch của bạn", href: "/plan" },
     { id: 8, label: "Blog", href: "/blog" },
     { id: 9, label: "Liên hệ", href: "/contact" },
+
   ];
 
 

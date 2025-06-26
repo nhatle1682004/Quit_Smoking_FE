@@ -247,7 +247,9 @@ function UserManagement() {
             rules={[
               { required: true, message: "Please enter username!" },
 
+
               { min: 3, message: "Username must be at least 3 characters!" },
+
 
               {
                 pattern: /^[a-zA-Z0-9_]+$/,
@@ -257,6 +259,7 @@ function UserManagement() {
           >
 
             {/* <Input placeholder="Enter username" readOnly={!!editingUserId} /> */}
+
 
             <Input
               placeholder="Enter username"
