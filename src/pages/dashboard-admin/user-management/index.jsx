@@ -5,6 +5,8 @@ import {
   Image,
   Input,
   Modal,
+  Popconfirm,
+  Radio,
   Select,
   Space,
   Table,
@@ -15,68 +17,54 @@ import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import api from "./../../../configs/axios";
 import { toast } from "react-toastify";
+import { useForm } from "antd/es/form/Form";
 
 function UserManagement() {
   const { Text } = Typography;
   const [open, setOpen] = useState(false);
   const [datas, setDatas] = useState([]);
-  // lấy dữ liệu gửi xuống back-end
+  const [form] = useForm();
+  const [editingUserId, setEditingUserId] = useState(null);
+
   const handleSubmit = async (values) => {
-    //value giá trị người dùng nhập trên form
-    // nhiệm vụ: cầm cục data chuyển xuống cho back-end
     try {
-      const token = localStorage.getItem("token");
-      console.log("Token hiện tại:", token);
-      const response = await api.post("user", values, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      toast.success("Thêm user thành công");
+      if (editingUserId) {
+        await api.put(`/user/${editingUserId}`, values);
+        toast.success("User updated successfully!");
+      } else {
+        await api.post("user", values);
+        toast.success("New user created successfully!");
+      }
+
       setOpen(false);
       fetchUser();
-    } catch (error) {
-      toast.error(error.response.data);
-    }
-  };
-  // lay du lieu
-  const fetchUser = async () => {
-    try {
-      const response = await api.get("user");
-      setDatas(response.data);
-    } catch (error) {
-      toast.error(error.response.data);
-    }
-  };
-  // xoa du lieu nguoi dung
-  const handleDelete = async (id) => {
-    try {
-      const response = await api.delete(`/user/${id}`);
-      toast.success("Xóa người dùng thành công");
-      fetchUser(); // load lại danh sách
-    } catch (error) {
-      toast.error(error.response.data);
-    }
-  };
-  // cap nhat du lieu nguoi dung
-  const handleUpdate = async (id, values) => {
-    try {
-      const response = await api.put(`/user/${id}`, { active: false });
-      toast.success("Cập nhật thành công");
-      fetchUser(); // cập nhật lại danh sách
-      setOpen(false); // đóng modal nếu cần
-    } catch (error) {
-      toast.error(error.response.data);
+      form.resetFields();
+      setEditingUserId(null);
+    } catch (err) {
+      toast.error(err.response?.data || "An error occurred");
     }
   };
 
-  const handleDeleteUser = async (id) => {
+  const fetchUser = async () => {
     try {
-      await api.put(`/user/${id}`, { active: false });
-      toast.success("Đã chuyển user sang inactive!");
-      fetchUser(); // cập nhật lại danh sách user nếu cần
+      const response = await api.get("user");
+      const users = response.data.map((user) => ({
+        ...user,
+        active: user.active === true || user.active === "true",
+      }));
+      setDatas(users);
     } catch (error) {
-      toast.error("Có lỗi khi chuyển trạng thái user!");
+      toast.error(error.response?.data || "Failed to load users");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/user/${id}`);
+      toast.success("User deleted successfully");
+      fetchUser();
+    } catch (error) {
+      toast.error(error.response?.data || "Delete failed");
     }
   };
 
@@ -84,13 +72,13 @@ function UserManagement() {
     if (!user.active) {
       try {
         await api.put(`/user/${user.id}/restore`);
-        toast.success("Khôi phục tài khoản thành công!");
-        fetchUser(); // cập nhật lại danh sách user nếu cần
+        toast.success("User restored successfully!");
+        fetchUser();
       } catch (error) {
-        toast.error("Khôi phục tài khoản thất bại!");
+        toast.error("Restore failed!");
       }
     } else {
-      toast.info("Tài khoản này đang hoạt động, không cần khôi phục.");
+      toast.info("This account is already active.");
     }
   };
 
@@ -125,13 +113,11 @@ function UserManagement() {
       dataIndex: "username",
       key: "username",
     },
-
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
     },
-
     {
       title: "Role",
       dataIndex: "role",
@@ -169,53 +155,116 @@ function UserManagement() {
     },
     {
       title: "Action",
-      key: "action",
-      render: (text, record) => (
+      dataIndex: "id",
+      key: "id",
+      render: (id, record) => (
         <Space>
-          <Button type="primary" onClick={() => handleUpdate(record)}>
+          <Button
+            type="primary"
+            onClick={() => {
+              setOpen(true);
+              setEditingUserId(record.id);
+              form.setFieldsValue(record);
+            }}
+            disabled={!record.active}
+          >
             Edit
           </Button>
-          <Button type="primary" danger onClick={() => handleDelete(record.id)}>
-            Delete
-          </Button>
-          <Button onClick={() => handleRestoreUser(record)}>Khôi phục</Button>
+          <Popconfirm
+            title="Delete the user"
+            description="Are you sure you want to delete this user?"
+            onConfirm={() => handleDelete(record.id)}
+            disabled={!record.active}
+          >
+            <Button type="primary" danger disabled={!record.active}>
+              Delete
+            </Button>
+          </Popconfirm>
+          <Button onClick={() => handleRestoreUser(record)}>Restore</Button>
         </Space>
       ),
     },
   ];
 
-  // useEffect(d/n hanh dong,[]: d/n dependency list: khi nao thi hanh dong trc dc chay)
-  // [] => chay 1 lan duy nhat khi load page
-  // () => {} : goi la anonymous function vi la ham ko co ten
-  // [name]: chay moi khi ma bien name thay doi
   useEffect(() => {
     fetchUser();
   }, []);
 
   return (
     <div>
-      <Button type="primary" onClick={() => setOpen(true)}>
-        Add new User
+      {/* Nút thêm người dùng */}
+      <Button
+        type="primary"
+        onClick={() => {
+          setOpen(true);
+          setEditingUserId(null);
+          form.resetFields();
+        }}
+      >
+        Add New User
       </Button>
-      <Table columns={columns} dataSource={datas} />
-      <Modal title="Add new User" open={open} onCancel={() => setOpen(false)}>
-        <Form labelCol={{ span: 24 }} onFinish={handleSubmit}>
+
+      {/* Bảng dữ liệu người dùng */}
+      <Table columns={columns} dataSource={datas} rowKey="id" />
+
+      {/* Modal thêm/sửa người dùng */}
+      <Modal
+        title={editingUserId ? "Edit User" : "Add New User"}
+        open={open}
+        onCancel={() => {
+          setOpen(false);
+          form.resetFields();
+          setEditingUserId(null);
+        }}
+        footer={null}
+      >
+        <Form
+          form={form}
+          labelCol={{ span: 24 }}
+          onFinish={handleSubmit}
+          layout="vertical"
+        >
+          {/* Họ và tên */}
           <Form.Item
             label="Full Name"
             name="fullName"
-            rules={[{ required: true }]}
+            rules={[
+              { required: true, message: "Please enter full name!" },
+              { min: 5, message: "Name must be at least 5 characters." },
+              {
+                pattern: /^(?!\s).+$/,
+                message: "Name cannot start with a space!",
+              },
+            ]}
           >
             <Input placeholder="Enter full name" />
           </Form.Item>
 
+          {/* Tên đăng nhập */}
           <Form.Item
             label="Username"
             name="username"
-            rules={[{ required: true }]}
+            rules={[
+              { required: true, message: "Please enter username!" },
+
+              { min: 3, message: "Username must be at least 3 characters!" },
+
+              {
+                pattern: /^[a-zA-Z0-9_]+$/,
+                message: "No spaces or special characters allowed!",
+              },
+            ]}
           >
-            <Input placeholder="Enter username" />
+
+            {/* <Input placeholder="Enter username" readOnly={!!editingUserId} /> */}
+
+            <Input
+              placeholder="Enter username"
+              readOnly={!!editingUserId} // Nếu đang sửa thì không cho chỉnh username
+            />
           </Form.Item>
 
+          {/* Email */}
           <Form.Item
             label="Email"
             name="email"
@@ -227,14 +276,37 @@ function UserManagement() {
             <Input placeholder="Enter email address" />
           </Form.Item>
 
+          {/* Giới tính */}
           <Form.Item
-            label="Password"
-            name="password"
-            rules={[{ required: true, message: "Please enter your password" }]}
+            label="Gender"
+            name="gender"
+            rules={[{ required: true, message: "Please select gender!" }]}
           >
-            <Input.Password placeholder="Enter password" />
+            <Radio.Group>
+              <Radio value="MALE">Male</Radio>
+              <Radio value="FEMALE">Female</Radio>
+            </Radio.Group>
           </Form.Item>
 
+          {/* Mật khẩu - chỉ hiển thị khi tạo mới */}
+          {!editingUserId && (
+            <Form.Item
+              label="Password"
+              name="password"
+              rules={[
+                { required: true, message: "Please enter password!" },
+                { min: 6, message: "Password must be at least 6 characters." },
+                {
+                  pattern: /^\S+$/,
+                  message: "Password cannot contain spaces!",
+                },
+              ]}
+            >
+              <Input.Password placeholder="Enter password" />
+            </Form.Item>
+          )}
+
+          {/* Tài khoản Premium */}
           <Form.Item
             label="Premium Account"
             name="premium"
@@ -243,23 +315,20 @@ function UserManagement() {
             <Checkbox>Enable Premium</Checkbox>
           </Form.Item>
 
+          {/* Vai trò */}
           <Form.Item label="Role" name="role" rules={[{ required: true }]}>
             <Select placeholder="Select role">
-              <Select.Option value="ADMIN">Admin</Select.Option>
+
+    
               <Select.Option value="CUSTOMER">Customer</Select.Option>
               <Select.Option value="COACH">Coach</Select.Option>
             </Select>
           </Form.Item>
 
-          {/* Nếu muốn thêm avatar URL:
-  <Form.Item label="Avatar URL" name="avatarUrl">
-    <Input placeholder="Paste avatar image URL (optional)" />
-  </Form.Item>
-  */}
-
+          {/* Nút submit */}
           <Form.Item>
             <Button type="primary" htmlType="submit" block>
-              Create New User
+              {editingUserId ? "Update User" : "Create New User"}
             </Button>
           </Form.Item>
         </Form>
