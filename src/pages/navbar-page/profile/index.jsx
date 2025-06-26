@@ -1,318 +1,603 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 import {
   Form,
   Input,
+  Select,
+  Radio,
+  DatePicker,
   Button,
   Card,
+  Collapse,
   Typography,
   Space,
-  message,
-  Radio,
-  Image,
+  Divider,
+  Modal,
 } from "antd";
-import {
-  UserOutlined,
-  MailOutlined,
-  ManOutlined,
-  EditOutlined,
-  SaveOutlined,
-  CloseOutlined,
-} from "@ant-design/icons";
-import { updateUser } from "../../../redux/features/userSlice";
 import api from "../../../configs/axios";
+import UserAvatar from "../../../components/avatar";
+import UserProfileDropdown from "../../../components/user-profile-dropdown";
+import { updateUser } from "../../../redux/features/userSlice";
+import dayjs from "dayjs";
 
-const Profile = () => {
-  const { Title, Text } = Typography;
-  const [form] = Form.useForm();
+const { Title, Text } = Typography;
+const { Panel } = Collapse;
+const { Option } = Select;
+const { TextArea } = Input;
+
+const UserProfile = () => {
+  const navigate = useNavigate();
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const [profileData, setProfileData] = useState(null);
+  const [isEditingUser, setIsEditingUser] = useState(false);
+  const [isEditingSmoking, setIsEditingSmoking] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [userForm] = Form.useForm();
+  const [smokingForm] = Form.useForm();
+  const [displayPrice, setDisplayPrice] = useState("");
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Synchronize Ant Design form fields with Redux user data
-  useEffect(() => {
-    // Chỉ setFieldsValue khi user có dữ liệu và form đã sẵn sàng
-    if (user && form) {
-      form.setFieldsValue({
-        fullName: user.fullName || "",
-        gender: user.gender || "MALE", // Đảm bảo có giá trị mặc định
-        avatarUrl: user.avatarUrl || "",
-      });
-    }
-  }, [user, form]); // Thêm 'form' vào dependency array
-
-  const handleSubmit = async (values) => {
-    console.log("Form submission initiated. Values:", values); // DEBUG
-    setIsLoading(true);
+  const fetchProfileData = useCallback(async () => {
     try {
-      // ===== BƯỚC GỠ LỖI: Giả lập cuộc gọi API =====
-      console.log("Bắt đầu giả lập cuộc gọi API trong 2 giây...");
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Lấy thông tin tài khoản
+      const userResponse = await api.get("/user/me");
+      const userData = userResponse.data;
+      setProfileData(userData);
 
-      // Giả sử API trả về thành công với dữ liệu đã cập nhật
-      const updatedFields = values;
-      console.log("Giả lập API thành công!", updatedFields);
-      // ===============================================
+      // Lấy thông tin khai báo ban đầu từ API thực
+      const smokingResponse = await api.get("/initial-condition");
+      const smokingData = smokingResponse.data;
 
-      /*
-      // ----- MÃ GỐC (TẠM THỜI VÔ HIỆU HÓA) -----
-      const token = user?.token;
-
-      if (!token) {
-        message.error("Xác thực không thành công. Vui lòng đăng nhập lại.");
-        setIsLoading(false);
-        return;
-      }
-
-      const response = await api.put("user/me", values, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      // Cập nhật form với dữ liệu - chỉ các trường cần thiết
+      userForm.setFieldsValue({
+        fullName: userData.fullName,
+        email: userData.email,
+        gender: userData.gender,
+        username: userData.username,
       });
 
-      const updatedFields = response.data;
-      // -----------------------------------------
-      */
+      smokingForm.setFieldsValue({
+        smokingStatus: smokingData.smokingStatus,
+        ageStarted: smokingData.ageStarted,
+        reasonStartedSmoking: smokingData.reasonStartedSmoking,
+        cigarettesPerDay: smokingData.cigarettesPerDay,
+        firstSmokeTimeOfDay: smokingData.firstSmokeTimeOfDay,
+        hasTriedToQuit: smokingData.hasTriedToQuit,
+        hasHealthIssues: smokingData.hasHealthIssues,
+        quitReason: smokingData.quitReason,
+        quitStartDate: smokingData.quitStartDate
+          ? dayjs(smokingData.quitStartDate)
+          : null,
+        pricePerCigarette: smokingData.pricePerCigarette,
+        cigarettesPerPack: smokingData.cigarettesPerPack,
+        weight: smokingData.weight,
+      });
 
-      const updatedUserData = {
-        ...user,
-        ...updatedFields,
+      // Khởi tạo displayPrice
+      if (smokingData.pricePerCigarette) {
+        setDisplayPrice(
+          Number(smokingData.pricePerCigarette).toLocaleString("vi-VN")
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      toast.error("Không thể tải thông tin profile");
+    } finally {
+      setLoading(false);
+    }
+  }, [userForm, smokingForm]);
+
+  useEffect(() => {
+    // Kiểm tra xem user đã đăng nhập chưa
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    // Lấy thông tin profile từ API
+    fetchProfileData();
+  }, [user, navigate, fetchProfileData]);
+
+  const handleSaveUser = async () => {
+    try {
+      const values = await userForm.validateFields();
+
+      // Cập nhật thông tin tài khoản - chỉ các trường có thể chỉnh sửa
+      const userDataToUpdate = {
+        fullName: values.fullName,
+        gender: values.gender,
       };
 
-      dispatch(updateUser(updatedUserData));
-      message.success("Cập nhật hồ sơ thành công!");
-      setIsEditing(false);
-    } catch (err) {
-      const errorMessage =
-        err.response?.data?.message || err.message || "Lỗi khi cập nhật hồ sơ.";
-      message.error(errorMessage);
-      console.error("Lỗi khi gửi form:", err); // Log lỗi chi tiết hơn
-    } finally {
-      setIsLoading(false);
+      await api.put("/user/me", userDataToUpdate);
+
+      // Cập nhật Redux store với thông tin user mới
+      dispatch(updateUser(userDataToUpdate));
+
+      setIsEditingUser(false);
+      toast.success("Cập nhật thông tin cá nhân thành công!");
+    } catch (error) {
+      if (error.errorFields) {
+        // Validation errors from Ant Design Form
+        toast.error("Vui lòng kiểm tra và điền đúng các trường bắt buộc.");
+      } else {
+        console.error("Error updating user:", error);
+        toast.error("Cập nhật thất bại!");
+      }
     }
   };
 
-  const onFinishFailed = (errorInfo) => {
-    console.log("Form validation failed:", errorInfo);
-    message.error("Vui lòng kiểm tra lại thông tin đã nhập!");
+  const handleSaveSmoking = async () => {
+    try {
+      const values = await smokingForm.validateFields();
+
+      // Cập nhật thông tin khai báo ban đầu qua API thực
+      await api.put("/initial-condition", values);
+      setProfileData(values);
+
+      setIsEditingSmoking(false);
+      toast.success("Cập nhật thông tin hút thuốc thành công!");
+    } catch (error) {
+      if (error.errorFields) {
+        // Validation errors from Ant Design Form
+        toast.error("Vui lòng kiểm tra và điền đúng các trường bắt buộc.");
+      } else {
+        console.error("Error updating smoking info:", error);
+        toast.error("Cập nhật thất bại!");
+      }
+    }
   };
 
-  const cancelEdit = () => {
-    // Reset form fields to original user values from Redux
-    form.setFieldsValue({
-      fullName: user?.fullName || "",
-      gender: user?.gender || "MALE",
-      avatarUrl: user?.avatarUrl || "",
-    });
-    setIsEditing(false);
+  const handlePriceChange = (e) => {
+    const { value } = e.target;
+    const numeric = value.replace(/[^\d]/g, "");
+    setDisplayPrice(numeric ? Number(numeric).toLocaleString("vi-VN") : "");
+    smokingForm.setFieldValue("pricePerCigarette", numeric);
   };
+
+  const handlePriceBlur = () => {
+    const price = smokingForm.getFieldValue("pricePerCigarette");
+    if (!price) {
+      setDisplayPrice("");
+      return;
+    }
+    const numPrice = Number(price);
+    if (!isNaN(numPrice) && numPrice > 0) {
+      setDisplayPrice(numPrice.toLocaleString("vi-VN"));
+    }
+  };
+
+  const handlePriceFocus = () => {
+    const price = smokingForm.getFieldValue("pricePerCigarette");
+    setDisplayPrice(price ? Number(price).toLocaleString("vi-VN") : "");
+  };
+
+  const handleUserSubmit = () => {
+    Modal.confirm({
+      title: "Xác nhận cập nhật thông tin cá nhân?",
+      content: "Bạn có chắc chắn muốn lưu các thay đổi này không?",
+      okText: "Xác nhận",
+      cancelText: "Hủy",
+      onOk: handleSaveUser,
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Đang tải thông tin...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profileData) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Không tìm thấy thông tin profile</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ padding: "24px", maxWidth: "800px", margin: "0 auto" }}>
-      <Title
-        level={2}
-        style={{ textAlign: "center", marginBottom: "30px", color: "#1890ff" }}
-      >
-        <span
-          style={{ borderBottom: "3px solid #1890ff", paddingBottom: "5px" }}
-        >
-          Hồ Sơ Cá Nhân
-        </span>
-      </Title>
-
-      <Card
-        style={{
-          borderRadius: "8px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-        }}
-      >
-        <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <Image
-            width={120}
-            height={120}
-            src={user?.avatarUrl}
-            alt="Avatar"
-            style={{
-              borderRadius: "50%",
-              objectFit: "cover",
-              border: "2px solid #f0f0f0",
-            }}
-            fallback="https://via.placeholder.com/120?text=No+Avatar"
-          />
-        </div>
-
-        {isEditing ? (
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleSubmit} // Ant Design's way to handle submission
-            onFinishFailed={onFinishFailed} // DEBUG: Add this to see validation errors
-            // initialValues được thiết lập lại mỗi khi component render nếu isEditing thay đổi
-            // Điều này đảm bảo form luôn bắt đầu với giá trị đúng từ Redux user
-            initialValues={{
-              fullName: user?.fullName || "",
-              gender: user?.gender || "MALE",
-              avatarUrl: user?.avatarUrl || "",
-            }}
-          >
-            <Form.Item
-              label="Họ và tên"
-              name="fullName"
-              rules={[
-                { required: true, message: "Vui lòng nhập họ tên!" },
-                { min: 5, message: "Họ tên phải có ít nhất 5 ký tự." },
-                {
-                  pattern: /^(?!\s).+$/,
-                  message: "Họ tên không được bắt đầu bằng khoảng trắng!",
-                },
-              ]}
-            >
-              <Input placeholder="Nhập họ tên đầy đủ" />
-            </Form.Item>
-
-            <Form.Item
-              label="Giới tính"
-              name="gender"
-              rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
-            >
-              <Radio.Group>
-                <Radio value="MALE">Nam</Radio>
-                <Radio value="FEMALE">Nữ</Radio>
-              </Radio.Group>
-            </Form.Item>
-
-            <Form.Item
-              label="Avatar (URL)"
-              name="avatarUrl"
-              // `required: true` có thể là nguyên nhân nếu người dùng không muốn set avatar
-              // Hãy cân nhắc nếu avatar là bắt buộc hay tùy chọn.
-              // Nếu tùy chọn, bỏ `required: true`
-              rules={[{ type: "url", message: "Phải là một URL hợp lệ!" }]}
-            >
-              <Input placeholder="https://example.com/avatar.jpg" />
-            </Form.Item>
-
-            {form.getFieldValue("avatarUrl") && (
-              <div style={{ textAlign: "center", marginBottom: 16 }}>
-                <Image
-                  width={100}
-                  height={100}
-                  src={form.getFieldValue("avatarUrl")}
-                  style={{ borderRadius: "50%", objectFit: "cover" }}
-                  fallback="https://via.placeholder.com/100x100?text=No+Img"
-                />
-                <Text
-                  type="secondary"
-                  style={{ display: "block", marginTop: "8px" }}
-                >
-                  Xem trước ảnh đại diện
-                </Text>
-              </div>
-            )}
-
-            <Space
-              size="middle"
-              style={{
-                width: "100%",
-                justifyContent: "flex-end",
-                marginTop: "20px",
-              }}
-            >
-              <Button
-                type="default"
-                onClick={cancelEdit}
-                disabled={isLoading}
-                icon={<CloseOutlined />}
-              >
-                Hủy
-              </Button>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={isLoading}
-                icon={<SaveOutlined />}
-              >
-                Lưu thay đổi
-              </Button>
-            </Space>
-          </Form>
-        ) : (
-          <div className="space-y-4">
-            <div style={{ marginBottom: "16px" }}>
-              <Text
-                type="secondary"
-                style={{ display: "block", fontSize: "12px" }}
-              >
-                Họ tên
-              </Text>
-              <Space>
-                <UserOutlined style={{ color: "#1890ff" }} />
-                <Text strong>{user?.fullName || "Chưa cập nhật"}</Text>
-              </Space>
-            </div>
-
-            <div style={{ marginBottom: "16px" }}>
-              <Text
-                type="secondary"
-                style={{ display: "block", fontSize: "12px" }}
-              >
-                Tên đăng nhập
-              </Text>
-              <Space>
-                <UserOutlined style={{ color: "#1890ff" }} />
-                <Text strong>{user?.username || "Chưa cập nhật"}</Text>
-              </Space>
-            </div>
-
-            <div style={{ marginBottom: "16px" }}>
-              <Text
-                type="secondary"
-                style={{ display: "block", fontSize: "12px" }}
-              >
-                Email
-              </Text>
-              <Space>
-                <MailOutlined style={{ color: "#1890ff" }} />
-                <Text strong>{user?.email || "Chưa cập nhật"}</Text>
-              </Space>
-            </div>
-
-            <div style={{ marginBottom: "16px" }}>
-              <Text
-                type="secondary"
-                style={{ display: "block", fontSize: "12px" }}
-              >
-                Giới tính
-              </Text>
-              <Space>
-                <ManOutlined style={{ color: "#1890ff" }} />
-                <Text strong>
-                  {user?.gender === "MALE"
-                    ? "Nam"
-                    : user?.gender === "FEMALE"
-                    ? "Nữ"
-                    : "Chưa cập nhật"}
-                </Text>
-              </Space>
-            </div>
-
-            <Button
-              type="primary"
-              block
-              size="large"
-              icon={<EditOutlined />}
-              onClick={() => setIsEditing(true)}
-              style={{ marginTop: "24px" }}
-            >
-              Chỉnh sửa hồ sơ
-            </Button>
+    <div className="min-h-screen bg-gray-100">
+      <main className="container mx-auto p-4 sm:p-8">
+        <div className="bg-white rounded-lg shadow-md p-8">
+          {/* Header Profile - Centered */}
+          <div className="text-center mb-8">
+            <Title level={2} className="!mb-0">
+              Thông tin tài khoản
+            </Title>
           </div>
-        )}
-      </Card>
+
+          {/* Collapsible Sections */}
+          <Collapse defaultActiveKey={["personal"]} ghost>
+            {/* Thông tin cá nhân */}
+            <Panel
+              header={
+                <Title level={4} className="!mb-0">
+                  Thông tin cá nhân
+                </Title>
+              }
+              key="personal"
+            >
+              <Card>
+                <Form form={userForm} layout="vertical">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Form.Item
+                      label="Họ và tên"
+                      name="fullName"
+                      rules={[
+                        { required: true, message: "Vui lòng nhập họ và tên!" },
+                      ]}
+                    >
+                      <Input placeholder="Nhập họ và tên" />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Giới tính"
+                      name="gender"
+                      rules={[
+                        { required: true, message: "Vui lòng chọn giới tính!" },
+                      ]}
+                    >
+                      <Select placeholder="Chọn giới tính">
+                        <Option value="MALE">Nam</Option>
+                        <Option value="FEMALE">Nữ</Option>
+                      </Select>
+                    </Form.Item>
+
+                    <Form.Item label="Email" name="email">
+                      <Input disabled placeholder="Email" />
+                    </Form.Item>
+
+                    <Form.Item label="Tên đăng nhập" name="username">
+                      <Input disabled placeholder="Tên đăng nhập" />
+                    </Form.Item>
+                  </div>
+
+                  {/* Hiển thị trạng thái Premium nếu có */}
+                  {profileData?.premium !== undefined && (
+                    <div className="mt-4">
+                      <Divider />
+                      <div className="flex items-center space-x-2">
+                        <Text strong>Trạng thái tài khoản:</Text>
+                        <span
+                          className={`px-2 py-1 rounded text-sm font-medium ${
+                            profileData.premium
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {profileData.premium ? "Premium" : "Miễn phí"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <Divider />
+
+                  <div className="flex justify-end space-x-4">
+                    <Button
+                      type="primary"
+                      onClick={
+                        isEditingUser
+                          ? handleUserSubmit
+                          : () => setIsEditingUser(true)
+                      }
+                    >
+                      Gửi
+                    </Button>
+                  </div>
+                </Form>
+              </Card>
+            </Panel>
+
+            {/* Thông tin hút thuốc */}
+            <Panel
+              header={
+                <Title level={4} className="!mb-0">
+                  Thông tin hút thuốc
+                </Title>
+              }
+              key="smoking"
+            >
+              <Card>
+                <Form form={smokingForm} layout="vertical">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Thông tin cơ bản */}
+                    <div className="space-y-4">
+                      <Title level={5}>Thông tin cơ bản</Title>
+                      <Form.Item
+                        label="Tuổi bắt đầu hút thuốc"
+                        name="ageStarted"
+                        rules={[
+                          { required: true, message: "Bắt buộc" },
+                          {
+                            validator: (_, value) => {
+                              const numValue = Number(value);
+                              if (isNaN(numValue)) {
+                                return Promise.reject(
+                                  new Error("Tuổi phải là số")
+                                );
+                              }
+                              if (numValue < 10) {
+                                return Promise.reject(
+                                  new Error(
+                                    "Tuổi bắt đầu hút thuốc phải từ 10 tuổi trở lên"
+                                  )
+                                );
+                              }
+                              if (numValue > 80) {
+                                return Promise.reject(
+                                  new Error(
+                                    "Tuổi bắt đầu hút thuốc không hợp lệ"
+                                  )
+                                );
+                              }
+                              return Promise.resolve();
+                            },
+                          },
+                        ]}
+                      >
+                        <Input placeholder="Nhập tuổi" />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Lý do bắt đầu hút thuốc"
+                        name="reasonStartedSmoking"
+                        rules={[
+                          { required: true, message: "Bắt buộc" },
+                          { min: 5, message: "Phải nhập ít nhất 5 ký tự" },
+                        ]}
+                      >
+                        <Input placeholder="Nhập lý do" />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Cân nặng (kg)"
+                        name="weight"
+                        rules={[
+                          { required: true, message: "Bắt buộc nhập cân nặng" },
+                          { type: "number", message: "Cân nặng phải là số" },
+                          {
+                            validator: (_, value) => {
+                              if (value <= 20) {
+                                return Promise.reject(
+                                  new Error("Cân nặng phải lớn hơn 20kg")
+                                );
+                              }
+                              if (value >= 300) {
+                                return Promise.reject(
+                                  new Error("Cân nặng phải nhỏ hơn 300kg")
+                                );
+                              }
+                              return Promise.resolve();
+                            },
+                          },
+                        ]}
+                      >
+                        <Input type="number" placeholder="Nhập cân nặng" />
+                      </Form.Item>
+                    </div>
+
+                    {/* Thông tin hút thuốc hiện tại */}
+                    <div className="space-y-4">
+                      <Title level={5}>Thông tin hút thuốc</Title>
+
+                      <Form.Item
+                        label="Số điếu mỗi ngày"
+                        name="cigarettesPerDay"
+                        rules={[
+                          { required: true, message: "Bắt buộc" },
+                          {
+                            validator: (_, value) => {
+                              const numValue = Number(value);
+                              if (isNaN(numValue)) {
+                                return Promise.reject(
+                                  new Error("Số điếu phải là số")
+                                );
+                              }
+                              if (numValue < 0) {
+                                return Promise.reject(
+                                  new Error("Số điếu phải từ 0 trở lên")
+                                );
+                              }
+                              if (numValue > 100) {
+                                return Promise.reject(
+                                  new Error(
+                                    "Số điếu không được vượt quá 100 điếu/ngày"
+                                  )
+                                );
+                              }
+                              return Promise.resolve();
+                            },
+                          },
+                        ]}
+                      >
+                        <Input placeholder="Nhập số điếu" />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Mốc thời gian hút điếu đầu tiên"
+                        name="firstSmokeTimeOfDay"
+                        rules={[{ required: true, message: "Bắt buộc chọn" }]}
+                      >
+                        <Select placeholder="Chọn thời gian">
+                          <Option value="morning">Sáng sớm (5h-8h)</Option>
+                          <Option value="breakfast">Sau bữa sáng</Option>
+                          <Option value="mid_morning">
+                            Giữa buổi sáng (9h-11h)
+                          </Option>
+                          <Option value="lunch">Sau bữa trưa</Option>
+                          <Option value="afternoon">
+                            Buổi chiều (13h-17h)
+                          </Option>
+                          <Option value="dinner">Sau bữa tối</Option>
+                          <Option value="evening">Buổi tối (19h-22h)</Option>
+                          <Option value="late_night">Đêm khuya (22h-5h)</Option>
+                          <Option value="stress">Khi căng thẳng/áp lực</Option>
+                          <Option value="social">Khi gặp gỡ bạn bè</Option>
+                          <Option value="coffee">Khi uống cà phê</Option>
+                          <Option value="other">Thời gian khác</Option>
+                        </Select>
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Giá mỗi điếu (VNĐ)"
+                        name="pricePerCigarette"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Vui lòng nhập giá mỗi điếu",
+                          },
+                          {
+                            validator: (_, value) => {
+                              const numValue = Number(value);
+                              if (isNaN(numValue)) {
+                                return Promise.reject(
+                                  new Error("Giá phải là số")
+                                );
+                              }
+                              if (numValue < 500) {
+                                return Promise.reject(
+                                  new Error(
+                                    "Giá mỗi điếu thường từ 500 VNĐ trở lên"
+                                  )
+                                );
+                              }
+                              if (numValue > 200000) {
+                                return Promise.reject(
+                                  new Error("Giá mỗi điếu không hợp lệ")
+                                );
+                              }
+                              return Promise.resolve();
+                            },
+                          },
+                        ]}
+                      >
+                        <Input
+                          placeholder="Nhập giá"
+                          value={displayPrice}
+                          onChange={handlePriceChange}
+                          onBlur={handlePriceBlur}
+                          onFocus={handlePriceFocus}
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Số điếu mỗi bao"
+                        name="cigarettesPerPack"
+                        rules={[
+                          { required: true, message: "Bắt buộc" },
+                          {
+                            validator: (_, value) => {
+                              const numValue = Number(value);
+                              if (isNaN(numValue)) {
+                                return Promise.reject(
+                                  new Error("Số điếu phải là số")
+                                );
+                              }
+                              if (numValue < 1) {
+                                return Promise.reject(
+                                  new Error("Số điếu mỗi bao phải từ 1 trở lên")
+                                );
+                              }
+                              if (numValue > 100) {
+                                return Promise.reject(
+                                  new Error("Số điếu mỗi bao không hợp lệ")
+                                );
+                              }
+                              return Promise.resolve();
+                            },
+                          },
+                        ]}
+                      >
+                        <Input placeholder="Nhập số điếu" />
+                      </Form.Item>
+                    </div>
+
+                    {/* Thông tin bổ sung */}
+                    <div className="space-y-4">
+                      <Title level={5}>Thông tin bổ sung</Title>
+
+                      <Form.Item
+                        label="Đã từng cố bỏ thuốc?"
+                        name="hasTriedToQuit"
+                        rules={[{ required: true, message: "Bắt buộc chọn" }]}
+                      >
+                        <Radio.Group>
+                          <Space direction="vertical">
+                            <Radio value="yes">Có</Radio>
+                            <Radio value="no">Không</Radio>
+                          </Space>
+                        </Radio.Group>
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Có vấn đề sức khỏe liên quan?"
+                        name="hasHealthIssues"
+                        rules={[{ required: true, message: "Bắt buộc chọn" }]}
+                      >
+                        <Radio.Group>
+                          <Space direction="vertical">
+                            <Radio value="yes">Có</Radio>
+                            <Radio value="no">Không</Radio>
+                          </Space>
+                        </Radio.Group>
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Lý do muốn bỏ thuốc"
+                        name="quitReason"
+                        rules={[
+                          { required: true, message: "Bắt buộc" },
+                          { min: 5, message: "Phải nhập ít nhất 5 ký tự" },
+                        ]}
+                      >
+                        <TextArea rows={3} placeholder="Nhập lý do" />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Ngày bắt đầu cai thuốc"
+                        name="quitStartDate"
+                      >
+                        <DatePicker
+                          disabled
+                          style={{ width: "100%" }}
+                          placeholder="Chọn ngày"
+                        />
+                      </Form.Item>
+                    </div>
+                  </div>
+
+                  <Divider />
+
+                  <div className="flex justify-end space-x-4">
+                    <Button
+                      type="primary"
+                      onClick={
+                        isEditingSmoking
+                          ? handleSaveSmoking
+                          : () => setIsEditingSmoking(true)
+                      }
+                    >
+                      Gửi
+                    </Button>
+                  </div>
+                </Form>
+              </Card>
+            </Panel>
+          </Collapse>
+        </div>
+      </main>
     </div>
   );
 };
 
-export default Profile;
+export default UserProfile;

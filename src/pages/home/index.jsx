@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
 import {
@@ -10,7 +10,8 @@ import {
   FaMedal,
   FaCalendarAlt,
 } from "react-icons/fa";
-
+import { Tabs } from "antd";
+import { useSelector } from "react-redux";
 // Import required CSS for the slider
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -19,11 +20,16 @@ import "slick-carousel/slick/slick-theme.css";
 import anhkeo1 from "../../assets/image/anhkeo1.png";
 import anhkeo2 from "../../assets/image/anhkeo2.png";
 import anhkeo3 from "../../assets/image/anhkeo3.jpg";
-import duocPham from "../../assets/image/duocPham.jpg";
-import sms from "../../assets/image/sms.jpg";
+import SuccessStories from "../navbar-page/success";
+import PremiumPlansSection from "../../components/premium";
 
 function HomePage() {
   const navigate = useNavigate();
+  const user = useSelector((state) => state.user);
+
+  useEffect(() => {
+    window.scrollTo(0, 0); //  Cuộn trang về đầu
+  }, []);
 
   // Banner images for the carousel
   const bannerImages = [
@@ -70,6 +76,7 @@ function HomePage() {
       title: "Theo dõi tiến trình",
       description:
         "Ghi nhận tình trạng hút thuốc hiện tại: số lượng điếu thuốc, tần suất hút, giá tiền thuốc hút",
+      navigateTo: "/journal",
     },
     {
       icon: <FaCalendarAlt className="w-8 h-8 text-blue-500" />,
@@ -88,40 +95,21 @@ function HomePage() {
       title: "Thành tích & Phần thưởng",
       description:
         "Mở khóa huy hiệu thành tích khi đạt được mốc không hút thuốc",
+      navigateTo: "/achievements",
     },
     {
       icon: <FaUsers className="w-8 h-8 text-blue-500" />,
       title: "Cộng đồng hỗ trợ",
       description:
         "Chia sẻ thành tích, động viên và nhận lời khuyên từ cộng đồng",
+      navigateTo: "/blog",
     },
     {
       icon: <FaComment className="w-8 h-8 text-blue-500" />,
-      title: "Tư vấn chuyên gia",
+      title: "Đặt lịch tư vấn chuyên gia",
       description:
-        "Nhận tư vấn trực tuyến từ các huấn luyện viên và chuyên gia y tế",
-    },
-  ];
-
-  // Câu chuyện thành công
-  const successStories = [
-    {
-      name: "Nguyễn Văn A",
-      story:
-        "Sau 15 năm hút thuốc, tôi đã cai nghiện thành công nhờ nền tảng này. Sức khỏe cải thiện rõ rệt sau 3 tháng.",
-      duration: "Cai thuốc được 6 tháng",
-    },
-    {
-      name: "Trần Thị B",
-      story:
-        "Tôi đã thử nhiều phương pháp khác nhau nhưng chỉ với hệ thống hỗ trợ này tôi mới thành công. Cảm ơn đội ngũ tư vấn!",
-      duration: "Cai thuốc được 1 năm",
-    },
-    {
-      name: "Lê Văn C",
-      story:
-        "Ứng dụng thông báo và kế hoạch cai thuốc đã giúp tôi từng bước giảm dần sự phụ thuộc vào nicotine một cách dễ dàng.",
-      duration: "Cai thuốc được 3 tháng",
+        "Đặt lịch hẹn và nhận tư vấn trực tiếp từ các huấn luyện viên, chuyên gia y tế.",
+      navigateTo: "/knowledge",
     },
   ];
 
@@ -191,7 +179,13 @@ function HomePage() {
                       {/* Nút CTA có glow effect khi hover */}
                       <div className="flex flex-col md:flex-row gap-4 justify-center">
                         <button
-                          onClick={() => navigate("/register")}
+                          onClick={() => {
+                            if (user) {
+                              navigate("/service");
+                            } else {
+                              navigate("/register");
+                            }
+                          }}
                           className="px-8 py-3 bg-[#3498db] hover:bg-[#2980b9] text-white font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-[#3498db]/50 hover:-translate-y-0.5"
                         >
                           Đăng Ký Ngay
@@ -206,10 +200,6 @@ function HomePage() {
                     </div>
                   </div>
                 </div>
-
-                {/* Layer 4: Trang trí - điểm nhấn hình tròn tạo chiều sâu */}
-                <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-[#3498db]/20 blur-xl"></div>
-                <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-[#3498db]/20 blur-xl"></div>
               </div>
             ))}
           </Slider>
@@ -247,7 +237,10 @@ function HomePage() {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-100"
+                className="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-100 cursor-pointer"
+                onClick={() =>
+                  feature.navigateTo && navigate(feature.navigateTo)
+                }
               >
                 <div className="mb-4">{feature.icon}</div>
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
@@ -258,49 +251,30 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Câu chuyện thành công */}
-      <section className="py-16 bg-white">
+      {/* Sau section giới thiệu về nền tảng, thêm section các gói dịch vụ */}
+      <section className="py-8 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Câu Chuyện Thành Công</h2>
+            <h2 className="text-3xl font-bold mb-4">
+              Các Gói Dịch Vụ Hỗ Trợ Cai Thuốc
+            </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Hàng nghìn người đã thành công cai thuốc lá với sự hỗ trợ của
-              chúng tôi. Đây là một số câu chuyện từ họ.
+              Chọn giải pháp phù hợp với bạn – từ tự quản lý đến hỗ trợ chuyên
+              sâu từ chuyên gia.
             </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {successStories.map((story, index) => (
-              <div
-                key={index}
-                className="bg-gray-50 p-6 rounded-lg shadow-md border border-gray-100"
-              >
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-[#3498db] rounded-full flex items-center justify-center text-white font-bold text-xl">
-                    {story.name.charAt(0)}
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="font-semibold">{story.name}</h3>
-                    <p className="text-sm text-[#3498db]">{story.duration}</p>
-                  </div>
-                </div>
-                <p className="text-gray-600 italic">{story.story}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-10">
-            <button
-              className="px-8 py-3 bg-[#3498db] text-white rounded-lg hover:bg-[#2980b9] transition-colors"
-              onClick={() => navigate("/success-stories")}
-            >
-              Xem Thêm Câu Chuyện
-            </button>
-          </div>
+          <PremiumPlansSection />
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* Câu chuyện thành công */}
+      <section className="py-8 bg-white">
+        <div className="container mx-auto px-6">
+          <SuccessStories />
+        </div>
+      </section>
+
+      {/* FAQ */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
@@ -363,17 +337,25 @@ function HomePage() {
           </p>
           <div className="flex flex-col md:flex-row gap-4 justify-center">
             <button
-              onClick={() => navigate("/register")}
+              onClick={() => {
+                if (user) {
+                  navigate("/service");
+                } else {
+                  navigate("/register");
+                }
+              }}
               className="px-8 py-3 bg-white text-[#3498db] font-bold rounded-lg hover:bg-gray-100 transition-colors"
             >
               Đăng Ký Ngay
             </button>
-            <button
-              onClick={() => navigate("/login")}
-              className="px-8 py-3 bg-transparent border-2 border-white text-white font-bold rounded-lg hover:bg-white/10 transition-colors"
-            >
-              Đăng Nhập
-            </button>
+            {!user && (
+              <button
+                onClick={() => navigate("/login")}
+                className="px-8 py-3 bg-transparent border-2 border-white text-white font-bold rounded-lg hover:bg-white/10 transition-colors"
+              >
+                Đăng Nhập
+              </button>
+            )}
           </div>
         </div>
       </section>

@@ -47,7 +47,7 @@ function UserManagement() {
           active: user.active === true || user.active === "true",
         }));
       setDatas(users);
-    } catch (error) {
+    } catch {
       toast.error("Lỗi tải dữ liệu!");
     } finally {
       setLoading(false);
@@ -63,18 +63,16 @@ function UserManagement() {
     const payload = { ...values, role: "CUSTOMER" };
     try {
       if (editingUserId) {
-        await api.put(`/user/${editingUserId}`, payload);
+        await api.put(`user/${editingUserId}`, payload);
         toast.success("Cập nhật thành công!");
       } else {
         await api.post("user", payload);
-        toast.success("Tạo khách hàng thành công!");
+        toast.success("Tạo mới thành công!");
       }
-      setOpen(false);
       fetchUser();
-      form.resetFields();
-      setEditingUserId(null);
-    } catch (err) {
-      toast.error("Lỗi lưu khách hàng!");
+      setOpen(false);
+    } catch {
+      toast.error("Thao tác thất bại!");
     } finally {
       setIsModalLoading(false);
     }
@@ -377,4 +375,3 @@ function UserManagement() {
 }
 
 export default UserManagement;
-  

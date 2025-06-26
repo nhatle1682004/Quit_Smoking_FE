@@ -82,7 +82,9 @@ function RegisterForm() {
           name="username"
           rules={[
             { required: true, message: "Vui lòng nhập tên đăng nhập!" },
-            { min: 4, message: "Tên đăng nhập phải có ít nhất 4 ký tự!" },
+
+            { min: 3, message: "Tên đăng nhập phải có ít nhất 3 ký tự!" },
+
             {
               pattern: /^[a-zA-Z0-9_]+$/,
               message: "Không được chứa khoảng trắng hoặc ký tự đặc biệt!",
@@ -103,7 +105,8 @@ function RegisterForm() {
             { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự." },
             {
               pattern: /^\S+$/,
-              message: "Mật khẩu không được chứa khoảng trắng!",
+              message: "Không được chứa khoảng trắng!",
+
             },
           ]}
           hasFeedback

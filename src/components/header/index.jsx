@@ -2,20 +2,26 @@ import { useState, useEffect, useRef } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../redux/features/userSlice";
 import logo from "../../assets/image/logo.jpg";
+import UserAvatar from "../avatar"; // avatar user
+import { logout } from "../../redux/features/userSlice"; // dropdown tách riêng
+import { FaBell, FaMedal } from "react-icons/fa";
+import UserProfileDropdown from "../user-profile-dropdown";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const dropdownRef = useRef(null);
 
   const user = useSelector((state) => state.user);
-  const avatarUrl =
-    user?.avatarUrl || "https://via.placeholder.com/100x100.png?text=Avatar";
+
+  const handleLogout = () => {
+    dispatch(logout());
+    setShowDropdown(false);
+  };
 
   const handleHomeClick = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -25,17 +31,18 @@ const Header = () => {
   const menuItems = [
     { id: 1, label: "Trang chủ", href: "/" },
     { id: 2, label: "Giới thiệu", href: "/about" },
-    { id: 3, label: "Kiến thức chung", href: "/knowledge" },
-    { id: 4, label: "Dịch vụ & Sản phẩm", href: "/product" },
-    { id: 5, label: "Gương cai thuốc thành công", href: "/success" },
-    { id: 6, label: "Blog", href: "/blog" },
-    { id: 7, label: "Liên hệ", href: "/contact" },
+
+    { id: 3, label: "Đặt lịch tư vấn chuyên gia", href: "/knowledge" },
+    { id: 4, label: "Dịch vụ", href: "/service" },
+    { id: 5, label: "Nhật ký", href: "/journal" },
+    { id: 6, label: "Tấm gương", href: "/success" },
+    { id: 7, label: "Kế hoạch của bạn", href: "/plan" },
+    { id: 8, label: "Blog", href: "/blog" },
+    { id: 9, label: "Liên hệ", href: "/contact" },
   ];
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -46,11 +53,9 @@ const Header = () => {
         setShowDropdown(false);
       }
     };
-
     if (showDropdown) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -58,10 +63,6 @@ const Header = () => {
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const toggleDropdown = () => setShowDropdown(!showDropdown);
-  const handleLogout = () => {
-    dispatch(logout());
-    setShowDropdown(false);
-  };
 
   return (
     <>
@@ -90,7 +91,7 @@ const Header = () => {
               </button>
             </div>
 
-            {/* Desktop Navigation */}
+            {/* Desktop menu */}
             <nav className="hidden md:flex space-x-8">
               {menuItems.map((item) => (
                 <button
@@ -105,48 +106,34 @@ const Header = () => {
               ))}
             </nav>
 
-            {/* Auth Buttons or User Profile */}
+            {/* Right side: login / user */}
             <div className="hidden md:flex items-center space-x-4">
               {user ? (
-                <div className="relative" ref={dropdownRef}>
+                <>
                   <button
-                    onClick={toggleDropdown}
-                    className="flex items-center space-x-2 text-white hover:text-gray-200"
+                    onClick={() => navigate("/achievements")}
+                    className="relative p-2 rounded-full hover:bg-yellow-100 transition-colors"
+                    aria-label="Thành tích"
                   >
-                    <span className="mr-2">
-                      {user.fullName || "Người dùng"}
-                    </span>
-                    <img
-                      src={avatarUrl}
-                      alt="User Avatar"
-                      className="cursor-pointer w-8 h-8 rounded-full object-cover"
-                      onError={(e) => {
-                        e.target.src =
-                          "https://via.placeholder.com/100x100.png?text=No+Img";
-                      }}
-                    />
+                    <FaMedal className="w-6 h-6 text-yellow-400" />
                   </button>
-
-                  {showDropdown && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50">
-                      <button
-                        onClick={() => {
-                          setShowDropdown(false);
-                          navigate("/profile");
-                        }}
-                        className="cursor-pointer block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Hồ sơ cá nhân
-                      </button>
-                      <button
-                        onClick={handleLogout}
-                        className="cursor-pointer block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Đăng xuất
-                      </button>
-                    </div>
-                  )}
-                </div>
+                  <button
+                    onClick={() => navigate("/notifications")}
+                    className="relative p-2 rounded-full hover:bg-blue-100 transition-colors"
+                    aria-label="Thông báo"
+                  >
+                    <FaBell className="w-6 h-6 text-white" />
+                    {/* Có thể thêm chấm đỏ nếu có thông báo mới */}
+                  </button>
+                  <UserProfileDropdown
+                    user={user}
+                    showDropdown={showDropdown}
+                    toggleDropdown={toggleDropdown}
+                    dropdownRef={dropdownRef}
+                    handleLogout={handleLogout}
+                    navigate={navigate}
+                  />
+                </>
               ) : (
                 <>
                   <button
@@ -165,7 +152,7 @@ const Header = () => {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile menu toggle */}
             <button
               onClick={toggleMenu}
               className="md:hidden p-2 rounded-lg hover:bg-[#2980b9] transition-colors duration-300 text-white"
@@ -179,7 +166,7 @@ const Header = () => {
             </button>
           </div>
 
-          {/* Mobile Navigation */}
+          {/* Mobile menu */}
           {isOpen && (
             <div className="md:hidden bg-[#2980b9] shadow-lg rounded-lg mt-2 p-4">
               <nav className="flex flex-col space-y-4">
@@ -195,24 +182,11 @@ const Header = () => {
                     {item.label}
                   </button>
                 ))}
-
                 {user ? (
-                  <div className="flex flex-col space-y-4 pt-4 border-t border-[#2573a7]">
-                    <div className="flex items-center mb-2">
-                      <img
-                        src={avatarUrl}
-                        alt="User Avatar"
-                        className="w-8 h-8 rounded-full object-cover mr-2"
-                        onError={(e) => {
-                          e.target.src =
-                            "https://via.placeholder.com/100x100.png?text=No+Img";
-                        }}
-                      />
-                      <span className="text-white">
-                        {user.fullName || "Người dùng"}
-                      </span>
+                  <>
+                    <div className="flex items-center pt-4 border-t border-[#2573a7]">
+                      <UserAvatar fullName={user.username} size={32} />
                     </div>
-
                     <button
                       onClick={() => {
                         navigate("/profile");
@@ -231,7 +205,7 @@ const Header = () => {
                     >
                       Đăng xuất
                     </button>
-                  </div>
+                  </>
                 ) : (
                   <div className="flex flex-col space-y-4 pt-4 border-t border-[#2573a7]">
                     <button
@@ -239,7 +213,7 @@ const Header = () => {
                         navigate("/login");
                         toggleMenu();
                       }}
-                      className="w-full px-4 py-2 bg-white text-[#2980b9] rounded-lg hover:bg-gray-100 transition-colors duration-300"
+                      className="w-full px-4 py-2 bg-white text-[#2980b9] rounded-lg hover:bg-gray-100"
                     >
                       Đăng Nhập
                     </button>
@@ -248,7 +222,7 @@ const Header = () => {
                         navigate("/register");
                         toggleMenu();
                       }}
-                      className="w-full px-4 py-2 bg-[#f39c12] text-white rounded-lg hover:bg-[#e67e22] transition-colors duration-300"
+                      className="w-full px-4 py-2 bg-[#f39c12] text-white rounded-lg hover:bg-[#e67e22]"
                     >
                       Đăng Ký
                     </button>

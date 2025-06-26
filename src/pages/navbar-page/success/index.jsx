@@ -14,10 +14,16 @@ function SuccessStories() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-center text-4xl font-bold mb-12 text-gray-800">
-        Gương cai thuốc thành công
-      </h1>
+    <div className="container mx-auto px-6">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Câu Chuyện Thành Công</h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Hàng nghìn người đã thành công cai thuốc lá với sự hỗ trợ của
+              chúng tôi. Đây là một số câu chuyện từ họ.
+            </p>
+          </div>
+        </div>
       <hr />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -57,14 +63,14 @@ function SuccessStories() {
         </div>
 
         {/* Story 3 */}
-         <div className="story-item text-center p-6 bg-white rounded-lg shadow-lg">
+        <div className="story-item text-center p-6 bg-white rounded-lg shadow-lg">
           <img
             src={tamGuong3}
             alt="Person 3"
             className="story-image w-40 h-40 rounded-full mx-auto mb-4 object-cover border-4 border-white"
             onClick={() => handleStoryClick(3)}
-          /> 
-           <h3 className="text-2xl font-semibold mb-2 text-red-600 cursor-pointer" onClick={() => handleStoryClick(3)}>
+          />
+          <h3 className="text-2xl font-semibold mb-2 text-red-600 cursor-pointer" onClick={() => handleStoryClick(3)}>
             Cai thuốc lá vì hạnh phúc, tương lai con cháu
           </h3>
           <p className="text-gray-700">

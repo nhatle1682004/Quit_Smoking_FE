@@ -15,18 +15,25 @@ import UpgradeSuggestions from "./pages/dashboard-admin/upgrade-suggestions/inde
 import UserManagement from "./pages/dashboard-admin/user-management";
 import Footer from "./components/footer";
 import InformationPage from "./pages/navbar-page/about";
-import ContactPage from "./pages/navbar-page/contact/index";
-import ProductPage from "./pages/navbar-page/product";
-import KnowledgePage from "./pages/navbar-page/knowledge/index";
+import ContactPage from './pages/navbar-page/contact/index';
+import KnowledgePage from './pages/navbar-page/knowledge/index';
+
 import BlogPage from "./pages/navbar-page/blog";
 import SuccessStories from "./pages/navbar-page/success/index";
 import SuccessStoryHoChiMinh from "./components/success-story-details/successStoryHoChiMinh";
 import SuccessStoryNguyenVanNgu from "./components/success-story-details/successStoryNguyenVanNgu";
 import SuccessStoryNguyenHieu from "./components/success-story-details/successStoryNguyenHieu";
 import Profile from "./pages/navbar-page/profile";
-import ForgotPassword from "./pages/auth/ForgotPassword";
-import ResetPassword from "./pages/auth/ResetPassword";
-import QuitPlanForm from "./pages/navbar-page/quit-plan";
+import InitialStatus from "./pages/init-status";
+import ProductPage from "./pages/navbar-page/service";
+import UserProfileDropdown from "./components/user-profile-dropdown";
+import UserProfile from "./pages/navbar-page/profile";
+import LogSmoking from "./pages/navbar-page/journal";
+import AchievementsPage from "./pages/navbar-page/achievements";
+import PlanFree from "./pages/navbar-page/planFree";
+import Payment from "./pages/payment";
+import ForgotPassword from "./pages/auth/forgotPassword";
+
 // import InitialSurvey from "./pages/initial-survey";
 import CoachManagement from "./pages/dashboard-admin/coach-managerment/index";
 
@@ -56,7 +63,7 @@ function App() {
           element: <KnowledgePage />,
         },
         {
-          path: "product",
+          path: "service",
           element: <ProductPage />,
         },
         {
@@ -85,11 +92,28 @@ function App() {
         },
         {
           path: "profile",
-          element: <Profile />,
+          element: <UserProfile />,
         },
         {
-          path: "/quit-plan",
-          element: <QuitPlanForm />,
+          path: "init-status",
+          element: <InitialStatus />,
+        },
+        {
+          path: "user-profile",
+          element: <UserProfileDropdown />,
+        },
+        {
+          path: "journal",
+          element: <LogSmoking />,
+        },
+        {
+          path: "achievements",
+          element: <AchievementsPage />,
+        },
+        {
+          path: "plan",
+          element: <PlanFree />,
+
         },
       ],
     },
@@ -113,13 +137,14 @@ function App() {
       ],
     },
     {
-      path: "/forgot-password",
-      element: <ForgotPassword />,
+      path: "/payment/:planId",
+      element: <Payment />,
     },
     {
-      path: "/reset-password",
-      element: <ResetPassword />,
-    },
+      path: "/forgot-password",
+      element: <ForgotPassword />,
+    }
+
   ]);
   return (
     <>

@@ -3,7 +3,7 @@ import { Button, Checkbox, Form, Input, Select } from "antd";
 import "./login.css";
 import { toast } from "react-toastify";
 import api from "../../configs/axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { login } from "../../redux/features/userSlice";
 import GoogleLoginButton from "../authen-button/GoogleLoginButton";
@@ -31,12 +31,37 @@ function LoginForm() {
       dispatch(login(response.data));
       localStorage.setItem("token", response.data.token);
       toast.success("Đăng nhập thành công!");
-      if (role === "ADMIN") navigate("/dashboard");
-      else if (role === "CUSTOMER") navigate("/");
-      else if (role === "COACH") navigate("/dashboard");
+
+      // Kiểm tra role và điều hướng phù hợp
+      if (role === "ADMIN" || role === "COACH") {
+        // Admin và Coach không cần khai báo tình trạng hút thuốc
+        navigate("/dashboard");
+      } else if (role === "CUSTOMER") {
+        // CUSTOMER cần kiểm tra xem đã khai báo tình trạng hút thuốc chưa
+        try {
+          // Kiểm tra từ API thay vì localStorage
+          const initStatusResponse = await api.get('/initial-condition');
+          // Nếu có dữ liệu, nghĩa là đã khai báo rồi
+          if (initStatusResponse.data && initStatusResponse.data.length > 0) {
+            navigate('/');
+          } else {
+            // Chưa khai báo, bắt buộc điền tình trạng hút thuốc ban đầu
+            navigate('/init-status');
+          }
+        } catch (error) {
+          // Nếu API trả về 404 hoặc lỗi khác, nghĩa là chưa khai báo
+          if (error.response?.status === 404) {
+            navigate('/init-status');
+          } else {
+            // Có lỗi khác, điều hướng về trang chủ
+            navigate('/');
+          }
+        }
+      }
     } catch (e) {
       console.log(e);
-      toast.error(e.response.data); //show ra man hinh cho nguoi dung biet loi
+      toast.error("Đăng nhập thất bại!");
+
     }
   };
   const onFinishFailed = (errorInfo) => {
@@ -46,6 +71,7 @@ function LoginForm() {
   return (
     <div className="login-form">
       <h1>Đăng Nhập</h1>
+
       <Form
         name="basic"
         layout="vertical"
@@ -76,17 +102,9 @@ function LoginForm() {
             placeholder="Nhập mật khẩu"
           />
         </Form.Item>
+        <Form.Item label={null}>
+           <Link to="/forgot-password">Quên mật khẩu?</Link>
 
-        {/* Thêm liên kết Quên mật khẩu */}
-        <Form.Item>
-          <div className="flex justify-end">
-            <span
-              className="text-blue-500 cursor-pointer hover:underline text-sm"
-              onClick={() => navigate("/forgot-password")}
-            >
-              Quên mật khẩu?
-            </span>
-          </div>
         </Form.Item>
 
         <Form.Item label={null}>
