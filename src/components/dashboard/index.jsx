@@ -21,7 +21,7 @@ const items = [
   getItem("Blog Moderation", "blogModeration", <FileOutlined />),
   getItem("Upgrade Suggestions", "upgradeSuggestions", <DollarOutlined />),
   getItem("User Management", "userManagement", <UserOutlined />),
-
+  getItem("Coach Management", "coachManagement", <UserOutlined />),
 ];
 const Dashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -45,7 +45,7 @@ const Dashboard = () => {
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }} />
-       
+
         <Content style={{ margin: "0 16px" }}>
           <Breadcrumb
             style={{ margin: "16px 0" }}
@@ -59,8 +59,8 @@ const Dashboard = () => {
               borderRadius: borderRadiusLG,
             }}
           >
-            <Outlet/>
-             {/* khi nguời dùng ấn item bên tay trái lập tức render children vô outlet */}
+            <Outlet />
+            {/* khi nguời dùng ấn item bên tay trái lập tức render children vô outlet */}
           </div>
         </Content>
         <Footer style={{ textAlign: "center" }}>

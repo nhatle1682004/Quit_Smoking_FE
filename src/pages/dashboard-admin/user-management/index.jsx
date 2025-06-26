@@ -12,59 +12,81 @@ import {
   Table,
   Tag,
   Typography,
+  Card,
 } from "antd";
-import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  RollbackOutlined,
+} from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import api from "./../../../configs/axios";
 import { toast } from "react-toastify";
 import { useForm } from "antd/es/form/Form";
 
 function UserManagement() {
-  const { Text } = Typography;
+  const { Title, Text } = Typography;
+  const [form] = useForm();
   const [open, setOpen] = useState(false);
   const [datas, setDatas] = useState([]);
-  const [form] = useForm();
   const [editingUserId, setEditingUserId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isModalLoading, setIsModalLoading] = useState(false);
+
+  const fetchUser = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get("user");
+      const users = response.data
+        .filter((user) => user.role === "CUSTOMER")
+        .map((user) => ({
+          ...user,
+          active: user.active === true || user.active === "true",
+        }));
+      setDatas(users);
+    } catch (error) {
+      toast.error("Lỗi tải dữ liệu!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   const handleSubmit = async (values) => {
+    setIsModalLoading(true);
+    const payload = { ...values, role: "CUSTOMER" };
     try {
       if (editingUserId) {
-        await api.put(`/user/${editingUserId}`, values);
-        toast.success("User updated successfully!");
+        await api.put(`/user/${editingUserId}`, payload);
+        toast.success("Cập nhật thành công!");
       } else {
-        await api.post("user", values);
-        toast.success("New user created successfully!");
+        await api.post("user", payload);
+        toast.success("Tạo khách hàng thành công!");
       }
-
       setOpen(false);
       fetchUser();
       form.resetFields();
       setEditingUserId(null);
     } catch (err) {
-      toast.error(err.response?.data || "An error occurred");
-    }
-  };
-
-  const fetchUser = async () => {
-    try {
-      const response = await api.get("user");
-      const users = response.data.map((user) => ({
-        ...user,
-        active: user.active === true || user.active === "true",
-      }));
-      setDatas(users);
-    } catch (error) {
-      toast.error(error.response?.data || "Failed to load users");
+      toast.error("Lỗi lưu khách hàng!");
+    } finally {
+      setIsModalLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
     try {
       await api.delete(`/user/${id}`);
-      toast.success("User deleted successfully");
+      toast.success("Đã xoá khách hàng!");
       fetchUser();
-    } catch (error) {
-      toast.error(error.response?.data || "Delete failed");
+    } catch {
+      toast.error("Lỗi khi xoá!");
     }
   };
 
@@ -72,13 +94,13 @@ function UserManagement() {
     if (!user.active) {
       try {
         await api.put(`/user/${user.id}/restore`);
-        toast.success("User restored successfully!");
+        toast.success("Khôi phục thành công!");
         fetchUser();
-      } catch (error) {
-        toast.error("Restore failed!");
+      } catch {
+        toast.error("Không thể khôi phục!");
       }
     } else {
-      toast.info("This account is already active.");
+      toast.info("Tài khoản đang hoạt động.");
     }
   };
 
@@ -87,11 +109,13 @@ function UserManagement() {
       title: "ID",
       dataIndex: "id",
       key: "id",
+      width: 60,
     },
     {
       title: "Avatar",
       dataIndex: "avatarUrl",
       key: "avatarUrl",
+      width: 100,
       render: (avatarUrl) => (
         <Image
           width={60}
@@ -104,12 +128,12 @@ function UserManagement() {
       ),
     },
     {
-      title: "Full Name",
+      title: "Họ tên",
       dataIndex: "fullName",
       key: "fullName",
     },
     {
-      title: "Username",
+      title: "Tên đăng nhập",
       dataIndex: "username",
       key: "username",
     },
@@ -119,26 +143,18 @@ function UserManagement() {
       key: "email",
     },
     {
-      title: "Role",
-      dataIndex: "role",
-      key: "role",
-      render: (role) => (
-        <Tag color={role === "ADMIN" ? "volcano" : "blue"}>{role}</Tag>
-      ),
-    },
-    {
-      title: "Gender",
+      title: "Giới tính",
       dataIndex: "gender",
       key: "gender",
-      render: (gender) => gender || "N/A",
+      render: (gender) => (gender === "MALE" ? "Nam" : "Nữ"),
     },
     {
-      title: "Active",
+      title: "Trạng thái",
       dataIndex: "active",
       key: "active",
       render: (active) => (
-        <Tag color={active ? "green" : "gray"}>
-          {active ? "Active" : "Inactive"}
+        <Tag color={active ? "green" : "red"}>
+          {active ? "Hoạt động" : "Tạm dừng"}
         </Tag>
       ),
     },
@@ -154,62 +170,84 @@ function UserManagement() {
         ),
     },
     {
-      title: "Action",
-      dataIndex: "id",
-      key: "id",
-      render: (id, record) => (
+      title: "Thao tác",
+      key: "actions",
+      render: (_, record) => (
         <Space>
           <Button
+            icon={<EditOutlined />}
             type="primary"
             onClick={() => {
               setOpen(true);
               setEditingUserId(record.id);
-              form.setFieldsValue(record);
+              form.setFieldsValue({ ...record });
             }}
             disabled={!record.active}
           >
-            Edit
+            Sửa
           </Button>
           <Popconfirm
-            title="Delete the user"
-            description="Are you sure you want to delete this user?"
+            title="Bạn chắc chắn xoá?"
             onConfirm={() => handleDelete(record.id)}
+            okText="Xoá"
+            cancelText="Hủy"
             disabled={!record.active}
           >
-            <Button type="primary" danger disabled={!record.active}>
-              Delete
+            <Button icon={<DeleteOutlined />} danger disabled={!record.active}>
+              Xoá
             </Button>
           </Popconfirm>
-          <Button onClick={() => handleRestoreUser(record)}>Restore</Button>
+          <Button
+            icon={<RollbackOutlined />}
+            onClick={() => handleRestoreUser(record)}
+            disabled={record.active}
+          >
+            Khôi phục
+          </Button>
         </Space>
       ),
     },
   ];
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
   return (
-    <div>
-      {/* Nút thêm người dùng */}
-      <Button
-        type="primary"
-        onClick={() => {
-          setOpen(true);
-          setEditingUserId(null);
-          form.resetFields();
-        }}
+    <div style={{ padding: 24, maxWidth: 1400, margin: "0 auto" }}>
+      <Title level={2} style={{ textAlign: "center" }}>
+        Quản lý Khách hàng
+      </Title>
+
+      <Card
+        title="Danh sách Khách hàng"
+        extra={
+          <Button
+            icon={<PlusOutlined />}
+            type="primary"
+            onClick={() => {
+              setOpen(true);
+              setEditingUserId(null);
+              form.resetFields();
+              form.setFieldsValue({
+                gender: "MALE",
+                active: true,
+                premium: false,
+              });
+            }}
+          >
+            Thêm Khách hàng
+          </Button>
+        }
       >
-        Add New User
-      </Button>
+        <Table
+          columns={columns}
+          dataSource={datas}
+          rowKey="id"
+          loading={loading}
+          pagination={{ pageSize: 10 }}
+          bordered
+        />
+      </Card>
 
-      {/* Bảng dữ liệu người dùng */}
-      <Table columns={columns} dataSource={datas} rowKey="id" />
-
-      {/* Modal thêm/sửa người dùng */}
       <Modal
-        title={editingUserId ? "Edit User" : "Add New User"}
+        title={editingUserId ? "Chỉnh sửa Khách hàng" : "Tạo Khách hàng mới"}
         open={open}
         onCancel={() => {
           setOpen(false);
@@ -217,6 +255,7 @@ function UserManagement() {
           setEditingUserId(null);
         }}
         footer={null}
+        centered
       >
         <Form
           form={form}
@@ -224,106 +263,111 @@ function UserManagement() {
           onFinish={handleSubmit}
           layout="vertical"
         >
-          {/* Họ và tên */}
           <Form.Item
-            label="Full Name"
+            label="Họ tên"
             name="fullName"
             rules={[
-              { required: true, message: "Please enter full name!" },
-              { min: 5, message: "Name must be at least 5 characters." },
-              {
-                pattern: /^(?!\s).+$/,
-                message: "Name cannot start with a space!",
-              },
+              { required: true, message: "Vui lòng nhập họ tên!" },
+              { min: 5, message: "Tối thiểu 5 ký tự." },
             ]}
           >
-            <Input placeholder="Enter full name" />
+            <Input placeholder="Nguyễn Văn A" />
           </Form.Item>
 
-          {/* Tên đăng nhập */}
           <Form.Item
-            label="Username"
+            label="Tên đăng nhập"
             name="username"
             rules={[
-              { required: true, message: "Please enter username!" },
-              { min: 3, message: "Username must be at least 3 characters!" },
+              { required: true, message: "Bắt buộc!" },
               {
                 pattern: /^[a-zA-Z0-9_]+$/,
-                message: "No spaces or special characters allowed!",
+                message: "Không khoảng trắng hoặc ký tự đặc biệt!",
               },
             ]}
           >
-            {/* <Input placeholder="Enter username" readOnly={!!editingUserId} /> */}
-            <Input
-              placeholder="Enter username"
-              readOnly={!!editingUserId} // Nếu đang sửa thì không cho chỉnh username
-            />
+            <Input disabled={!!editingUserId} placeholder="nguyenvana" />
           </Form.Item>
 
-          {/* Email */}
           <Form.Item
             label="Email"
             name="email"
             rules={[
-              { required: true, message: "Please enter your email" },
-              { type: "email", message: "Invalid email format" },
+              { required: true, message: "Bắt buộc!" },
+              { type: "email", message: "Email không hợp lệ!" },
             ]}
           >
-            <Input placeholder="Enter email address" />
+            <Input placeholder="email@example.com" />
           </Form.Item>
 
-          {/* Giới tính */}
           <Form.Item
-            label="Gender"
+            label="Avatar URL"
+            name="avatarUrl"
+            rules={[
+              { required: true, message: "Hãy nhập liên kết ảnh!" },
+              { type: "url", message: "Phải là một URL hợp lệ!" },
+            ]}
+          >
+            <Input placeholder="https://..." />
+          </Form.Item>
+
+          {form.getFieldValue("avatarUrl") && (
+            <div style={{ textAlign: "center", marginBottom: 16 }}>
+              <Image
+                width={100}
+                height={100}
+                src={form.getFieldValue("avatarUrl")}
+                style={{ borderRadius: "50%", objectFit: "cover" }}
+              />
+              <Text type="secondary" style={{ display: "block" }}>
+                Xem trước ảnh đại diện
+              </Text>
+            </div>
+          )}
+
+          <Form.Item
+            label="Giới tính"
             name="gender"
-            rules={[{ required: true, message: "Please select gender!" }]}
+            rules={[{ required: true, message: "Chọn giới tính!" }]}
           >
             <Radio.Group>
-              <Radio value="MALE">Male</Radio>
-              <Radio value="FEMALE">Female</Radio>
+              <Radio value="MALE">Nam</Radio>
+              <Radio value="FEMALE">Nữ</Radio>
             </Radio.Group>
           </Form.Item>
 
-          {/* Mật khẩu - chỉ hiển thị khi tạo mới */}
           {!editingUserId && (
             <Form.Item
-              label="Password"
+              label="Mật khẩu"
               name="password"
               rules={[
-                { required: true, message: "Please enter password!" },
-                { min: 6, message: "Password must be at least 6 characters." },
-                {
-                  pattern: /^\S+$/,
-                  message: "Password cannot contain spaces!",
-                },
+                { required: true, message: "Vui lòng nhập mật khẩu!" },
+                { min: 6, message: "Tối thiểu 6 ký tự!" },
               ]}
             >
-              <Input.Password placeholder="Enter password" />
+              <Input.Password />
             </Form.Item>
           )}
 
-          {/* Tài khoản Premium */}
           <Form.Item
-            label="Premium Account"
+            label="Tài khoản Premium"
             name="premium"
             valuePropName="checked"
           >
-            <Checkbox>Enable Premium</Checkbox>
+            <Checkbox>Premium</Checkbox>
           </Form.Item>
 
-          {/* Vai trò */}
-          <Form.Item label="Role" name="role" rules={[{ required: true }]}>
-            <Select placeholder="Select role">
-              <Select.Option value="ADMIN">Admin</Select.Option>
-              <Select.Option value="CUSTOMER">Customer</Select.Option>
-              <Select.Option value="COACH">Coach</Select.Option>
-            </Select>
+          <Form.Item name="role" initialValue="CUSTOMER" hidden>
+            <Input />
           </Form.Item>
 
-          {/* Nút submit */}
           <Form.Item>
-            <Button type="primary" htmlType="submit" block>
-              {editingUserId ? "Update User" : "Create New User"}
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              loading={isModalLoading}
+            >
+              {editingUserId ? "Cập nhật" : "Tạo mới"}
             </Button>
           </Form.Item>
         </Form>
@@ -333,3 +377,4 @@ function UserManagement() {
 }
 
 export default UserManagement;
+  

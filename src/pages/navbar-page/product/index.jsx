@@ -128,18 +128,38 @@ const ProductPage = () => {
       }
     };
 
+    console.log("Existing data before editing:", existingData); // Logging để debug
+
+    // Đảm bảo readinessScale là số
+    let readinessScaleValue = "";
+    if (
+      existingData.readinessScale !== null &&
+      existingData.readinessScale !== undefined
+    ) {
+      readinessScaleValue = String(existingData.readinessScale);
+    }
+
     // Cập nhật formData với dữ liệu hiện có
     setFormData({
-      cigarettesPerDay: existingData.cigarettesPerDay || "",
+      cigarettesPerDay:
+        existingData.cigarettesPerDay !== null
+          ? String(existingData.cigarettesPerDay)
+          : "",
       firstSmokeTime: existingData.firstSmokeTime || "",
       quitReason: existingData.quitReason || "",
       intentionSince: formatISODate(existingData.intentionSince) || "",
-      readinessScale: existingData.readinessScale || "",
+      readinessScale: readinessScaleValue,
       emotion: existingData.emotion || "",
     });
 
+    // Đảm bảo step được đặt về 1 để bắt đầu quy trình chỉnh sửa đúng cách
+    setStep(1);
+
     setIsEditing(true);
     setShowExistingDataModal(false);
+
+    // Xóa lỗi khi bắt đầu chỉnh sửa
+    setErrors({});
   };
 
   // Hàm chuyển đến trang QuitPlan mà không chỉnh sửa
@@ -216,7 +236,12 @@ const ProductPage = () => {
         newErrors.intentionSince = "Vui lòng chọn ngày";
     }
     if (currentStep === 3) {
-      if (!formData.readinessScale)
+      // Sửa lại để xử lý cả trường hợp readinessScale = 0
+      if (
+        formData.readinessScale === "" ||
+        formData.readinessScale === null ||
+        formData.readinessScale === undefined
+      )
         newErrors.readinessScale = "Vui lòng nhập mức sẵn sàng";
       if (!formData.emotion) newErrors.emotion = "Vui lòng nhập cảm xúc";
     }
@@ -224,11 +249,16 @@ const ProductPage = () => {
   };
 
   const handleNext = () => {
+    console.log("Current step:", step, "Form data:", formData);
     const stepErrors = validateStep(step);
+
     if (Object.keys(stepErrors).length === 0) {
-      setStep((prev) => Math.min(prev + 1, 3));
+      const nextStep = Math.min(step + 1, 3);
+      console.log("Moving to step:", nextStep);
+      setStep(nextStep);
       setErrors({});
     } else {
+      console.log("Validation errors:", stepErrors);
       setErrors(stepErrors);
     }
   };
@@ -240,8 +270,21 @@ const ProductPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Form submission attempted. Current step:", step);
+
+    // Kiểm tra xem người dùng đang ở bước nào
+    if (step !== 3) {
+      console.log("Not at final step, moving to next step instead");
+      handleNext();
+      return;
+    }
+
+    // Kiểm tra lỗi ở bước cuối cùng
     const stepErrors = validateStep(step);
+    console.log("Final submission validation errors:", stepErrors);
+
     if (Object.keys(stepErrors).length === 0) {
+      // Đặt trạng thái loading
       setLoading(true);
 
       // Định dạng dữ liệu trước khi gửi
@@ -262,18 +305,19 @@ const ProductPage = () => {
 
         // Nếu đang chỉnh sửa, sử dụng PUT thay vì POST
         if (isEditing) {
-          // Sử dụng đúng endpoint như trong Swagger
           await api.put("/initial-condition", payload, config);
+          // Hiển thị thông báo thành công
+          alert("✅ Cập nhật thông tin thành công!");
         } else {
           await api.post("/initial-condition", payload, config);
+          // Hiển thị thông báo thành công
+          alert("✅ Ghi nhận thông tin thành công!");
         }
 
         setSubmitted(true);
 
-        // Chuyển hướng đến trang QuitPlan sau 2 giây
-        setTimeout(() => {
-          navigate("/quit-plan");
-        }, 2000);
+        // Chỉ chuyển hướng khi người dùng nhấn OK trên thông báo
+        navigate("/quit-plan");
       } catch (err) {
         if (err.response && err.response.status === 401) {
           alert("❌ Bạn chưa đăng nhập hoặc phiên đăng nhập đã hết hạn.");
@@ -329,10 +373,10 @@ const ProductPage = () => {
 
           <div className="border rounded-lg p-4 bg-gray-50">
             <h3 className="font-medium text-gray-800 flex items-center gap-2 mb-3">
-              <FiCalendar className="text-blue-500" /> Ý định bỏ thuốc
+              <FiCalendar className="text-blue-500" /> Tại sao bạn hút thuốc
             </h3>
             <p>
-              <span className="font-semibold">Lý do bỏ thuốc:</span>{" "}
+              <span className="font-semibold">Lý do hút thuốc:</span>{" "}
               {existingData?.quitReason}
             </p>
             <p>
@@ -388,6 +432,7 @@ const ProductPage = () => {
     );
   }
 
+  // Thay đổi thành phần submitted
   if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-green-50">
@@ -400,9 +445,12 @@ const ProductPage = () => {
               ? "Chúng tôi đã cập nhật thông tin sức khỏe của bạn."
               : "Chúng tôi đã ghi nhận thông tin sức khỏe của bạn."}
           </p>
-          <p className="text-blue-600">
-            Đang chuyển hướng đến trang tạo kế hoạch bỏ thuốc...
-          </p>
+          <button
+            onClick={() => navigate("/quit-plan")}
+            className="mt-4 bg-blue-600 text-white px-8 py-2 rounded-lg hover:bg-blue-700 transition"
+          >
+            Đến trang kế hoạch bỏ thuốc
+          </button>
         </div>
       </div>
     );
@@ -469,18 +517,18 @@ const ProductPage = () => {
           {step === 2 && (
             <div className="space-y-4 animate-fade-in">
               <h2 className="text-xl font-semibold text-gray-700 flex items-center gap-2">
-                <FiCalendar className="text-blue-500" /> Ý định bỏ thuốc
+                <FiCalendar className="text-blue-500" /> Tại sao bạn hút thuốc
               </h2>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Lý do bạn muốn bỏ thuốc
+                  Lý do bạn muốn hút thuốc
                 </label>
                 <textarea
                   name="quitReason"
                   value={formData.quitReason}
                   onChange={handleChange}
                   rows="3"
-                  placeholder="Ví dụ: vì sức khỏe, gia đình, tài chính..."
+                  placeholder="Ví dụ: ÁP LỰC, THÓI QUEN, XÃ HỘI..."
                   className="w-full rounded-md border-gray-300 shadow-sm mt-1"
                 />
                 {errors.quitReason && (
@@ -527,6 +575,9 @@ const ProductPage = () => {
                   value={formData.readinessScale}
                   onChange={handleChange}
                   className="w-full rounded-md border-gray-300 shadow-sm mt-1"
+                  onBlur={(e) =>
+                    console.log("readinessScale value:", e.target.value)
+                  }
                 />
                 {errors.readinessScale && (
                   <p className="text-red-500 text-sm mt-1">
@@ -544,6 +595,7 @@ const ProductPage = () => {
                   onChange={handleChange}
                   placeholder="Ví dụ: lo lắng, tự tin, áp lực..."
                   className="w-full rounded-md border-gray-300 shadow-sm mt-1"
+                  onBlur={(e) => console.log("emotion value:", e.target.value)}
                 />
                 {errors.emotion && (
                   <p className="text-red-500 text-sm mt-1">{errors.emotion}</p>
@@ -584,7 +636,7 @@ const ProductPage = () => {
                   ? "Đang gửi..."
                   : isEditing
                   ? "Cập nhật thông tin"
-                  : "Gửi thông tin"}
+                  : "Hoàn thành & Gửi thông tin"}
               </button>
             )}
           </div>

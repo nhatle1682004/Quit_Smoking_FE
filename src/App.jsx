@@ -28,6 +28,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import QuitPlanForm from "./pages/navbar-page/quit-plan";
 // import InitialSurvey from "./pages/initial-survey";
+import CoachManagement from "./pages/dashboard-admin/coach-managerment/index";
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -108,6 +109,7 @@ function App() {
         { path: "blogModeration", element: <BlogModeration /> },
         { path: "upgradeSuggestions", element: <UpgradeSuggestions /> },
         { path: "userManagement", element: <UserManagement /> },
+        { path: "coachManagement", element: <CoachManagement /> },
       ],
     },
     {

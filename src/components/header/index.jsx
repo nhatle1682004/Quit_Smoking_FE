@@ -1,14 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
-import { FaUserCircle } from "react-icons/fa";
-import { useNavigate } from "react-router-dom"; // Bỏ import Link
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/features/userSlice";
 import logo from "../../assets/image/logo.jpg";
 
 const Header = () => {
-  const avatarUrl = "../src/assets/image/avatar.png";
-
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -17,10 +14,12 @@ const Header = () => {
   const dropdownRef = useRef(null);
 
   const user = useSelector((state) => state.user);
+  const avatarUrl =
+    user?.avatarUrl || "https://via.placeholder.com/100x100.png?text=Avatar";
 
   const handleHomeClick = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    navigate('/');
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    navigate("/");
   };
 
   const menuItems = [
@@ -59,7 +58,6 @@ const Header = () => {
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const toggleDropdown = () => setShowDropdown(!showDropdown);
-
   const handleLogout = () => {
     dispatch(logout());
     setShowDropdown(false);
@@ -86,7 +84,7 @@ const Header = () => {
                   className="h-18 w-18 rounded-full object-cover"
                   onError={(e) => {
                     e.target.src =
-                      "https://png.pngtree.com/png-clipart/20190904/original/pngtree-user-cartoon-avatar-pattern-flat-avatar-png-image_4492883.jpg";
+                      "https://via.placeholder.com/80x80.png?text=Logo";
                   }}
                 />
               </button>
@@ -97,7 +95,9 @@ const Header = () => {
               {menuItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => item.id === 1 ? handleHomeClick() : navigate(item.href)}
+                  onClick={() =>
+                    item.id === 1 ? handleHomeClick() : navigate(item.href)
+                  }
                   className="cursor-pointer text-white hover:text-gray-200 transition-colors duration-300 bg-transparent border-0"
                 >
                   {item.label}
@@ -120,6 +120,10 @@ const Header = () => {
                       src={avatarUrl}
                       alt="User Avatar"
                       className="cursor-pointer w-8 h-8 rounded-full object-cover"
+                      onError={(e) => {
+                        e.target.src =
+                          "https://via.placeholder.com/100x100.png?text=No+Img";
+                      }}
                     />
                   </button>
 
@@ -199,6 +203,10 @@ const Header = () => {
                         src={avatarUrl}
                         alt="User Avatar"
                         className="w-8 h-8 rounded-full object-cover mr-2"
+                        onError={(e) => {
+                          e.target.src =
+                            "https://via.placeholder.com/100x100.png?text=No+Img";
+                        }}
                       />
                       <span className="text-white">
                         {user.fullName || "Người dùng"}
