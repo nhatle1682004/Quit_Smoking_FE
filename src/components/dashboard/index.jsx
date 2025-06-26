@@ -5,6 +5,7 @@ import {
   FileOutlined,
   UserOutlined,
   LogoutOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
 import {
   Breadcrumb,
@@ -82,8 +83,13 @@ const Dashboard = () => {
               padding: "0 24px",
             }}
           >
-            <div style={{ fontSize: "18px", fontWeight: "bold" }}>
-              Dashboard
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <div style={{ fontSize: "18px", fontWeight: "bold" }}>
+                Dashboard
+              </div>
+              <Button icon={<HomeOutlined />} onClick={() => navigate("/")}>
+                Home
+              </Button>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <span style={{ fontSize: "14px" }}>
