@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,8 +11,6 @@ import UserProfileDropdown from "../user-profile-dropdown";
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -20,7 +18,6 @@ const Header = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-    setShowDropdown(false);
   };
 
   const handleHomeClick = () => {
@@ -32,7 +29,7 @@ const Header = () => {
     { id: 1, label: "Trang chủ", href: "/" },
     { id: 2, label: "Giới thiệu", href: "/about" },
 
-    { id: 3, label: "Đặt lịch tư vấn chuyên gia", href: "/knowledge" },
+    { id: 3, label: "Đặt lịch tư vấn chuyên gia", href: "/booking" },
     { id: 4, label: "Dịch vụ", href: "/service" },
     { id: 5, label: "Nhật ký", href: "/journal" },
     { id: 6, label: "Tấm gương", href: "/success" },
@@ -47,22 +44,7 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
-      }
-    };
-    if (showDropdown) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showDropdown]);
-
   const toggleMenu = () => setIsOpen(!isOpen);
-  const toggleDropdown = () => setShowDropdown(!showDropdown);
 
   return (
     <>
@@ -110,6 +92,14 @@ const Header = () => {
             <div className="hidden md:flex items-center space-x-4">
               {user ? (
                 <>
+                  {user.role === "ADMIN" && (
+                    <button
+                      onClick={() => navigate("/dashboard")}
+                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-300"
+                    >
+                      Dashboard
+                    </button>
+                  )}
                   <button
                     onClick={() => navigate("/achievements")}
                     className="relative p-2 rounded-full hover:bg-yellow-100 transition-colors"
@@ -125,14 +115,7 @@ const Header = () => {
                     <FaBell className="w-6 h-6 text-white" />
                     {/* Có thể thêm chấm đỏ nếu có thông báo mới */}
                   </button>
-                  <UserProfileDropdown
-                    user={user}
-                    showDropdown={showDropdown}
-                    toggleDropdown={toggleDropdown}
-                    dropdownRef={dropdownRef}
-                    handleLogout={handleLogout}
-                    navigate={navigate}
-                  />
+                  <UserProfileDropdown />
                 </>
               ) : (
                 <>
@@ -184,6 +167,17 @@ const Header = () => {
                 ))}
                 {user ? (
                   <>
+                    {user.role === "ADMIN" && (
+                      <button
+                        onClick={() => {
+                          navigate("/dashboard");
+                          toggleMenu();
+                        }}
+                        className="text-white hover:text-gray-200 transition-colors duration-300 text-left bg-transparent border-0"
+                      >
+                        Dashboard
+                      </button>
+                    )}
                     <div className="flex items-center pt-4 border-t border-[#2573a7]">
                       <UserAvatar fullName={user.username} size={32} />
                     </div>
