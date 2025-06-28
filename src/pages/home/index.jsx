@@ -10,7 +10,7 @@ import {
   FaMedal,
   FaCalendarAlt,
 } from "react-icons/fa";
-import { Tabs } from 'antd';
+import { Tabs } from "antd";
 import { useSelector } from "react-redux";
 // Import required CSS for the slider
 import "slick-carousel/slick/slick.css";
@@ -28,7 +28,7 @@ function HomePage() {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
 
-    useEffect(() => {
+  useEffect(() => {
     window.scrollTo(0, 0); //  Cuộn trang về đầu
   }, []);
 
@@ -239,7 +239,9 @@ function HomePage() {
               <div
                 key={index}
                 className="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-100 cursor-pointer"
-                onClick={() => feature.navigateTo && navigate(feature.navigateTo)}
+                onClick={() =>
+                  feature.navigateTo && navigate(feature.navigateTo)
+                }
               >
                 <div className="mb-4">{feature.icon}</div>
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
@@ -254,9 +256,12 @@ function HomePage() {
       <section className="py-8 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Các Gói Dịch Vụ Hỗ Trợ Cai Thuốc</h2>
+            <h2 className="text-3xl font-bold mb-4">
+              Các Gói Dịch Vụ Hỗ Trợ Cai Thuốc
+            </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Chọn giải pháp phù hợp với bạn – từ tự quản lý đến hỗ trợ chuyên sâu từ chuyên gia.
+              Chọn giải pháp phù hợp với bạn – từ tự quản lý đến hỗ trợ chuyên
+              sâu từ chuyên gia.
             </p>
           </div>
           <PremiumPlansSection />
@@ -266,11 +271,11 @@ function HomePage() {
       {/* Câu chuyện thành công */}
       <section className="py-8 bg-white">
         <div className="container mx-auto px-6">
-            <SuccessStories/>
+          <SuccessStories />
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* FAQ */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">

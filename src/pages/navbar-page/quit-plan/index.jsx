@@ -34,12 +34,18 @@ const QuitPlanForm = () => {
   const [submittedPlanData, setSubmittedPlanData] = useState(null);
   const [planHistory, setPlanHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
+  // New state variables for plan selection
+  const [planType, setPlanType] = useState(null); // 'free' or 'paid'
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [showPackageSelection, setShowPackageSelection] = useState(false);
   const [formData, setFormData] = useState({
     targetQuitDate: "",
     motivationReason: "",
     method: "TEMPLATE",
     startDate: new Date().toISOString().split("T")[0],
     goal: "",
+    planType: "FREE", // Default to free
+    packageType: null, // Will be set for paid plans
   });
   const [errors, setErrors] = useState({});
   const [hasActivePlan, setHasActivePlan] = useState(false);
@@ -202,7 +208,17 @@ const QuitPlanForm = () => {
           ? { headers: { Authorization: `Bearer ${token}` } }
           : {};
 
-        const response = await api.post("/quit-plan", formData, config);
+        // Include plan type information
+        const planData = {
+          ...formData,
+          // Make sure planType is capitalized for API
+          planType: formData.planType.toUpperCase(),
+          // Only include packageType if it's a paid plan
+          packageType:
+            formData.planType === "PAID" ? formData.packageType : null,
+        };
+
+        const response = await api.post("/quit-plan", planData, config);
         setSubmittedPlanData(response.data);
         setHasActivePlan(true);
 
@@ -415,6 +431,18 @@ const QuitPlanForm = () => {
                       {submittedPlanData?.method || "TEMPLATE"}
                     </span>
                   </div>
+                  {submittedPlanData?.planType === "PAID" && (
+                    <div className="flex justify-between border-b border-green-100 pb-2">
+                      <span className="text-gray-600">Gói:</span>
+                      <span className="font-medium">
+                        {submittedPlanData?.packageType === "BASIC" && "Cơ Bản"}
+                        {submittedPlanData?.packageType === "STANDARD" &&
+                          "Tiêu Chuẩn"}
+                        {submittedPlanData?.packageType === "PREMIUM" &&
+                          "Cao Cấp"}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -442,10 +470,10 @@ const QuitPlanForm = () => {
 
             <div className="mt-10 flex flex-wrap justify-center gap-4">
               <button
-                onClick={() => navigate("/dashboard")}
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition shadow-md"
+                onClick={() => navigate("/tracking")}
+                className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition shadow-md flex items-center gap-2"
               >
-                Đi đến bảng điều khiển
+                <FiTrendingUp /> Theo dõi tiến trình hằng ngày
               </button>
 
               {/* Nếu có lịch sử, hiển thị nút xem lịch sử */}
@@ -485,13 +513,342 @@ const QuitPlanForm = () => {
     );
   }
 
+  // Plan type selection view (initial screen if no plan exists)
+  if (!planType) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-12 px-4">
+        <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+          <div className="text-center mb-10">
+            <h1 className="text-3xl font-bold text-gray-800 mb-6">
+              Chọn loại kế hoạch bỏ thuốc
+            </h1>
+            <p className="text-lg text-gray-600">
+              Hãy chọn loại kế hoạch phù hợp với nhu cầu của bạn
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+            {/* Free plan option */}
+            <div
+              onClick={() => {
+                setPlanType("free");
+                setFormData((prev) => ({
+                  ...prev,
+                  planType: "FREE",
+                  packageType: null,
+                }));
+              }}
+              className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-xl cursor-pointer border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all"
+            >
+              <div className="text-center">
+                <div className="text-5xl mb-4">🌱</div>
+                <h3 className="text-2xl font-bold text-blue-700 mb-4">
+                  Miễn phí
+                </h3>
+                <div className="bg-white rounded-lg p-4 mb-6">
+                  <p className="text-3xl font-bold text-blue-600 mb-2">0 ₫</p>
+                  <p className="text-gray-500">Không mất phí</p>
+                </div>
+                <ul className="text-left space-y-3 mb-6">
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Tự lên kế hoạch bỏ thuốc</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Theo dõi tiến độ cơ bản</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Nhật ký cai thuốc</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Paid plan option */}
+            <div
+              onClick={() => {
+                setPlanType("paid");
+                setShowPackageSelection(true);
+              }}
+              className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-xl cursor-pointer border-2 border-green-200 hover:border-green-400 hover:shadow-lg transition-all"
+            >
+              <div className="text-center">
+                <div className="text-5xl mb-4">⭐</div>
+                <h3 className="text-2xl font-bold text-green-700 mb-4">
+                  Trả phí
+                </h3>
+                <div className="bg-white rounded-lg p-4 mb-6">
+                  <p className="text-3xl font-bold text-green-600 mb-2">
+                    Từ 99.000 ₫
+                  </p>
+                  <p className="text-gray-500">Theo gói</p>
+                </div>
+                <ul className="text-left space-y-3 mb-6">
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Kế hoạch bỏ thuốc được cá nhân hóa</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Tư vấn và hỗ trợ chuyên sâu</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Công cụ và tài nguyên cao cấp</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Cộng đồng hỗ trợ</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {planHistory.length > 0 && (
+            <div className="mt-10 text-center">
+              <button
+                onClick={() => setShowHistory(true)}
+                className="text-blue-600 hover:text-blue-800 underline flex items-center gap-1 mx-auto"
+              >
+                <FiClock size={16} /> Xem lịch sử kế hoạch bỏ thuốc
+              </button>
+            </div>
+          )}
+        </div>
+        {showHistory && <HistoryModal />}
+      </div>
+    );
+  }
+
+  // Package selection view for paid plans
+  if (planType === "paid" && showPackageSelection) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-12 px-4">
+        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+          <div className="mb-8">
+            <button
+              onClick={() => {
+                setPlanType(null);
+                setShowPackageSelection(false);
+              }}
+              className="flex items-center text-blue-600 hover:text-blue-800"
+            >
+              ← Quay lại
+            </button>
+          </div>
+
+          <div className="text-center mb-10">
+            <h1 className="text-3xl font-bold text-gray-800 mb-6">
+              Chọn gói phù hợp với bạn
+            </h1>
+            <p className="text-lg text-gray-600">
+              Dựa trên mức độ hút thuốc hiện tại của bạn
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            {/* Basic Package */}
+            <div
+              onClick={() => {
+                setSelectedPackage("basic");
+                setFormData((prev) => ({
+                  ...prev,
+                  planType: "PAID",
+                  packageType: "BASIC",
+                }));
+                setShowPackageSelection(false);
+              }}
+              className="border-2 border-blue-200 hover:border-blue-400 rounded-2xl overflow-hidden hover:shadow-lg transition-all cursor-pointer"
+            >
+              <div className="bg-blue-100 p-4 text-center">
+                <h3 className="text-xl font-bold text-blue-700">Gói Cơ Bản</h3>
+                <p className="text-gray-600 text-sm mt-1">Cho người hút nhẹ</p>
+              </div>
+              <div className="p-6">
+                <p className="text-center mb-4">
+                  <span className="text-3xl font-bold text-gray-800">
+                    99.000 ₫
+                  </span>
+                  <span className="text-gray-500 text-sm">/tháng</span>
+                </p>
+                <div className="bg-blue-50 p-3 rounded-lg mb-4 text-center">
+                  <p className="font-medium text-blue-700">
+                    Phù hợp cho người hút
+                  </p>
+                  <p className="text-2xl font-bold text-blue-800">
+                    ≤ 10 điếu/ngày
+                  </p>
+                </div>
+                <ul className="space-y-2 mb-6">
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Kế hoạch giảm nhẹ nhàng</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Công cụ theo dõi tiến độ</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Tài liệu hỗ trợ</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Standard Package */}
+            <div
+              onClick={() => {
+                setSelectedPackage("standard");
+                setFormData((prev) => ({
+                  ...prev,
+                  planType: "PAID",
+                  packageType: "STANDARD",
+                }));
+                setShowPackageSelection(false);
+              }}
+              className="border-2 border-green-300 hover:border-green-500 rounded-2xl overflow-hidden hover:shadow-lg transition-all cursor-pointer transform scale-105"
+            >
+              <div className="bg-green-500 p-4 text-center">
+                <h3 className="text-xl font-bold text-white">Gói Tiêu Chuẩn</h3>
+                <p className="text-green-50 text-sm mt-1">
+                  Cho người hút vừa phải
+                </p>
+                <div className="bg-white text-green-600 font-bold py-1 px-3 rounded-full text-xs inline-block mt-2">
+                  PHỔ BIẾN NHẤT
+                </div>
+              </div>
+              <div className="p-6">
+                <p className="text-center mb-4">
+                  <span className="text-3xl font-bold text-gray-800">
+                    199.000 ₫
+                  </span>
+                  <span className="text-gray-500 text-sm">/tháng</span>
+                </p>
+                <div className="bg-green-50 p-3 rounded-lg mb-4 text-center">
+                  <p className="font-medium text-green-700">
+                    Phù hợp cho người hút
+                  </p>
+                  <p className="text-2xl font-bold text-green-800">
+                    10-20 điếu/ngày
+                  </p>
+                </div>
+                <ul className="space-y-2 mb-6">
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Tất cả tính năng của gói Cơ Bản</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Hỗ trợ cá nhân qua chat</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Công cụ đối phó cơn thèm</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Nhắc nhở và động viên</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Premium Package */}
+            <div
+              onClick={() => {
+                setSelectedPackage("premium");
+                setFormData((prev) => ({
+                  ...prev,
+                  planType: "PAID",
+                  packageType: "PREMIUM",
+                }));
+                setShowPackageSelection(false);
+              }}
+              className="border-2 border-purple-200 hover:border-purple-400 rounded-2xl overflow-hidden hover:shadow-lg transition-all cursor-pointer"
+            >
+              <div className="bg-purple-100 p-4 text-center">
+                <h3 className="text-xl font-bold text-purple-700">
+                  Gói Cao Cấp
+                </h3>
+                <p className="text-gray-600 text-sm mt-1">Cho người hút nặng</p>
+              </div>
+              <div className="p-6">
+                <p className="text-center mb-4">
+                  <span className="text-3xl font-bold text-gray-800">
+                    299.000 ₫
+                  </span>
+                  <span className="text-gray-500 text-sm">/tháng</span>
+                </p>
+                <div className="bg-purple-50 p-3 rounded-lg mb-4 text-center">
+                  <p className="font-medium text-purple-700">
+                    Phù hợp cho người hút
+                  </p>
+                  <p className="text-2xl font-bold text-purple-800">
+                    > 20 điếu/ngày
+                  </p>
+                </div>
+                <ul className="space-y-2 mb-6">
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Tất cả tính năng của gói Tiêu Chuẩn</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Tư vấn 1:1 với chuyên gia</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Kế hoạch chi tiết từng ngày</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Hỗ trợ khẩn cấp 24/7</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-1">✓</span>
+                    <span>Báo cáo tiến độ nâng cao</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Form tạo kế hoạch mới (chỉ hiển thị khi không có kế hoạch active)
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-12 px-4">
       <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+        <div className="mb-8">
+          <button
+            onClick={() => {
+              setPlanType(null);
+              setShowPackageSelection(false);
+              setSelectedPackage(null);
+            }}
+            className="flex items-center text-blue-600 hover:text-blue-800"
+          >
+            ← Quay lại lựa chọn gói
+          </button>
+        </div>
+
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">
-            Tạo kế hoạch bỏ thuốc
+            {planType === "free"
+              ? "Tạo kế hoạch bỏ thuốc"
+              : `Kế hoạch bỏ thuốc ${
+                  selectedPackage === "basic"
+                    ? "Cơ Bản"
+                    : selectedPackage === "standard"
+                    ? "Tiêu Chuẩn"
+                    : "Cao Cấp"
+                }`}
           </h1>
 
           {planHistory.length > 0 && (
@@ -505,6 +862,41 @@ const QuitPlanForm = () => {
             </Button>
           )}
         </div>
+
+        {planType === "paid" && (
+          <div
+            className={`mb-8 p-4 rounded-xl ${
+              selectedPackage === "basic"
+                ? "bg-blue-50 border-l-4 border-blue-500"
+                : selectedPackage === "standard"
+                ? "bg-green-50 border-l-4 border-green-500"
+                : "bg-purple-50 border-l-4 border-purple-500"
+            }`}
+          >
+            <h3
+              className={`text-lg font-medium mb-2 ${
+                selectedPackage === "basic"
+                  ? "text-blue-700"
+                  : selectedPackage === "standard"
+                  ? "text-green-700"
+                  : "text-purple-700"
+              }`}
+            >
+              {selectedPackage === "basic"
+                ? "Gói Cơ Bản"
+                : selectedPackage === "standard"
+                ? "Gói Tiêu Chuẩn"
+                : "Gói Cao Cấp"}
+            </h3>
+            <p className="text-gray-600">
+              {selectedPackage === "basic"
+                ? "Kế hoạch này phù hợp cho người hút dưới 10 điếu mỗi ngày."
+                : selectedPackage === "standard"
+                ? "Kế hoạch này được thiết kế cho người hút từ 10-20 điếu mỗi ngày."
+                : "Kế hoạch chuyên sâu dành cho người hút trên 20 điếu mỗi ngày."}
+            </p>
+          </div>
+        )}
 
         <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl shadow-sm mb-8">
           <p className="text-lg text-gray-700">

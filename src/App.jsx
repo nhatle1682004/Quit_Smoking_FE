@@ -15,8 +15,7 @@ import UpgradeSuggestions from "./pages/dashboard-admin/upgrade-suggestions/inde
 import UserManagement from "./pages/dashboard-admin/user-management";
 import Footer from "./components/footer";
 import InformationPage from "./pages/navbar-page/about";
-import ContactPage from './pages/navbar-page/contact/index';
-import KnowledgePage from './pages/navbar-page/knowledge/index';
+import ContactPage from "./pages/navbar-page/contact/index";
 
 import BlogPage from "./pages/navbar-page/blog";
 import SuccessStories from "./pages/navbar-page/success/index";
@@ -36,6 +35,8 @@ import UserProfileDropdown from "./components/user-profile-dropdown";
 import OtpVerify from "./pages/auth/otp-verify";
 
 // import InitialSurvey from "./pages/initial-survey";
+import CoachManagement from "./pages/dashboard-admin/coach-managerment/index";
+import BookingConsultPage from "./pages/navbar-page/booking/index";
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -59,8 +60,8 @@ function App() {
           element: <InformationPage />,
         },
         {
-          path: "knowledge",
-          element: <KnowledgePage />,
+          path: "booking",
+          element: <BookingConsultPage />,
         },
         {
           path: "service",
@@ -113,7 +114,6 @@ function App() {
         {
           path: "plan",
           element: <PlanFree />,
-
         },
       ],
     },
@@ -133,6 +133,7 @@ function App() {
         { path: "blogModeration", element: <BlogModeration /> },
         { path: "upgradeSuggestions", element: <UpgradeSuggestions /> },
         { path: "userManagement", element: <UserManagement /> },
+        { path: "coachManagement", element: <CoachManagement /> },
       ],
     },
     {
@@ -143,11 +144,6 @@ function App() {
       path: "/forgot-password",
       element: <ForgotPassword />,
     },
-    {
-      path: "/otp-verify",
-      element: <OtpVerify />,
-    },
-
   ]);
   return (
     <>

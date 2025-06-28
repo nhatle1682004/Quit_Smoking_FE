@@ -5,8 +5,17 @@ import {
   FileOutlined,
   UserOutlined,
   LogoutOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
-import { Breadcrumb, Layout, Menu, theme, Button, Avatar, Dropdown } from "antd";
+import {
+  Breadcrumb,
+  Layout,
+  Menu,
+  theme,
+  Button,
+  Avatar,
+  Dropdown,
+} from "antd";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/features/userSlice";
@@ -28,7 +37,7 @@ const items = [
   getItem("Blog Moderation", "blogModeration", <FileOutlined />),
   getItem("Upgrade Suggestions", "upgradeSuggestions", <DollarOutlined />),
   getItem("User Management", "userManagement", <UserOutlined />),
-
+  getItem("Coach Management", "coachManagement", <UserOutlined />),
 ];
 
 const Dashboard = () => {
@@ -65,32 +74,44 @@ const Dashboard = () => {
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }}>
-          <div style={{ 
-            display: "flex", 
-            justifyContent: "space-between", 
-            alignItems: "center", 
-            width: "100%",
-            padding: "0 24px"
-          }}>
-            <div style={{ fontSize: "18px", fontWeight: "bold" }}>
-              Dashboard
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%",
+              padding: "0 24px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <div style={{ fontSize: "18px", fontWeight: "bold" }}>
+                Dashboard
+              </div>
+              <Button icon={<HomeOutlined />} onClick={() => navigate("/")}>
+                Home
+              </Button>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <span style={{ fontSize: "14px" }}>
                 Xin chào, {user?.fullName || user?.username || "User"}
               </span>
-              <Avatar 
-                style={{ 
-                  backgroundColor: user?.avatarUrl ? 'transparent' : '#1890ff',
-                  backgroundImage: user?.avatarUrl ? `url(${user.avatarUrl})` : 'none'
+              <Avatar
+                style={{
+                  backgroundColor: user?.avatarUrl ? "transparent" : "#1890ff",
+                  backgroundImage: user?.avatarUrl
+                    ? `url(${user.avatarUrl})`
+                    : "none",
                 }}
               >
-                {!user?.avatarUrl && (user?.fullName?.charAt(0) || user?.username?.charAt(0) || "U")}
+                {!user?.avatarUrl &&
+                  (user?.fullName?.charAt(0) ||
+                    user?.username?.charAt(0) ||
+                    "U")}
               </Avatar>
-              <Button 
-                type="primary" 
+              <Button
+                type="primary"
                 danger
-                icon={<LogoutOutlined />} 
+                icon={<LogoutOutlined />}
                 onClick={handleLogout}
                 size="small"
               >
@@ -99,7 +120,7 @@ const Dashboard = () => {
             </div>
           </div>
         </Header>
-       
+
         <Content style={{ margin: "0 16px" }}>
           <Breadcrumb
             style={{ margin: "16px 0" }}
@@ -113,8 +134,8 @@ const Dashboard = () => {
               borderRadius: borderRadiusLG,
             }}
           >
-            <Outlet/>
-             {/* khi nguời dùng ấn item bên tay trái lập tức render children vô outlet */}
+            <Outlet />
+            {/* khi nguời dùng ấn item bên tay trái lập tức render children vô outlet */}
           </div>
         </Content>
         <Footer style={{ textAlign: "center" }}>
