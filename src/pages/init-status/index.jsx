@@ -9,18 +9,20 @@ import dayjs from 'dayjs';
 const { Option } = Select;
 
 const INITIAL_FORM_STATE = {
-  smokingStatus: '',
-  ageStarted: '',
-  reasonStartedSmoking: '',
   cigarettesPerDay: '',
-  firstSmokeTimeOfDay: '',
-  hasTriedToQuit: null,
-  hasHealthIssues: null,
+  firstSmokeTime: '',
+  reasonForStarting: '',
   quitReason: '',
-  quitStartDate: '',
+  intentionSince: '',
+  readinessScale: '',
+  emotion: '',
+  startSmokingAge: '',
   pricePerCigarette: '',
   cigarettesPerPack: '',
-  weight: '',
+  hasTriedToQuit: null,
+  hasHealthIssues: null,
+  weightKg: '',
+  desiredQuitDate: '',
 };
 
 function InitialStatus() {
@@ -28,21 +30,20 @@ function InitialStatus() {
   const [displayPrice, setDisplayPrice] = useState('');
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  // Sử dụng useWatch để theo dõi giá trị smokingStatus
-  const smokingStatus = Form.useWatch('smokingStatus', form);
 
   useEffect(() => {
-    // Kiểm tra xem đã khai báo tình trạng hút thuốc chưa từ API
     const checkInitStatus = async () => {
       try {
-        const response = await api.get('/initial-condition');
+        const response = await api.get('/initial-condition/active');
         if (response.data) {
-          navigate('/');
+          navigate('/'); // Nếu có dữ liệu, chuyển hướng về trang chủ
         }
       } catch (error) {
         if (error.response?.status !== 404) {
+          // Chỉ log lỗi nếu không phải là 404
           console.error('Error checking init status:', error);
         }
+        // Nếu là 404, không làm gì cả, để form hiển thị
       }
     };
     checkInitStatus();
@@ -78,10 +79,9 @@ function InitialStatus() {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      // Chuyển ngày sang string nếu là object
       const submitData = {
         ...values,
-        quitStartDate: values.quitStartDate ? values.quitStartDate.format('YYYY-MM-DD') : '',
+        desiredQuitDate: values.desiredQuitDate ? values.desiredQuitDate.format('YYYY-MM-DD') : '',
       };
       await api.post('initial-condition', submitData);
       toast.success('Khai báo thành công!');
@@ -115,7 +115,7 @@ function InitialStatus() {
             {/* Các trường nhập liệu luôn hiển thị */}
             <Form.Item
               label={<span className="font-semibold">Tuổi bắt đầu hút thuốc <span className="text-red-500">*</span></span>}
-              name="ageStarted"
+              name="startSmokingAge"
               rules={[
                 { required: true, message: 'Bắt buộc' },
                 { validator: (_, value) => {
@@ -131,7 +131,7 @@ function InitialStatus() {
             </Form.Item>
             <Form.Item
               label={<span className="font-semibold">Lý do bắt đầu hút thuốc <span className="text-red-500">*</span></span>}
-              name="reasonStartedSmoking"
+              name="reasonForStarting"
               rules={[
                 { required: true, message: 'Bắt buộc' },
                 { min: 5, message: 'Phải nhập ít nhất 5 ký tự' }
@@ -157,7 +157,7 @@ function InitialStatus() {
             </Form.Item>
             <Form.Item
               label={<span className="font-semibold">Mốc thời gian hút điếu đầu tiên trong ngày <span className="text-red-500">*</span></span>}
-              name="firstSmokeTimeOfDay"
+              name="firstSmokeTime"
               rules={[{ required: true, message: 'Bắt buộc chọn' }]}
             >
               <Select placeholder="-- Chọn thời gian --">
@@ -223,8 +223,8 @@ function InitialStatus() {
               rules={[{ required: true, message: 'Bắt buộc chọn' }]}
             >
               <Radio.Group>
-                <Radio value="yes">Có</Radio>
-                <Radio value="no">Không</Radio>
+                <Radio value={true}>Có</Radio>
+                <Radio value={false}>Không</Radio>
               </Radio.Group>
             </Form.Item>
 
@@ -234,8 +234,8 @@ function InitialStatus() {
               rules={[{ required: true, message: 'Bắt buộc chọn' }]}
             >
               <Radio.Group>
-                <Radio value="yes">Có</Radio>
-                <Radio value="no">Không</Radio>
+                <Radio value={true}>Có</Radio>
+                <Radio value={false}>Không</Radio>
               </Radio.Group>
             </Form.Item>
 
@@ -251,8 +251,49 @@ function InitialStatus() {
             </Form.Item>
 
             <Form.Item
-              label={<span className="font-semibold">Ngày bắt đầu cai thuốc <span className="text-red-500">*</span></span>}
-              name="quitStartDate"
+              label={<span className="font-semibold">Bạn đã có ý định bỏ thuốc từ khi nào?</span>}
+              name="intentionSince"
+              rules={[]}
+            >
+              <Input placeholder="Ví dụ: 1 tháng trước, 1 năm trước..." />
+            </Form.Item>
+
+            <Form.Item
+              label={<span className="font-semibold">Mức độ sẵn sàng bỏ thuốc (1-10)</span>}
+              name="readinessScale"
+              rules={[]}
+            >
+              <Input type="number" min={1} max={10} placeholder="Ví dụ: 7" />
+            </Form.Item>
+
+            <Form.Item
+              label={<span className="font-semibold">Cảm xúc hiện tại khi nghĩ đến việc bỏ thuốc</span>}
+              name="emotion"
+              rules={[]}
+            >
+              <Input placeholder="Ví dụ: lo lắng, tự tin, sợ hãi..." />
+            </Form.Item>
+
+            <Form.Item
+              label={<span className="font-semibold">Cân nặng (kg) <span className="text-red-500">*</span></span>}
+              name="weightKg"
+              rules={[
+                { required: true, message: 'Bắt buộc nhập cân nặng' },
+                { validator: (_, value) => {
+                  const num = Number(value);
+                  if (isNaN(num)) return Promise.reject('Cân nặng phải là số');
+                  if (num < 0.1) return Promise.reject('Cân nặng phải lớn hơn 0kg');
+                  if (num >= 300) return Promise.reject('Cân nặng phải nhỏ hơn 300kg');
+                  return Promise.resolve();
+                }}
+              ]}
+            >
+              <Input type="number" placeholder="Ví dụ: 65" min={0.1} />
+            </Form.Item>
+
+            <Form.Item
+              label={<span className="font-semibold">Ngày mong muốn bắt đầu cai thuốc <span className="text-red-500">*</span></span>}
+              name="desiredQuitDate"
               rules={[
                 { required: true, message: 'Bắt buộc' },
                 { validator: (_, value) => {
@@ -264,24 +305,6 @@ function InitialStatus() {
               ]}
             >
               <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" />
-            </Form.Item>
-
-            <Form.Item
-              label={<span className="font-semibold">Cân nặng (kg) <span className="text-red-500">*</span></span>}
-              name="weight"
-              rules={[
-                { required: true, message: 'Bắt buộc nhập cân nặng' },
-                { validator: (_, value) => {
-                  const num = Number(value);
-                  if (isNaN(num)) return Promise.reject('Cân nặng phải là số');
-                  if (num < 0) return Promise.reject('Cân nặng không được nhỏ hơn 0');
-                  if (num <= 20) return Promise.reject('Cân nặng phải lớn hơn 20kg');
-                  if (num >= 300) return Promise.reject('Cân nặng phải nhỏ hơn 300kg');
-                  return Promise.resolve();
-                }}
-              ]}
-            >
-              <Input type="number" placeholder="Ví dụ: 65" min={0} />
             </Form.Item>
 
             <Form.Item>
