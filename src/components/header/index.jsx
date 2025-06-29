@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { FiMenu, FiX } from "react-icons/fi";
+import { FiMenu, FiX, FiChevronDown } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { Dropdown } from "antd";
 import logo from "../../assets/image/logo.jpg";
 import UserAvatar from "../avatar"; // avatar user
 import { logout } from "../../redux/features/userSlice"; // dropdown tách riêng
@@ -28,15 +29,34 @@ const Header = () => {
   const menuItems = [
     { id: 1, label: "Trang chủ", href: "/" },
     { id: 2, label: "Giới thiệu", href: "/about" },
-
     { id: 3, label: "Đặt lịch tư vấn chuyên gia", href: "/booking" },
-    { id: 4, label: "Dịch vụ", href: "/service" },
+    { id: 4, label: "Công cụ hỗ trợ", href: "/service", hasDropdown: true },
     { id: 5, label: "Nhật ký", href: "/journal" },
     { id: 6, label: "Tấm gương", href: "/success" },
-    { id: 7, label: "Kế hoạch của bạn", href: "/plan" },
+    { id: 7, label: "Kế hoạch của bạn", href: "/plan-free" },
     { id: 8, label: "Blog", href: "/blog" },
     { id: 9, label: "Liên hệ", href: "/contact" },
   ];
+
+  const serviceDropdownItems = [
+    { id: 1, label: "Lập kế hoạch cai thuốc", href: "/service/quit-plan-free" },
+    { id: 2, label: "Theo dõi tiến trình", href: "/service/process-tracking" },
+    { id: 3, label: "Tính toán chi phí", href: "/service/cost-calculator" },
+  ];
+
+  const serviceDropdownMenu = {
+    items: serviceDropdownItems.map((item) => ({
+      key: item.id,
+      label: (
+        <button
+          onClick={() => navigate(item.href)}
+          className="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
+        >
+          {item.label}
+        </button>
+      ),
+    })),
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -76,15 +96,30 @@ const Header = () => {
             {/* Desktop menu */}
             <nav className="hidden md:flex space-x-8">
               {menuItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() =>
-                    item.id === 1 ? handleHomeClick() : navigate(item.href)
-                  }
-                  className="cursor-pointer text-white hover:text-gray-200 transition-colors duration-300 bg-transparent border-0"
-                >
-                  {item.label}
-                </button>
+                <div key={item.id} className="relative">
+                  {item.hasDropdown ? (
+                    <Dropdown
+                      menu={serviceDropdownMenu}
+                      placement="bottomLeft"
+                      trigger={["hover"]}
+                      overlayClassName="service-dropdown"
+                    >
+                      <button className="cursor-pointer text-white hover:text-gray-200 transition-colors duration-300 bg-transparent border-0 flex items-center space-x-1">
+                        <span>{item.label}</span>
+                        <FiChevronDown className="w-4 h-4" />
+                      </button>
+                    </Dropdown>
+                  ) : (
+                    <button
+                      onClick={() =>
+                        item.id === 1 ? handleHomeClick() : navigate(item.href)
+                      }
+                      className="cursor-pointer text-white hover:text-gray-200 transition-colors duration-300 bg-transparent border-0"
+                    >
+                      {item.label}
+                    </button>
+                  )}
+                </div>
               ))}
             </nav>
 
@@ -154,16 +189,40 @@ const Header = () => {
             <div className="md:hidden bg-[#2980b9] shadow-lg rounded-lg mt-2 p-4">
               <nav className="flex flex-col space-y-4">
                 {menuItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      item.id === 1 ? handleHomeClick() : navigate(item.href);
-                      toggleMenu();
-                    }}
-                    className="text-white hover:text-gray-200 transition-colors duration-300 text-left bg-transparent border-0"
-                  >
-                    {item.label}
-                  </button>
+                  <div key={item.id}>
+                    {item.hasDropdown ? (
+                      <div>
+                        <div className="text-white flex items-center justify-between">
+                          <span>{item.label}</span>
+                          <FiChevronDown className="w-4 h-4" />
+                        </div>
+                        <div className="ml-4 mt-2 space-y-2">
+                          {serviceDropdownItems.map((dropdownItem) => (
+                            <button
+                              key={dropdownItem.id}
+                              onClick={() => {
+                                navigate(dropdownItem.href);
+                                toggleMenu();
+                              }}
+                              className="text-gray-200 hover:text-white transition-colors duration-300 text-left bg-transparent border-0 block w-full"
+                            >
+                              {dropdownItem.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          item.id === 1 ? handleHomeClick() : navigate(item.href);
+                          toggleMenu();
+                        }}
+                        className="text-white hover:text-gray-200 transition-colors duration-300 text-left bg-transparent border-0"
+                      >
+                        {item.label}
+                      </button>
+                    )}
+                  </div>
                 ))}
                 {user ? (
                   <>

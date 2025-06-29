@@ -37,6 +37,8 @@ import OtpVerify from "./pages/auth/otp-verify";
 // import InitialSurvey from "./pages/initial-survey";
 import CoachManagement from "./pages/dashboard-admin/coach-managerment/index";
 import BookingConsultPage from "./pages/navbar-page/booking/index";
+import ProcessTracking from "./pages/service/process-tracking";
+import QuitPlanFree from "./pages/service/quit-plan-free";
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -66,6 +68,20 @@ function App() {
         {
           path: "service",
           element: <ProductPage />,
+          children: [
+            {
+              path: "quit-plan-free",
+              element: <QuitPlanFree />,
+            },
+            {
+              path: "process-tracking",
+              element: <ProcessTracking />,
+            },
+            {
+              path: "cost-calculator",
+              element: <ProductPage />,
+            },
+          ],
         },
         {
           path: "success",
@@ -112,9 +128,10 @@ function App() {
           element: <AchievementsPage />,
         },
         {
-          path: "plan",
+          path: "plan-free",
           element: <PlanFree />,
         },
+
       ],
     },
     {
@@ -143,6 +160,10 @@ function App() {
     {
       path: "/forgot-password",
       element: <ForgotPassword />,
+    },
+    {
+      path: "/otp-verify",
+      element: <OtpVerify />,
     },
   ]);
   return (

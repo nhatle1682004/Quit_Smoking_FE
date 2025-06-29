@@ -3,7 +3,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import api from '../../configs/axios';
-import { Form, Input, Select, Radio, DatePicker, Button } from 'antd';
+import { Form, Input, Select, Radio, DatePicker, Button, InputNumber } from 'antd';
 import dayjs from 'dayjs';
 
 const { Option } = Select;
@@ -288,7 +288,7 @@ function InitialStatus() {
                 }}
               ]}
             >
-              <Input type="number" placeholder="Ví dụ: 65" min={0.1} />
+              <InputNumber type="number" placeholder="Ví dụ: 65" min={0.1} />
             </Form.Item>
 
             <Form.Item

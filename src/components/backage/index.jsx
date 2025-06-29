@@ -15,8 +15,9 @@ const PLANS = [
     duration: 'Không giới hạn',
     shortDescription: 'Trải nghiệm các tính năng cơ bản',
     keyFeatures: [
-      'Lập kế hoạch cai thuốc cơ bản theo mục tiêu',
-      'Nhận thông báo theo mục tiêu'
+      'Bạn sẽ nhận được file hướng dẫn chi tiết',
+      'Tự theo dõi kế hoạch bỏ thuốc tại nhà',
+      'Hệ thống sẽ nhắc nhở bạn mỗi ngày để tiếp thêm động lực',
     ],
     benefits: [
       'Truy cập các tính năng nền tảng để bắt đầu hành trình bỏ thuốc.',
@@ -130,7 +131,7 @@ const PremiumDetailsModal = ({ plan, open, onClose }) => {
   const handleBuy = () => {
     onClose();
     if (plan.id === 'free') {
-      navigate('/init-status'); // trực tiếp chuyển tới luồng onboarding miễn phí
+      navigate('/plan-free'); // trực tiếp chuyển tới luồng onboarding miễn phí
     } else {
       navigate(`/payment/${plan.id}`);
     }
@@ -230,9 +231,9 @@ const PremiumPlansSection = () => {
       <div className="flex justify-center mb-8">
         <Tabs defaultActiveKey="1" items={tabItems} onChange={setBillingCycle} centered size="large" />
       </div>
-      <Row gutter={[24, 24]} justify="center">
+      <Row gutter={[16, 24]} justify="center">
         {PLANS.map((plan) => (
-          <Col xs={24} sm={12} md={12} lg={8} key={plan.id}>
+          <Col xs={24} sm={12} lg={6} xl={6} key={plan.id}>
             <Card
               className={`h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg rounded-xl border-t-8 ${plan.borderColor} relative`}
             >
@@ -247,12 +248,12 @@ const PremiumPlansSection = () => {
               <div className="flex flex-col h-full">
                 {/* Header */}
                 <div className="text-center mb-6">
-                  <h3 className={`text-2xl font-bold mb-2 text-${plan.color}-600`}>
+                  <h3 className={`text-xl font-bold mb-2 text-${plan.color}-600`}>
                     {plan.name}
                   </h3>
-                  <p className="text-gray-600 text-sm mb-4">{plan.shortDescription}</p>
+                  <p className="text-gray-600 text-xs mb-4">{plan.shortDescription}</p>
                   <div className="mb-4">
-                    <span className="text-3xl font-extrabold text-gray-900">
+                    <span className="text-2xl font-extrabold text-gray-900">
                       {getPriceDisplay(plan, billingCycle)}
                     </span>
                   </div>
@@ -260,13 +261,13 @@ const PremiumPlansSection = () => {
 
                 {/* Features */}
                 <div className="flex-grow mb-6">
-                  <ul className="space-y-3">
+                  <ul className="space-y-2">
                     {plan.keyFeatures.map((feature, i) => (
-                      <li key={i} className="flex items-start text-sm">
+                      <li key={i} className="flex items-start text-xs">
                         <CheckCircleFilled
-                          className={`text-${plan.color}-500 mr-3 mt-0.5 flex-shrink-0`}
+                          className={`text-${plan.color}-500 mr-2 mt-0.5 flex-shrink-0`}
                         />
-                        <span className="text-gray-700">{feature}</span>
+                        <span className="text-gray-700 leading-relaxed">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -278,11 +279,11 @@ const PremiumPlansSection = () => {
                     type="primary"
                     size="large"
                     block
-                    className={`font-bold text-white ${plan.buttonClass} h-12`}
+                    className={`font-bold text-white ${plan.buttonClass} h-10`}
                     disabled={plan.disabled}
                     onClick={() => !plan.disabled && handleOpenDetails(plan)}
                   >
-                    {plan.ctaText}
+                    Xem chi tiết
                   </Button>
                 </div>
               </div>

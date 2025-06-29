@@ -39,6 +39,7 @@ const ProductPage = () => {
           setShowExistingDataModal(true);
         }
       } catch (error) {
+        console.error("Error:", error);
         // Nếu không có dữ liệu hoặc có lỗi, cho phép người dùng khai báo mới
         setCheckingStatus(false);
       } finally {
@@ -147,6 +148,7 @@ const ProductPage = () => {
       const date = new Date(dateStr);
       return date.toISOString().split("T")[0];
     } catch (error) {
+      console.error("Error:", error);
       console.error("Invalid date format:", dateStr);
       return "";
     }
