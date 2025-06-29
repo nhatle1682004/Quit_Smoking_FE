@@ -25,17 +25,20 @@ import SuccessStoryNguyenHieu from "./components/success-story-details/successSt
 import Profile from "./pages/navbar-page/profile";
 import InitialStatus from "./pages/init-status";
 import ProductPage from "./pages/navbar-page/service";
-import UserProfileDropdown from "./components/user-profile-dropdown";
 import UserProfile from "./pages/navbar-page/profile";
 import LogSmoking from "./pages/navbar-page/journal";
 import AchievementsPage from "./pages/navbar-page/achievements";
 import PlanFree from "./pages/navbar-page/planFree";
 import Payment from "./pages/payment";
-import ForgotPassword from "./pages/auth/forgotPassword";
+import ForgotPassword from "./pages/auth/forgot-password/index.";
+import UserProfileDropdown from "./components/user-profile-dropdown";
+import OtpVerify from "./pages/auth/otp-verify";
 
 // import InitialSurvey from "./pages/initial-survey";
 import CoachManagement from "./pages/dashboard-admin/coach-managerment/index";
 import BookingConsultPage from "./pages/navbar-page/booking/index";
+import ProcessTracking from "./pages/service/process-tracking";
+import QuitPlanFree from "./pages/service/quit-plan-free";
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -65,6 +68,20 @@ function App() {
         {
           path: "service",
           element: <ProductPage />,
+          children: [
+            {
+              path: "quit-plan-free",
+              element: <QuitPlanFree />,
+            },
+            {
+              path: "process-tracking",
+              element: <ProcessTracking />,
+            },
+            {
+              path: "cost-calculator",
+              element: <ProductPage />,
+            },
+          ],
         },
         {
           path: "success",
@@ -111,9 +128,10 @@ function App() {
           element: <AchievementsPage />,
         },
         {
-          path: "plan",
+          path: "plan-free",
           element: <PlanFree />,
         },
+
       ],
     },
     {
@@ -142,6 +160,10 @@ function App() {
     {
       path: "/forgot-password",
       element: <ForgotPassword />,
+    },
+    {
+      path: "/otp-verify",
+      element: <OtpVerify />,
     },
   ]);
   return (

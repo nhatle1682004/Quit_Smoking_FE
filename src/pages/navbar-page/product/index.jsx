@@ -1,51 +1,6 @@
-import React, { useState, useEffect } from "react";
-import {
-  FiPackage,
-  FiCalendar,
-  FiTrendingUp,
-  FiHeart,
-  FiEdit,
-  FiArrowRight,
-} from "react-icons/fi";
-import axios from "axios";
-import { Alert, Spin, Modal, Button } from "antd";
-import api from "./../../../configs/axios";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const QuoteSlider = () => {
-  const quotes = [
-    "Mỗi ngày không hút thuốc là một chiến thắng đáng ăn mừng",
-    "Lá phổi bạn đang khỏe dần theo từng hơi thở sạch",
-    "Bạn không từ bỏ gì cả, bạn đang đạt được mọi thứ",
-    "Những bước nhỏ tạo nên thay đổi lớn",
-  ];
-  const [currentQuote, setCurrentQuote] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentQuote((prev) => (prev + 1) % quotes.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl shadow-sm">
-      <p className="text-lg text-gray-700 italic animate-fade-in">
-        {quotes[currentQuote]}
-      </p>
-    </div>
-  );
-};
-
-const ProgressBar = ({ currentStep }) => (
-  <div className="w-full bg-gray-100 h-2 rounded-full mb-8">
-    <div
-      className="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full transition-all duration-500"
-      style={{ width: `${(currentStep / 3) * 100}%` }}
-    ></div>
-  </div>
-);
-
+import api from "../../../configs/axios";
 const ProductPage = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -84,6 +39,7 @@ const ProductPage = () => {
           setShowExistingDataModal(true);
         }
       } catch (error) {
+        console.error("Error:", error);
         // Nếu không có dữ liệu hoặc có lỗi, cho phép người dùng khai báo mới
         setCheckingStatus(false);
       } finally {
@@ -192,6 +148,7 @@ const ProductPage = () => {
       const date = new Date(dateStr);
       return date.toISOString().split("T")[0];
     } catch (error) {
+      console.error("Error:", error);
       console.error("Invalid date format:", dateStr);
       return "";
     }

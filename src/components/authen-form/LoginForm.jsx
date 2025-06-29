@@ -40,9 +40,9 @@ function LoginForm() {
         // CUSTOMER cần kiểm tra xem đã khai báo tình trạng hút thuốc chưa
         try {
           // Kiểm tra từ API thay vì localStorage
-          const initStatusResponse = await api.get('/initial-condition');
+          const initStatusResponse = await api.get('/initial-condition/active');
           // Nếu có dữ liệu, nghĩa là đã khai báo rồi
-          if (initStatusResponse.data && initStatusResponse.data.length > 0) {
+          if (initStatusResponse.data) {
             navigate('/');
           } else {
             // Chưa khai báo, bắt buộc điền tình trạng hút thuốc ban đầu
@@ -50,7 +50,7 @@ function LoginForm() {
           }
         } catch (error) {
           // Nếu API trả về 404 hoặc lỗi khác, nghĩa là chưa khai báo
-          if (error.response?.status === 404) {
+          if (error.response?.status === 403) {
             navigate('/init-status');
           } else {
             // Có lỗi khác, điều hướng về trang chủ

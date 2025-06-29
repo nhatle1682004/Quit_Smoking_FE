@@ -16,12 +16,8 @@ function RegisterForm() {
 
   const onFinish = async (values) => {
     console.log("Success:", values);
-
-    // Loại bỏ trường confirm khỏi dữ liệu gửi đi
-    const { confirm, ...registerData } = values;
-
     try {
-      await api.post("register", registerData);
+      await api.post("register", values);
       toast.success("Tạo tài khoản thành công!");
       navigate("/login");
     } catch (e) {
