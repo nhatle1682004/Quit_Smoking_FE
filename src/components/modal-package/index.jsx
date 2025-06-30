@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Card, Button, Tabs, Tag, Row, Col } from 'antd';
 import { CheckCircleFilled } from '@ant-design/icons';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Modal chi tiết gói (tích hợp lại logic PremiumDetailsModal)
 import { Modal, Typography, List, Divider } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import api from '../../configs/axios';
 const { Title, Text, Paragraph } = Typography;
 
 const PLANS = [
@@ -127,15 +130,50 @@ const formatCurrency = (number) => {
 
 const PremiumDetailsModal = ({ plan, open, onClose }) => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   if (!plan) return null;
-  const handleBuy = () => {
-    onClose();
+  
+  const handleBuy = async () => {
     if (plan.id === 'free') {
-      navigate('/plan-free'); // trực tiếp chuyển tới luồng onboarding miễn phí
+      setLoading(true);
+      try {
+        // Kiểm tra xem người dùng đã khai báo dữ liệu chưa
+        const response = await api.get('/initial-condition/active');
+        if (response.data) {
+          // Đã khai báo rồi, chuyển thẳng đến trang quit-plan-free
+          toast.success('Chuyển đến trang tạo kế hoạch cai thuốc!');
+          setTimeout(() => {
+            navigate('/service/quit-plan-free');
+          }, 1000);
+        } else {
+          // Chưa khai báo, chuyển đến trang khai báo trước
+          toast.info('Vui lòng khai báo thông tin hút thuốc trước!');
+          setTimeout(() => {
+            navigate('/init-status');
+          }, 1000);
+        }
+      } catch (error) {
+        if (error.response?.status === 404) {
+          // Chưa khai báo dữ liệu, chuyển đến trang khai báo
+          toast.info('Vui lòng khai báo thông tin hút thuốc trước!');
+          setTimeout(() => {
+            navigate('/init-status');
+          }, 1000);
+        } else {
+          // Có lỗi khác, hiển thị thông báo
+          console.error('Error checking user data:', error);
+          toast.error('Có lỗi xảy ra, vui lòng thử lại!');
+        }
+      } finally {
+        setLoading(false);
+        onClose();
+      }
     } else {
+      onClose();
       navigate(`/payment/${plan.id}`);
     }
   };
+  
   return (
     <Modal
       open={open}
@@ -158,7 +196,12 @@ const PremiumDetailsModal = ({ plan, open, onClose }) => {
         <Text strong>Mô tả:</Text>
         <Paragraph>{plan.description}</Paragraph>
         <div className="flex justify-end mt-4">
-          <Button type="primary" size="large" onClick={handleBuy}>
+          <Button 
+            type="primary" 
+            size="large" 
+            onClick={handleBuy}
+            loading={loading}
+          >
             {plan.id === 'free' ? 'Bắt đầu ngay' : 'Mua ngay'}
           </Button>
         </div>
@@ -228,6 +271,7 @@ const PremiumPlansSection = () => {
 
   return (
     <div className="w-full">
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="flex justify-center mb-8">
         <Tabs defaultActiveKey="1" items={tabItems} onChange={setBillingCycle} centered size="large" />
       </div>
@@ -296,4 +340,4 @@ const PremiumPlansSection = () => {
   );
 };
 
-export default PremiumPlansSection;
+export default PremiumPlansSection; 

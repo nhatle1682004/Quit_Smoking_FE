@@ -21,7 +21,7 @@ import anhkeo1 from "../../assets/image/anhkeo1.png";
 import anhkeo2 from "../../assets/image/anhkeo2.png";
 import anhkeo3 from "../../assets/image/anhkeo3.jpg";
 import SuccessStories from "../navbar-page/success";
-import PremiumPlansSection from "../../components/backage";
+import PremiumPlansSection from "../../components/modal-package";
 
 
 function HomePage() {

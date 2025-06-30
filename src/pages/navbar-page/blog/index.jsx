@@ -27,6 +27,7 @@ function BlogPage() {
 
       message.success("Tải danh sách blog thành công!");
     } catch (err) {
+      
       message.error("Không thể tải danh sách blog.");
     } finally {
       setLoading(false);

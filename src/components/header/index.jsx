@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Dropdown } from "antd";
 import logo from "../../assets/image/logo.jpg";
-import UserAvatar from "../avatar"; // avatar user
-import { logout } from "../../redux/features/userSlice"; // dropdown tách riêng
+import UserAvatar from "../avatar";
+import { logout } from "../../redux/features/userSlice";
 import { FaBell, FaMedal } from "react-icons/fa";
 import UserProfileDropdown from "../user-profile-dropdown";
 
@@ -17,25 +17,25 @@ const Header = () => {
 
   const user = useSelector((state) => state.user);
 
-  const handleLogout = () => {
-    dispatch(logout());
-  };
+  const handleLogout = () => dispatch(logout());
 
   const handleHomeClick = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     navigate("/");
   };
 
+  /* ---------- MENU DATA ----------- */
   const menuItems = [
     { id: 1, label: "Trang chủ", href: "/" },
     { id: 2, label: "Giới thiệu", href: "/about" },
     { id: 3, label: "Đặt lịch tư vấn chuyên gia", href: "/booking" },
     { id: 4, label: "Công cụ hỗ trợ", href: "/service", hasDropdown: true },
-    { id: 5, label: "Nhật ký", href: "/journal" },
-    { id: 6, label: "Tấm gương", href: "/success" },
-    { id: 7, label: "Kế hoạch của bạn", href: "/plan-free" },
-    { id: 8, label: "Blog", href: "/blog" },
-    { id: 9, label: "Liên hệ", href: "/contact" },
+    { id: 5, label: "Gói dịch vụ", href: "/package" }, // KHÔNG dropdown
+    { id: 6, label: "Nhật ký", href: "/journal" },
+    { id: 7, label: "Tấm gương", href: "/success" },
+    { id: 8, label: "Kế hoạch của bạn", href: "/my-plan" },
+    { id: 9, label: "Blog", href: "/blog" },
+    { id: 10, label: "Liên hệ", href: "/contact" },
   ];
 
   const serviceDropdownItems = [
@@ -50,13 +50,14 @@ const Header = () => {
       label: (
         <button
           onClick={() => navigate(item.href)}
-          className="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
+          className="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 duration-200"
         >
           {item.label}
         </button>
       ),
     })),
   };
+  /* ---------- END MENU DATA ----------- */
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -69,86 +70,84 @@ const Header = () => {
   return (
     <>
       <header
-        className={`fixed w-full z-50 transition-all duration-300 ${
+        className={`fixed w-full z-50 duration-300 ${
           isScrolled ? "bg-[#3498db] shadow-lg" : "bg-[#3498db]"
         }`}
       >
         <div className="container mx-auto px-4">
+          {/* ---------- TOP BAR ---------- */}
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <div className="flex-shrink-0">
-              <button
-                onClick={handleHomeClick}
-                className="cursor-pointer border-0 bg-transparent p-0"
-              >
-                <img
-                  src={logo}
-                  alt="Logo"
-                  className="h-18 w-18 rounded-full object-cover"
-                  onError={(e) => {
-                    e.target.src =
-                      "https://via.placeholder.com/80x80.png?text=Logo";
-                  }}
-                />
-              </button>
-            </div>
+            <button
+              onClick={handleHomeClick}
+              className="flex-shrink-0 border-0 bg-transparent p-0"
+            >
+              <img
+                src={logo}
+                alt="Logo"
+                className="h-18 w-18 rounded-full object-cover"
+                onError={(e) =>
+                  (e.target.src =
+                    "https://via.placeholder.com/80x80.png?text=Logo")
+                }
+              />
+            </button>
 
             {/* Desktop menu */}
             <nav className="hidden md:flex space-x-8">
-              {menuItems.map((item) => (
-                <div key={item.id} className="relative">
-                  {item.hasDropdown ? (
-                    <Dropdown
-                      menu={serviceDropdownMenu}
-                      placement="bottomLeft"
-                      trigger={["hover"]}
-                      overlayClassName="service-dropdown"
-                    >
-                      <button className="cursor-pointer text-white hover:text-gray-200 transition-colors duration-300 bg-transparent border-0 flex items-center space-x-1">
-                        <span>{item.label}</span>
-                        <FiChevronDown className="w-4 h-4" />
-                      </button>
-                    </Dropdown>
-                  ) : (
-                    <button
-                      onClick={() =>
-                        item.id === 1 ? handleHomeClick() : navigate(item.href)
-                      }
-                      className="cursor-pointer text-white hover:text-gray-200 transition-colors duration-300 bg-transparent border-0"
-                    >
-                      {item.label}
+              {menuItems.map((item) =>
+                item.hasDropdown ? (
+                  /* chỉ còn dropdown cho id = 4 */
+                  <Dropdown
+                    key={item.id}
+                    menu={serviceDropdownMenu}
+                    placement="bottomLeft"
+                    trigger={["hover"]}
+                  >
+                    <button className="text-white flex items-center space-x-1 hover:text-gray-200 duration-300">
+                      <span>{item.label}</span>
+                      <FiChevronDown className="w-4 h-4" />
                     </button>
-                  )}
-                </div>
-              ))}
+                  </Dropdown>
+                ) : (
+                  <button
+                    key={item.id}
+                    onClick={() =>
+                      item.id === 1 ? handleHomeClick() : navigate(item.href)
+                    }
+                    className="text-white hover:text-gray-200 duration-300"
+                  >
+                    {item.label}
+                  </button>
+                )
+              )}
             </nav>
 
-            {/* Right side: login / user */}
+            {/* Right side */}
             <div className="hidden md:flex items-center space-x-4">
               {user ? (
                 <>
                   {user.role === "ADMIN" && (
                     <button
                       onClick={() => navigate("/dashboard")}
-                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-300"
+                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 duration-300"
                     >
                       Dashboard
                     </button>
                   )}
                   <button
                     onClick={() => navigate("/achievements")}
-                    className="relative p-2 rounded-full hover:bg-yellow-100 transition-colors"
+                    className="relative p-2 rounded-full hover:bg-yellow-100"
                     aria-label="Thành tích"
                   >
                     <FaMedal className="w-6 h-6 text-yellow-400" />
                   </button>
                   <button
                     onClick={() => navigate("/notifications")}
-                    className="relative p-2 rounded-full hover:bg-blue-100 transition-colors"
+                    className="relative p-2 rounded-full hover:bg-blue-100"
                     aria-label="Thông báo"
                   >
                     <FaBell className="w-6 h-6 text-white" />
-                    {/* Có thể thêm chấm đỏ nếu có thông báo mới */}
                   </button>
                   <UserProfileDropdown />
                 </>
@@ -156,13 +155,13 @@ const Header = () => {
                 <>
                   <button
                     onClick={() => navigate("/login")}
-                    className="px-4 py-2 bg-white text-[#2980b9] rounded-lg hover:bg-gray-100 transition-colors duration-300"
+                    className="px-4 py-2 bg-white text-[#2980b9] rounded-lg hover:bg-gray-100"
                   >
                     Đăng Nhập
                   </button>
                   <button
                     onClick={() => navigate("/register")}
-                    className="px-4 py-2 bg-[#f39c12] text-white rounded-lg hover:bg-[#e67e22] transition-colors duration-300"
+                    className="px-4 py-2 bg-[#f39c12] text-white rounded-lg hover:bg-[#e67e22]"
                   >
                     Đăng Ký
                   </button>
@@ -173,57 +172,55 @@ const Header = () => {
             {/* Mobile menu toggle */}
             <button
               onClick={toggleMenu}
-              className="md:hidden p-2 rounded-lg hover:bg-[#2980b9] transition-colors duration-300 text-white"
+              className="md:hidden p-2 rounded-lg hover:bg-[#2980b9] text-white"
               aria-label="Toggle menu"
             >
-              {isOpen ? (
-                <FiX className="w-6 h-6" />
-              ) : (
-                <FiMenu className="w-6 h-6" />
-              )}
+              {isOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
             </button>
           </div>
+          {/* ---------- END TOP BAR ---------- */}
 
           {/* Mobile menu */}
           {isOpen && (
             <div className="md:hidden bg-[#2980b9] shadow-lg rounded-lg mt-2 p-4">
               <nav className="flex flex-col space-y-4">
-                {menuItems.map((item) => (
-                  <div key={item.id}>
-                    {item.hasDropdown ? (
-                      <div>
-                        <div className="text-white flex items-center justify-between">
-                          <span>{item.label}</span>
-                          <FiChevronDown className="w-4 h-4" />
-                        </div>
-                        <div className="ml-4 mt-2 space-y-2">
-                          {serviceDropdownItems.map((dropdownItem) => (
-                            <button
-                              key={dropdownItem.id}
-                              onClick={() => {
-                                navigate(dropdownItem.href);
-                                toggleMenu();
-                              }}
-                              className="text-gray-200 hover:text-white transition-colors duration-300 text-left bg-transparent border-0 block w-full"
-                            >
-                              {dropdownItem.label}
-                            </button>
-                          ))}
-                        </div>
+                {menuItems.map((item) =>
+                  item.hasDropdown ? (
+                    /* mobile chỉ xử lý dropdown cho service */
+                    <div key={item.id}>
+                      <div className="text-white flex items-center justify-between">
+                        <span>{item.label}</span>
+                        <FiChevronDown className="w-4 h-4" />
                       </div>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          item.id === 1 ? handleHomeClick() : navigate(item.href);
-                          toggleMenu();
-                        }}
-                        className="text-white hover:text-gray-200 transition-colors duration-300 text-left bg-transparent border-0"
-                      >
-                        {item.label}
-                      </button>
-                    )}
-                  </div>
-                ))}
+                      <div className="ml-4 mt-2 space-y-2">
+                        {serviceDropdownItems.map((sub) => (
+                          <button
+                            key={sub.id}
+                            onClick={() => {
+                              navigate(sub.href);
+                              toggleMenu();
+                            }}
+                            className="text-gray-200 hover:text-white text-left w-full"
+                          >
+                            {sub.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        item.id === 1 ? handleHomeClick() : navigate(item.href);
+                        toggleMenu();
+                      }}
+                      className="text-white hover:text-gray-200 text-left"
+                    >
+                      {item.label}
+                    </button>
+                  )
+                )}
+
                 {user ? (
                   <>
                     {user.role === "ADMIN" && (
@@ -232,7 +229,7 @@ const Header = () => {
                           navigate("/dashboard");
                           toggleMenu();
                         }}
-                        className="text-white hover:text-gray-200 transition-colors duration-300 text-left bg-transparent border-0"
+                        className="text-white hover:text-gray-200 text-left"
                       >
                         Dashboard
                       </button>
@@ -245,7 +242,7 @@ const Header = () => {
                         navigate("/profile");
                         toggleMenu();
                       }}
-                      className="text-white hover:text-gray-200 transition-colors duration-300 text-left bg-transparent border-0"
+                      className="text-white hover:text-gray-200 text-left"
                     >
                       Hồ sơ cá nhân
                     </button>
@@ -254,7 +251,7 @@ const Header = () => {
                         handleLogout();
                         toggleMenu();
                       }}
-                      className="text-left text-white hover:text-gray-200 transition-colors duration-300 bg-transparent border-0"
+                      className="text-white hover:text-gray-200 text-left"
                     >
                       Đăng xuất
                     </button>
@@ -286,7 +283,8 @@ const Header = () => {
           )}
         </div>
       </header>
-      <div className="h-24"></div>
+      {/* spacer */}
+      <div className="h-24" />
     </>
   );
 };

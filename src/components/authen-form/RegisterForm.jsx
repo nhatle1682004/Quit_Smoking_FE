@@ -3,7 +3,7 @@ import "./register.css";
 import { Button, Checkbox, Form, Input, Radio } from "antd";
 import api from "../../configs/axios";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   UserOutlined,
   LockOutlined,
@@ -153,6 +153,14 @@ function RegisterForm() {
           </Button>
         </Form.Item>
       </Form>
+      <Form.Item className="!mb-0">
+        <div className="text-center mt-4">
+          <span className="text-gray-600">Đã có tài khoản? </span>
+          <Link to="/login" className="text-blue-600 font-semibold hover:underline">
+            Đăng nhập
+          </Link>
+        </div>
+      </Form.Item>
     </div>
   );
 }

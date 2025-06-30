@@ -10,7 +10,7 @@ function SuccessStories() {
   const navigate = useNavigate();
 
   const handleStoryClick = (storyId) => {
-    navigate(`/success-story-details/${storyId}`);
+    navigate(`/success/success-story-details/${storyId}`);
   };
 
   return (

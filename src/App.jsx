@@ -28,7 +28,6 @@ import ProductPage from "./pages/navbar-page/service";
 import UserProfile from "./pages/navbar-page/profile";
 import LogSmoking from "./pages/navbar-page/journal";
 import AchievementsPage from "./pages/navbar-page/achievements";
-import PlanFree from "./pages/navbar-page/planFree";
 import Payment from "./pages/payment";
 import ForgotPassword from "./pages/auth/forgot-password/index.";
 import UserProfileDropdown from "./components/user-profile-dropdown";
@@ -38,7 +37,10 @@ import OtpVerify from "./pages/auth/otp-verify";
 import CoachManagement from "./pages/dashboard-admin/coach-managerment/index";
 import BookingConsultPage from "./pages/navbar-page/booking/index";
 import ProcessTracking from "./pages/service/process-tracking";
+import Plan from "./pages/navbar-page/my-plan";
 import QuitPlanFree from "./pages/service/quit-plan-free";
+import PackagePage from "./pages/package";
+import ResetPassword from "./pages/auth/reset-password";
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -68,24 +70,34 @@ function App() {
         {
           path: "service",
           element: <ProductPage />,
-          children: [
-            {
-              path: "quit-plan-free",
-              element: <QuitPlanFree />,
-            },
-            {
-              path: "process-tracking",
-              element: <ProcessTracking />,
-            },
-            {
-              path: "cost-calculator",
-              element: <ProductPage />,
-            },
-          ],
+        },
+        {
+          path: "service/quit-plan-free",
+          element: <QuitPlanFree />,
+        },
+        {
+          path: "service/process-tracking",
+          element: <ProcessTracking />,
+        },
+        {
+          path: "service/cost-calculator",
+          element: <ProductPage />,
         },
         {
           path: "success",
           element: <SuccessStories />,
+        },
+        {
+          path: "success/success-story-details/1",
+          element: <SuccessStoryHoChiMinh />,
+        },
+        {
+          path: "success/success-story-details/2",
+          element: <SuccessStoryNguyenVanNgu />,
+        },
+        {
+          path: "success/success-story-details/3",
+          element: <SuccessStoryNguyenHieu />,
         },
         {
           path: "blog",
@@ -95,18 +107,7 @@ function App() {
           path: "contact",
           element: <ContactPage />,
         },
-        {
-          path: "success-story-details/1",
-          element: <SuccessStoryHoChiMinh />,
-        },
-        {
-          path: "success-story-details/2",
-          element: <SuccessStoryNguyenVanNgu />,
-        },
-        {
-          path: "success-story-details/3",
-          element: <SuccessStoryNguyenHieu />,
-        },
+
         {
           path: "profile",
           element: <UserProfile />,
@@ -128,8 +129,16 @@ function App() {
           element: <AchievementsPage />,
         },
         {
-          path: "plan-free",
-          element: <PlanFree />,
+          path: "my-plan",
+          element: <Plan />,
+        },
+        {
+          path: "package",
+          element: <PackagePage />,
+        },
+        {
+          path: "reset-password",
+          element: <ResetPassword />,
         },
 
       ],

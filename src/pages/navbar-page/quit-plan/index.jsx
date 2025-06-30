@@ -788,7 +788,7 @@ const QuitPlanForm = () => {
                     Phù hợp cho người hút
                   </p>
                   <p className="text-2xl font-bold text-purple-800">
-                    > 20 điếu/ngày
+                    &gt; 20 điếu/ngày
                   </p>
                 </div>
                 <ul className="space-y-2 mb-6">
