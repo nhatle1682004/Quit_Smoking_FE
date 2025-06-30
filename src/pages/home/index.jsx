@@ -21,7 +21,8 @@ import anhkeo1 from "../../assets/image/anhkeo1.png";
 import anhkeo2 from "../../assets/image/anhkeo2.png";
 import anhkeo3 from "../../assets/image/anhkeo3.jpg";
 import SuccessStories from "../navbar-page/success";
-import PremiumPlansSection from "../../components/premium";
+import PremiumPlansSection from "../../components/backage";
+
 
 function HomePage() {
   const navigate = useNavigate();
@@ -251,7 +252,7 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Sau section giới thiệu về nền tảng, thêm section các gói dịch vụ */}
+      {/* Sau section giới thiệu về nền tảng, thêm section các dịch vụ */}
       <section className="py-8 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
