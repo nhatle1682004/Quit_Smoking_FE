@@ -19,12 +19,7 @@ import {
   SearchOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
-import axios from "axios";
-
-// Axios instance for API calls
-const api = axios.create({
-  baseURL: "https://68512c568612b47a2c08e9af.mockapi.io",
-});
+import api from "../../../configs/axios";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;

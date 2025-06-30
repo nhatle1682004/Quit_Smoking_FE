@@ -10,21 +10,18 @@ import {
   Tag,
   Typography,
   Card,
-  Flex,
+  Switch, // Vẫn có thể giữ lại hoặc xóa đi nếu không dùng ở đâu khác
 } from "antd";
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   RollbackOutlined,
-} from "@ant-design/icons"; // Import Ant Design Icons
-import { toast } from "react-toastify"; // Ensure react-toastify is installed and configured
+} from "@ant-design/icons";
+import { toast } from "react-toastify";
 import React, { useEffect, useState } from "react";
-import api from "./../../../configs/axios"; // Assuming this is correctly configured
+import api from "./../../../configs/axios";
 import { useForm } from "antd/es/form/Form";
-
-// Make sure react-toastify's CSS is imported in your main App.js or index.js
-// import 'react-toastify/dist/ReactToastify.css';
 
 function CoachManagement() {
   const { Title, Text } = Typography;
@@ -32,12 +29,11 @@ function CoachManagement() {
   const [open, setOpen] = useState(false);
   const [coaches, setCoaches] = useState([]);
   const [editingId, setEditingId] = useState(null);
-  const [loading, setLoading] = useState(true); // Added loading state for table
-  const [isModalLoading, setIsModalLoading] = useState(false); // Added loading state for modal form submission
+  const [loading, setLoading] = useState(true);
+  const [isModalLoading, setIsModalLoading] = useState(false);
 
-  // Fetch danh sách coach từ API
   const fetchCoaches = async () => {
-    setLoading(true); // Set loading to true when fetching starts
+    setLoading(true);
     try {
       const res = await api.get("/user");
       const data = res.data.filter((u) => u.role === "COACH");
@@ -46,7 +42,7 @@ function CoachManagement() {
       toast.error("Không thể tải danh sách coach. Vui lòng thử lại.");
       console.error("Fetch coaches error:", err);
     } finally {
-      setLoading(false); // Set loading to false when fetching ends
+      setLoading(false);
     }
   };
 
@@ -54,15 +50,18 @@ function CoachManagement() {
     fetchCoaches();
   }, []);
 
-  // Submit form (Add/Edit)
   const handleSubmit = async (values) => {
-    setIsModalLoading(true); // Set modal loading
+    setIsModalLoading(true);
     try {
+      // THAY ĐỔI QUAN TRỌNG: Thêm cứng "premium: true" vào payload
+      const payload = { ...values, role: "COACH", premium: true };
+
       if (editingId) {
-        await api.put(`/user/${editingId}`, values);
+        delete payload.password;
+        await api.put(`/user/${editingId}`, payload);
         toast.success("Cập nhật coach thành công!");
       } else {
-        await api.post("/user", { ...values, role: "COACH" });
+        await api.post("/user", payload);
         toast.success("Thêm coach mới thành công!");
       }
       setOpen(false);
@@ -72,20 +71,18 @@ function CoachManagement() {
     } catch (err) {
       const errorMessage =
         err.response?.data?.message ||
-        err.message ||
-        "Lỗi khi lưu thông tin coach";
+        "Lỗi khi lưu thông tin coach. Vui lòng kiểm tra lại dữ liệu.";
       toast.error(errorMessage);
-      console.error("Submit form error:", err);
+      console.error("Submit form error:", err.response || err);
     } finally {
-      setIsModalLoading(false); // Unset modal loading
+      setIsModalLoading(false);
     }
   };
 
-  // Delete coach
   const handleDelete = async (id) => {
     try {
       await api.delete(`/user/${id}`);
-      toast.success("Xoá coach thành công!");
+      toast.success("Xoá coach thành công! Trạng thái đã được cập nhật.");
       fetchCoaches();
     } catch (err) {
       const errorMessage =
@@ -95,23 +92,16 @@ function CoachManagement() {
     }
   };
 
-  // Restore coach (assuming there's an API endpoint for this)
-  const handleRestore = async (user) => {
-    if (!user.active) {
-      try {
-        await api.put(`/user/${user.id}/restore`); // Assuming /user/:id/restore endpoint
-        toast.success("Khôi phục coach thành công!");
-        fetchCoaches();
-      } catch (err) {
-        const errorMessage =
-          err.response?.data?.message ||
-          err.message ||
-          "Lỗi khi khôi phục coach.";
-        toast.error(errorMessage);
-        console.error("Restore coach error:", err);
-      }
-    } else {
-      toast.info("Coach này đang hoạt động. Không cần khôi phục.");
+  const handleRestore = async (id) => {
+    try {
+      await api.put(`/user/${id}/restore`);
+      toast.success("Khôi phục coach thành công!");
+      fetchCoaches();
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.message || "Lỗi khi khôi phục coach.";
+      toast.error(errorMessage);
+      console.error("Restore coach error:", err);
     }
   };
 
@@ -123,21 +113,26 @@ function CoachManagement() {
       sorter: (a, b) => a.fullName.localeCompare(b.fullName),
     },
     {
-      title: "Tên đăng nhập",
-      dataIndex: "username",
-      key: "username",
-      sorter: (a, b) => a.username.localeCompare(b.username),
-    },
-    {
       title: "Email",
       dataIndex: "email",
       key: "email",
     },
     {
-      title: "Khu vực",
-      dataIndex: "area",
-      key: "area",
-      render: (area) => area || <Text type="secondary">N/A</Text>,
+      title: "Giới tính",
+      dataIndex: "gender",
+      key: "gender",
+      render: (gender) => (gender === "MALE" ? "Nam" : "Nữ"),
+    },
+    {
+      title: "Premium",
+      dataIndex: "premium",
+      key: "premium",
+      render: (premium) => (
+        // Cột này sẽ luôn hiển thị tag "Có" cho các coach
+        <Tag color={premium ? "gold" : "default"}>
+          {premium ? "Có" : "Không"}
+        </Tag>
+      ),
     },
     {
       title: "Trạng thái",
@@ -145,11 +140,11 @@ function CoachManagement() {
       key: "active",
       render: (active) => (
         <Tag color={active ? "green" : "red"}>
-          {active ? "Đang hoạt động" : "Tạm dừng"}
+          {active ? "Hoạt động" : "Tạm dừng"}
         </Tag>
       ),
       filters: [
-        { text: "Đang hoạt động", value: true },
+        { text: "Hoạt động", value: true },
         { text: "Tạm dừng", value: false },
       ],
       onFilter: (value, record) => record.active === value,
@@ -167,37 +162,24 @@ function CoachManagement() {
               form.setFieldsValue(record);
               setOpen(true);
             }}
-            disabled={!record.active} // Disable edit if not active
-            tooltip="Sửa thông tin coach"
-          >
-            Sửa
-          </Button>
-          <Popconfirm
-            title="Xác nhận xoá"
-            description={`Bạn có chắc muốn xoá coach "${record.fullName}"?`}
-            onConfirm={() => handleDelete(record.id)}
-            okText="Xoá"
-            cancelText="Hủy"
-            placement="topRight"
-            disabled={!record.active} // Disable delete if not active
-          >
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-              disabled={!record.active}
-              tooltip="Xoá coach này"
+          />
+          {record.active ? (
+            <Popconfirm
+              title="Xác nhận tạm dừng"
+              description={`Bạn có chắc muốn tạm dừng coach "${record.fullName}"?`}
+              onConfirm={() => handleDelete(record.id)}
+              okText="Đồng ý"
+              cancelText="Hủy"
             >
-              Xoá
-            </Button>
-          </Popconfirm>
-          <Button
-            onClick={() => handleRestore(record)}
-            icon={<RollbackOutlined />}
-            disabled={record.active} // Disable restore if already active
-            tooltip="Khôi phục coach"
-          >
-            Khôi phục
-          </Button>
+              <Button danger icon={<DeleteOutlined />} />
+            </Popconfirm>
+          ) : (
+            <Button
+              onClick={() => handleRestore(record.id)}
+              icon={<RollbackOutlined />}
+              style={{ color: "green", borderColor: "green" }}
+            />
+          )}
         </Space>
       ),
     },
@@ -205,19 +187,11 @@ function CoachManagement() {
 
   return (
     <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
-      <Title
-        level={2}
-        style={{ textAlign: "center", marginBottom: "30px", color: "#1890ff" }}
-      >
-        <span
-          style={{ borderBottom: "3px solid #1890ff", paddingBottom: "5px" }}
-        >
-          Quản lý Coach Hỗ trợ Cai Nghiện Thuốc lá
-        </span>
+      <Title level={2} style={{ textAlign: "center", marginBottom: "24px" }}>
+        Quản lý Coach
       </Title>
 
       <Card
-        title="Danh sách Coach"
         extra={
           <Button
             type="primary"
@@ -232,11 +206,6 @@ function CoachManagement() {
             Thêm Coach Mới
           </Button>
         }
-        style={{
-          marginBottom: "24px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-        }}
       >
         <Table
           columns={columns}
@@ -255,14 +224,14 @@ function CoachManagement() {
           </Title>
         }
         open={open}
-        onCancel={() => {
-          setOpen(false);
+        onCancel={() => setOpen(false)}
+        afterClose={() => {
           form.resetFields();
           setEditingId(null);
         }}
-        footer={null} // Custom footer for submit button inside form
-        centered // Center the modal on the screen
-        maskClosable={!isModalLoading} // Prevent closing modal when loading
+        footer={null}
+        centered
+        maskClosable={!isModalLoading}
       >
         <Form layout="vertical" form={form} onFinish={handleSubmit}>
           <Form.Item
@@ -307,32 +276,28 @@ function CoachManagement() {
             </Form.Item>
           )}
 
-          <Form.Item label="Khu vực" name="area">
-            <Input placeholder="Nhập khu vực hoạt động (ví dụ: Hà Nội, TP.HCM)" />
-          </Form.Item>
-
           <Form.Item
-            label="Trạng thái"
-            name="active"
-            rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}
-            initialValue={true} // Default to active for new coaches
+            name="gender"
+            label="Giới tính"
+            rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
           >
-            <Select placeholder="Chọn trạng thái">
-              <Select.Option value={true}>Đang hoạt động</Select.Option>
-              <Select.Option value={false}>Tạm dừng</Select.Option>
+            <Select placeholder="Chọn giới tính">
+              <Select.Option value="MALE">Nam</Select.Option>
+              <Select.Option value="FEMALE">Nữ</Select.Option>
             </Select>
           </Form.Item>
 
-          <Form.Item>
+          {/* XÓA BỎ: Đã xóa Form Item cho Premium ở đây */}
+
+          <Form.Item style={{ marginTop: "20px" }}>
             <Button
               type="primary"
               htmlType="submit"
               block
               size="large"
               loading={isModalLoading}
-              style={{ marginTop: "20px" }}
             >
-              {editingId ? "Cập nhật Coach" : "Thêm Coach Mới"}
+              {editingId ? "Cập nhật" : "Thêm Mới"}
             </Button>
           </Form.Item>
         </Form>
