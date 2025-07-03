@@ -1,30 +1,70 @@
-import React from 'react';
-import { Typography } from 'antd';
-import PremiumPlansSection from '../../components/modal-package';
+import { Button, Card, Col, Row, Tag } from 'antd';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
+import { toast } from 'react-toastify';
 
-const { Title, Paragraph } = Typography;
+function PackagePage() {
+  const [initialPackages, setInitialPackages] = useState([]);
 
-const PackagePage = () => {
+  const fetchPackages = async () => {
+        try{
+          const response = await axios.get('https://685b9c6789952852c2da2b80.mockapi.io/package');
+          console.log(response.data);
+          setInitialPackages(response.data); 
+        }catch(err){
+          console.log(err);
+          toast.error("Lỗi khi mua gói");
+        }
+  }
+  useEffect(() => {
+    fetchPackages();
+  }, []);
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
-      <div className="container mx-auto px-4 max-w-7xl">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <Title level={1} className="text-blue-600 mb-4">
-            🎯 Chọn Gói Dịch Vụ Phù Hợp Với Bạn
-          </Title>
-          <Paragraph className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Chúng tôi cung cấp nhiều gói dịch vụ khác nhau để hỗ trợ bạn trong hành trình cai thuốc. 
-            Từ gói miễn phí cơ bản đến gói Premium với tư vấn chuyên sâu 1:1.
-          </Paragraph>
-        </div>
+    <div style={{ padding: "24px" }}>
+      <h2 style={{ textAlign: "center", marginBottom: "24px" }}>Danh sách gói hỗ trợ</h2>
 
-        {/* Component gói dịch vụ */}
-        <PremiumPlansSection />
-
-      </div>
+      <Row gutter={[16, 16]}>
+        {initialPackages
+        .filter((pkg) => pkg.isActive)
+        .map((pkg) => (
+          <Col key={pkg.id} xs={24} sm={12} md={8} lg={6}>
+            <Card
+              title={pkg.name}
+              bordered
+              extra={
+                <Tag color={pkg.isActive ? 'green' : 'red'}>
+                  {/* Không có nội dung */}
+                </Tag>
+              }
+              style={{ height: "100%" }}
+            >
+              <p><strong>Mô tả:</strong></p>
+              <ul style={{ paddingLeft: 20 }}>
+                {(pkg.description ? pkg.description.split(/;|\n/) : []).map((item, idx) => (
+                  <li key={idx} style={{ listStyle: "none", marginBottom: 4 }}>
+                    <span role="img" aria-label="tick">✅</span> {item.trim()}
+                  </li>
+                ))}
+              </ul>
+              <p><strong>Thời gian:</strong> {pkg.durationInDays} ngày</p>
+              <p><strong>Giá:</strong> {pkg.price?.toLocaleString()} VNĐ</p>
+              <p><strong>Cấp độ:</strong> {pkg.level}</p>
+              <Button
+                type="primary"
+                block
+                disabled={!pkg.isActive}
+                onClick={() => {
+                  toast.success(`Bạn đã chọn gói: ${pkg.name}`);
+                }}
+              >
+                Mua ngay
+              </Button>
+            </Card>
+          </Col>
+        ))}
+      </Row>
     </div>
-  );
-};
+  )
+}
 
 export default PackagePage;

@@ -41,6 +41,7 @@ import Plan from "./pages/navbar-page/my-plan";
 import QuitPlanFree from "./pages/service/quit-plan-free";
 import PackagePage from "./pages/package";
 import ResetPassword from "./pages/auth/reset-password";
+import ManagePackage from "./pages/dashboard-admin/manage-package";
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -160,6 +161,7 @@ function App() {
         { path: "upgradeSuggestions", element: <UpgradeSuggestions /> },
         { path: "userManagement", element: <UserManagement /> },
         { path: "coachManagement", element: <CoachManagement /> },
+        { path: "managePackage", element: <ManagePackage /> },
       ],
     },
     {
