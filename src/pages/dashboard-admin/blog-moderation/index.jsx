@@ -10,9 +10,10 @@ import {
   Typography,
   Form,
   message,
+  Image, // UPDATED: Import Image component for better display
 } from "antd";
 import {
-  EditOutlined, // Changed from CheckCircleOutlined/CloseCircleOutlined
+  EditOutlined,
   EyeOutlined,
   DeleteOutlined,
   PlusOutlined,
@@ -114,26 +115,27 @@ function BlogModeration() {
 
   // Handle form submission for both create and edit
   const handleBlogFormSubmit = async (values) => {
+    // 'values' now includes title, content, and imageUrl from the form
     try {
       if (editingBlog) {
         // Edit existing blog
         await api.put(`/blogs/${editingBlog.id}`, {
-          ...values,
-          updatedAt: new Date().toISOString(), // Add update timestamp
+          ...values, // The entire request body is sent here
+          updatedAt: new Date().toISOString(),
         });
         message.success("Đã cập nhật bài viết");
       } else {
         // Create new blog
         await api.post("/blogs", {
-          ...values,
-          status: "approved", // New blogs are "approved" by default
+          ...values, // The entire request body is sent here
+          status: "approved",
           createdAt: new Date().toISOString(),
         });
         message.success("Đã tạo bài viết mới");
       }
-      setBlogFormModalVisible(false); // Close modal
-      blogForm.resetFields(); // Reset form fields
-      fetchBlogs(); // Refresh blog list
+      setBlogFormModalVisible(false);
+      blogForm.resetFields();
+      fetchBlogs();
     } catch (error) {
       console.error("Error submitting blog:", error);
       message.error(`Không thể ${editingBlog ? "cập nhật" : "tạo"} bài viết`);
@@ -159,7 +161,6 @@ function BlogModeration() {
         try {
           await api.delete(`/blogs/${blogId}`);
           message.success("Đã xóa bài viết");
-          // Optimistically update the UI instead of refetching
           const newBlogs = blogs.filter((blog) => blog.id !== blogId);
           setBlogs(newBlogs);
           setPagination((p) => ({ ...p, total: newBlogs.length }));
@@ -170,7 +171,6 @@ function BlogModeration() {
             error
           );
           message.error("Lỗi khi xóa bài viết. Vui lòng thử lại.");
-          // By re-throwing the error, we prevent the modal from closing
           throw error;
         }
       },
@@ -262,7 +262,6 @@ function BlogModeration() {
             </Text>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-0 w-full sm:w-auto">
-            {/* Removed pending badge as moderation is not needed */}
             <Button
               icon={<PlusOutlined />}
               onClick={showCreateBlogModal}
@@ -324,7 +323,7 @@ function BlogModeration() {
         onCancel={() => {
           setBlogFormModalVisible(false);
           blogForm.resetFields();
-          setEditingBlog(null); // Clear editing blog when modal closes
+          setEditingBlog(null);
         }}
         footer={null}
         destroyOnClose={true}
@@ -340,6 +339,28 @@ function BlogModeration() {
           >
             <Input placeholder="Nhập tiêu đề..." className="rounded-md" />
           </Form.Item>
+
+          {/* NEW: Image URL Field */}
+          <Form.Item
+            name="imageUrl"
+            label="URL Hình ảnh"
+            rules={[
+              {
+                type: "url",
+                message: "Vui lòng nhập một URL hợp lệ!",
+              },
+              {
+                required: true,
+                message: "Vui lòng nhập URL hình ảnh!",
+              },
+            ]}
+          >
+            <Input
+              placeholder="https://example.com/image.png"
+              className="rounded-md"
+            />
+          </Form.Item>
+
           <Form.Item
             name="content"
             label="Nội dung"
@@ -353,6 +374,7 @@ function BlogModeration() {
               className="rounded-md"
             />
           </Form.Item>
+
           <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 mt-4">
             <Button
               onClick={() => {
@@ -375,7 +397,7 @@ function BlogModeration() {
         </Form>
       </Modal>
 
-      {/* Blog Details Modal (remains the same) */}
+      {/* Blog Details Modal */}
       <Modal
         title={
           <Title level={4} className="mb-0 text-gray-800">
@@ -391,6 +413,19 @@ function BlogModeration() {
       >
         {viewingBlog && (
           <div className="p-4 bg-gray-50 rounded-lg shadow-inner">
+            {/* UPDATED: Display Image if URL exists */}
+            {viewingBlog.imageUrl && (
+              <div className="mb-4">
+                <Title level={5} className="mt-0 mb-2 text-gray-900">
+                  Hình ảnh
+                </Title>
+                <Image
+                  src={viewingBlog.imageUrl}
+                  alt={viewingBlog.title}
+                  className="max-w-full rounded-lg shadow-md"
+                />
+              </div>
+            )}
             <Paragraph className="text-gray-700 leading-relaxed text-base">
               <span className="font-medium text-gray-900">Ngày tạo:</span>{" "}
               {new Date(viewingBlog.createdAt).toLocaleString("vi-VN")}
@@ -412,8 +447,6 @@ function BlogModeration() {
           </div>
         )}
       </Modal>
-
-      {/* Removed Rejection Reason Modal as moderation is not needed */}
     </div>
   );
 }

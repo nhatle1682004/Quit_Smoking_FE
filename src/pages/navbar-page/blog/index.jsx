@@ -1,34 +1,24 @@
 import React, { useEffect, useState } from "react";
-import {
-  Card,
-  Rate,
-  Input,
-  Button,
-  message,
-  Spin,
-  Avatar,
-  Typography,
-} from "antd";
+import { Rate, Input, Button, message, Spin, Avatar, Typography } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import api from "../../../configs/axios";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
-// Các component con đã được tái cấu trúc và áp dụng style mới
 const { TextArea } = Input;
 const { Title, Text, Paragraph } = Typography;
 
-// --- COMPONENT CON (Đã áp dụng style mới) ---
+// --- CÁC COMPONENT CON (ĐÃ CHUYỂN SANG GIAO DIỆN SÁNG) ---
 
 const PageSpinner = ({ tip }) => (
-  <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
+  <div className="flex justify-center items-center min-h-screen bg-gray-50 text-gray-800">
     <Spin size="large" tip={tip} />
   </div>
 );
 
 const ActionPrompt = ({ title, buttonText, buttonLink, isPremiumAction }) => (
-  <div className="p-4 text-center">
-    <Text className="mb-3 block text-gray-400 italic">{title}</Text>
+  <div className="p-4 text-center bg-gray-50 rounded-lg">
+    <Text className="mb-3 block text-gray-500 italic">{title}</Text>
     <Button
       type="primary"
       className={`bg-gradient-to-r ${
@@ -44,35 +34,34 @@ const ActionPrompt = ({ title, buttonText, buttonLink, isPremiumAction }) => (
 
 const FeedbackList = ({ feedbacks }) => (
   <div className="mt-6">
-    <Title level={5} className="text-gray-200">
+    <Title level={5} className="text-gray-800">
       Phản hồi từ cộng đồng
     </Title>
-    <div className="mt-3 p-4 bg-black/20 rounded-lg max-h-48 overflow-y-auto space-y-4 border border-white/10">
+    <div className="mt-3 p-4 bg-gray-100 rounded-lg max-h-48 overflow-y-auto space-y-4 border border-gray-200">
       {feedbacks && feedbacks.length > 0 ? (
         feedbacks.map((fb, index) => (
           <div key={index} className="flex items-start space-x-3">
             <Avatar src={fb.user?.avatarUrl} icon={<UserOutlined />} />
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <Text strong className="text-gray-100">
+                <Text strong className="text-gray-900">
                   {fb.user?.username || "Người dùng"}
                 </Text>
                 <Rate
                   disabled
                   allowHalf
                   value={fb.rating}
-                  // Override style của antd để có màu vàng sáng
-                  className="text-xs !text-yellow-400"
+                  className="text-xs !text-yellow-500"
                 />
               </div>
-              <Paragraph className="text-gray-300 mt-1 mb-0 text-sm">
+              <Paragraph className="text-gray-600 mt-1 mb-0 text-sm">
                 {fb.comment}
               </Paragraph>
             </div>
           </div>
         ))
       ) : (
-        <Text className="text-gray-400 italic">Chưa có phản hồi nào.</Text>
+        <Text className="text-gray-500 italic">Chưa có phản hồi nào.</Text>
       )}
     </div>
   </div>
@@ -87,7 +76,7 @@ const FeedbackForm = ({
 }) => (
   <div className="pt-4">
     <Spin spinning={isLoading} tip="Đang gửi...">
-      <Title level={5} className="text-gray-200">
+      <Title level={5} className="text-gray-800">
         Để lại đánh giá của bạn
       </Title>
       <div className="mt-3 space-y-4">
@@ -95,8 +84,7 @@ const FeedbackForm = ({
           allowHalf
           value={interaction?.rating || 0}
           onChange={(value) => onInteractionChange(blogId, "rating", value)}
-          // Override style để phù hợp với dark mode
-          className="text-2xl !text-yellow-400 hover:!text-yellow-300"
+          className="text-2xl !text-yellow-500 hover:!text-yellow-400"
         />
         <TextArea
           rows={3}
@@ -105,8 +93,7 @@ const FeedbackForm = ({
           onChange={(e) =>
             onInteractionChange(blogId, "feedback", e.target.value)
           }
-          // Style cho TextArea trong Dark Mode
-          className="bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500"
+          className="bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500"
         />
         <Button
           type="primary"
@@ -157,28 +144,31 @@ const BlogCard = ({ blog, user, interactions, feedbacks, handlers }) => {
   };
 
   return (
-    // Đây là phần tạo hiệu ứng Glassmorphism
-    <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg overflow-hidden flex flex-col h-full transition-all duration-300 hover:border-white/40 hover:shadow-2xl">
+    // Card với style sáng, đổ bóng nhẹ
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       <img
         alt={blog.title}
+        // Sử dụng blog.imageUrl từ API, nếu không có thì dùng ảnh placeholder
         src={
-          blog.imgUrl ||
-          "https://via.placeholder.com/400x225.png?text=Blog+Image"
+          blog.imageUrl ||
+          "https://via.placeholder.com/400x225.png?text=H%C3%ACnh+%E1%BA%A3nh+Blog"
         }
         className="h-56 w-full object-cover"
       />
       <div className="p-6 flex flex-col flex-grow">
         <div className="flex-grow">
-          <Title level={3} className="text-xl font-semibold text-gray-100 mb-2">
+          <Title level={4} className="font-semibold text-gray-900 mb-2">
             {blog.title}
           </Title>
           <Paragraph
-            className="text-gray-300"
+            className="text-gray-600"
             ellipsis={{
               rows: 3,
               expandable: true,
               symbol: (
-                <span className="text-purple-400 font-semibold">đọc thêm</span>
+                <span className="text-purple-600 font-semibold cursor-pointer">
+                  đọc thêm
+                </span>
               ),
             }}
           >
@@ -186,7 +176,7 @@ const BlogCard = ({ blog, user, interactions, feedbacks, handlers }) => {
           </Paragraph>
         </div>
 
-        <div className="mt-auto pt-6 border-t border-white/10">
+        <div className="mt-auto pt-6 border-t border-gray-200">
           <FeedbackList feedbacks={feedbacks[blog.id]} />
           <div className="mt-6">{renderFeedbackSection()}</div>
         </div>
@@ -198,7 +188,6 @@ const BlogCard = ({ blog, user, interactions, feedbacks, handlers }) => {
 // --- COMPONENT CHÍNH ---
 
 function BlogPage() {
-  // ... (Toàn bộ state và logic giống hệt như trước, không cần thay đổi)
   const [blogs, setBlogs] = useState([]);
   const [interactions, setInteractions] = useState({});
   const [feedbacks, setFeedbacks] = useState({});
@@ -317,18 +306,12 @@ function BlogPage() {
   }
 
   return (
-    // Container chính với hiệu ứng Aurora
-    <div className="relative min-h-screen w-full bg-gray-900 overflow-hidden isolate">
-      {/* Các đốm màu nền tạo hiệu ứng Aurora */}
-      <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-lighten filter blur-3xl opacity-20 animate-blob"></div>
-      <div className="absolute top-0 -right-4 w-96 h-96 bg-indigo-500 rounded-full mix-blend-lighten filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-8 left-20 w-96 h-96 bg-sky-500 rounded-full mix-blend-lighten filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
-
-      {/* Nội dung chính */}
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    // Container chính với nền sáng
+    <div className="min-h-screen w-full bg-gray-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <Title
           level={1}
-          className="text-center mb-12 text-4xl font-bold text-white tracking-wider"
+          className="text-center mb-12 text-4xl font-bold text-gray-900 tracking-tight"
         >
           Khám Phá Blog
         </Title>
@@ -351,7 +334,7 @@ function BlogPage() {
           </div>
         ) : (
           <div className="text-center py-16">
-            <Text className="text-lg text-gray-400">
+            <Text className="text-lg text-gray-500">
               Không có bài viết nào để hiển thị.
             </Text>
           </div>
