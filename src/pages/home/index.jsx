@@ -21,7 +21,6 @@ import anhkeo1 from "../../assets/image/anhkeo1.png";
 import anhkeo2 from "../../assets/image/anhkeo2.png";
 import anhkeo3 from "../../assets/image/anhkeo3.jpg";
 import SuccessStories from "../navbar-page/success";
-import PremiumPlansSection from "../../components/backage";
 
 
 function HomePage() {
@@ -249,22 +248,6 @@ function HomePage() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Sau section giới thiệu về nền tảng, thêm section các dịch vụ */}
-      <section className="py-8 bg-white">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
-              Các Gói Dịch Vụ Hỗ Trợ Cai Thuốc
-            </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Chọn giải pháp phù hợp với bạn – từ tự quản lý đến hỗ trợ chuyên
-              sâu từ chuyên gia.
-            </p>
-          </div>
-          <PremiumPlansSection />
         </div>
       </section>
 

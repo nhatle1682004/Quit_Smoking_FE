@@ -3,7 +3,7 @@ import "./register.css";
 import { Button, Checkbox, Form, Input, Radio } from "antd";
 import api from "../../configs/axios";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   UserOutlined,
   LockOutlined,
@@ -92,6 +92,21 @@ function RegisterForm() {
             placeholder="Nhập tên đăng nhập"
           />
         </Form.Item>
+        <Form.Item
+          label="Số điện thoại"
+          name="phone"
+          rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" },
+            {
+              pattern: /^[0-9]+$/,
+              message: "Số điện thoại không hợp lệ!",
+            },
+            {
+              min: 10,
+            }
+          ]}
+        >
+          <Input prefix={<PhoneOutlined className="text-gray-400" />} placeholder="Nhập số điện thoại" />
+        </Form.Item>
 
         <Form.Item
           label="Mật khẩu"
@@ -152,6 +167,15 @@ function RegisterForm() {
             Đăng Ký
           </Button>
         </Form.Item>
+      
+      <Form.Item className="!mb-0">
+        <div className="text-center mt-4">
+          <span className="text-gray-600">Đã có tài khoản? </span>
+          <Link to="/login" className="text-blue-600 font-semibold hover:underline">
+            Đăng nhập
+          </Link>
+        </div>
+      </Form.Item>
       </Form>
     </div>
   );

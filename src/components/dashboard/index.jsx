@@ -6,6 +6,7 @@ import {
   UserOutlined,
   LogoutOutlined,
   HomeOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import {
   Breadcrumb,
@@ -38,6 +39,7 @@ const items = [
   getItem("Upgrade Suggestions", "upgradeSuggestions", <DollarOutlined />),
   getItem("User Management", "userManagement", <UserOutlined />),
   getItem("Coach Management", "coachManagement", <UserOutlined />),
+  getItem("Manage Package ", "managePackage", <AppstoreOutlined />),
 ];
 
 const Dashboard = () => {
