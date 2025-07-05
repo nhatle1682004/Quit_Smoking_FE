@@ -32,36 +32,34 @@ function LoginForm() {
       localStorage.setItem("token", response.data.token);
       toast.success("Đăng nhập thành công!");
 
-      // Kiểm tra role và điều hướng phù hợp
+
       if (role === "ADMIN" || role === "COACH") {
-        // Admin và Coach không cần khai báo tình trạng hút thuốc
         navigate("/dashboard");
       } else if (role === "CUSTOMER") {
-        // CUSTOMER cần kiểm tra xem đã khai báo tình trạng hút thuốc chưa
         try {
-          // Kiểm tra từ API thay vì localStorage
-          const initStatusResponse = await api.get('/initial-condition/active');
-          // Nếu có dữ liệu, nghĩa là đã khai báo rồi
-          if (initStatusResponse.data) {
+          const response = await api.get('/initial-condition/active');
+          if (response.data) {
+            console.log("Init condition:", response.data)
             navigate('/');
           } else {
-            // Chưa khai báo, bắt buộc điền tình trạng hút thuốc ban đầu
-            navigate('/init-status');
+            if (error.response?.status == 403) {
+              navigate('/initial-condition');
+            }
           }
         } catch (error) {
-          // Nếu API trả về 404 hoặc lỗi khác, nghĩa là chưa khai báo
-          if (error.response?.status === 403) {
-            navigate('/init-status');
-          } else {
-            // Có lỗi khác, điều hướng về trang chủ
-            navigate('/');
+          if (error.response?.status == 403 || error.response?.status == 500) {
+            navigate('/initial-condition');
+            console.log("Init condition:", response.data)
           }
         }
       }
     } catch (e) {
       console.log(e);
-      toast.error("Đăng nhập thất bại!");
-
+      if (e.response && (e.response.status === 401 || e.response.status === 400)) {
+        toast.error("Tên đăng nhập hoặc mật khẩu không đúng!");
+      } else {
+        toast.error("Đăng nhập thất bại!");
+      }
     }
   };
   const onFinishFailed = (errorInfo) => {
@@ -132,5 +130,4 @@ function LoginForm() {
     </div>
   );
 }
-
 export default LoginForm;

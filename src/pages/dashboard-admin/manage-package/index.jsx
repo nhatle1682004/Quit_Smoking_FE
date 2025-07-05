@@ -86,6 +86,11 @@ function ManagePackage() {
             title: "Mô tả",
             dataIndex: "description",
             key: "description",
+            render: (text) => (text ? text.split(/;|\n/) : []).map((item, idx) => (
+                <li key={idx} style={{ listStyle: "none", marginBottom: 4 }}>
+                    <span role="img" aria-label="tick">✅</span> {item.trim()}
+                </li>
+            )),
         },
         {
             title: "Cấp độ",
@@ -142,6 +147,7 @@ function ManagePackage() {
                 }}
                 onOk={() => {
                     form.submit();
+                    setOpen(false);
                 }}
             >
                 <Form layout='vertical' onFinish={handleSubmit}form={form}>
@@ -202,11 +208,11 @@ function ManagePackage() {
                         <Switch />
                     </Form.Item>
 
-                    <Form.Item>
+                    {/* <Form.Item>
                         <Button type="primary" htmlType="submit">
                             {isUpdate ? 'Cập nhật gói' : 'Thêm gói mới'}
                         </Button>
-                    </Form.Item>
+                    </Form.Item> */}
 
                 </Form>
 

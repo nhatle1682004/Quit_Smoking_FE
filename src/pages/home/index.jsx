@@ -21,6 +21,7 @@ import anhkeo1 from "../../assets/image/anhkeo1.png";
 import anhkeo2 from "../../assets/image/anhkeo2.png";
 import anhkeo3 from "../../assets/image/anhkeo3.jpg";
 import SuccessStories from "../navbar-page/success";
+import PackagePage from "../package";
 
 
 function HomePage() {
@@ -231,6 +232,12 @@ function HomePage() {
               từ chuyên gia, hành trình cai thuốc của bạn sẽ trở nên dễ dàng
               hơn.
             </p>
+            <button
+              className="mt-6 px-8 py-3 bg-[#3498db] text-white rounded-lg font-bold hover:bg-[#2980b9] transition-colors shadow-lg"
+              onClick={() => navigate('/service/quit-plan-free')}
+            >
+              Lập kế hoạch ngay
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -250,6 +257,13 @@ function HomePage() {
           </div>
         </div>
       </section>
+
+      <section className="py-8 bg-white">
+        <div className="container mx-auto px-6">
+          <PackagePage/>
+        </div>
+      </section>
+      <hr />
 
       {/* Câu chuyện thành công */}
       <section className="py-8 bg-white">

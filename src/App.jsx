@@ -23,7 +23,6 @@ import SuccessStoryHoChiMinh from "./components/success-story-details/successSto
 import SuccessStoryNguyenVanNgu from "./components/success-story-details/successStoryNguyenVanNgu";
 import SuccessStoryNguyenHieu from "./components/success-story-details/successStoryNguyenHieu";
 import Profile from "./pages/navbar-page/profile";
-import InitialStatus from "./pages/init-status";
 import ProductPage from "./pages/navbar-page/service";
 import UserProfile from "./pages/navbar-page/profile";
 import LogSmoking from "./pages/navbar-page/journal";
@@ -32,8 +31,6 @@ import Payment from "./pages/payment";
 import ForgotPassword from "./pages/auth/forgot-password/index.";
 import UserProfileDropdown from "./components/user-profile-dropdown";
 import OtpVerify from "./pages/auth/otp-verify";
-
-// import InitialSurvey from "./pages/initial-survey";
 import CoachManagement from "./pages/dashboard-admin/coach-managerment/index";
 import BookingConsultPage from "./pages/navbar-page/booking/index";
 import ProcessTracking from "./pages/service/process-tracking";
@@ -42,6 +39,10 @@ import QuitPlanFree from "./pages/service/quit-plan-free";
 import PackagePage from "./pages/package";
 import ResetPassword from "./pages/auth/reset-password";
 import ManagePackage from "./pages/dashboard-admin/manage-package";
+import PaymentPage from "./pages/payment";
+import ProfileInitialCondition from "./components/profile-initial-condition";
+import InitialCondition from "./pages/initial-condition";
+
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -114,8 +115,8 @@ function App() {
           element: <UserProfile />,
         },
         {
-          path: "init-status",
-          element: <InitialStatus />,
+          path: "initial-condition-information",
+          element: <ProfileInitialCondition />,
         },
         {
           path: "user-profile",
@@ -165,8 +166,8 @@ function App() {
       ],
     },
     {
-      path: "/payment/:planId",
-      element: <Payment />,
+      path: "/payment",
+      element: <PaymentPage />,
     },
     {
       path: "/forgot-password",
@@ -175,6 +176,10 @@ function App() {
     {
       path: "/otp-verify",
       element: <OtpVerify />,
+    },
+    {
+      path: "/initial-condition",
+      element: <InitialCondition />,
     },
   ]);
   return (

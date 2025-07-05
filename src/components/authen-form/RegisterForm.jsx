@@ -9,6 +9,7 @@ import {
   LockOutlined,
   MailOutlined,
   IdcardOutlined,
+  PhoneOutlined,
 } from "@ant-design/icons";
 
 function RegisterForm() {
@@ -35,14 +36,14 @@ function RegisterForm() {
       <Form
         name="basic"
         layout="vertical"
-        labelCol={{ span: 24 }}
+        // labelCol={{ span: 24 }}
         initialValues={{ remember: true }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
-        autoComplete="off"
+        // autoComplete="off"
       >
         <Form.Item
-          label="Họ và tên"
+          // label="Họ và tên"
           name="fullName"
           rules={[
             { required: true, message: "Vui lòng nhập họ và tên!" },
@@ -60,7 +61,7 @@ function RegisterForm() {
         </Form.Item>
 
         <Form.Item
-          label="Email"
+          // label="Email"
           name="email"
           rules={[
             { required: true, message: "Vui lòng nhập email!" },
@@ -74,7 +75,7 @@ function RegisterForm() {
         </Form.Item>
 
         <Form.Item
-          label="Tên đăng nhập"
+          // label="Tên đăng nhập"
           name="username"
           rules={[
             { required: true, message: "Vui lòng nhập tên đăng nhập!" },
@@ -93,8 +94,8 @@ function RegisterForm() {
           />
         </Form.Item>
         <Form.Item
-          label="Số điện thoại"
-          name="phone"
+          // label="Số điện thoại"
+          name="phoneNumber"
           rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" },
             {
               pattern: /^[0-9]+$/,
@@ -109,7 +110,7 @@ function RegisterForm() {
         </Form.Item>
 
         <Form.Item
-          label="Mật khẩu"
+          // label="Mật khẩu"
           name="password"
           rules={[
             { required: true, message: "Vui lòng nhập mật khẩu!" },
@@ -129,7 +130,7 @@ function RegisterForm() {
         </Form.Item>
 
         <Form.Item
-          label="Xác nhận mật khẩu"
+        // label="Xác nhận mật khẩu"
           name="confirm"
           dependencies={["password"]}
           hasFeedback
@@ -169,7 +170,7 @@ function RegisterForm() {
         </Form.Item>
       
       <Form.Item className="!mb-0">
-        <div className="text-center mt-4">
+        <div className="text-center mt-[-4px]">
           <span className="text-gray-600">Đã có tài khoản? </span>
           <Link to="/login" className="text-blue-600 font-semibold hover:underline">
             Đăng nhập
