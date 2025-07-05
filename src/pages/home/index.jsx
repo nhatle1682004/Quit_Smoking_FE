@@ -21,7 +21,7 @@ import anhkeo1 from "../../assets/image/anhkeo1.png";
 import anhkeo2 from "../../assets/image/anhkeo2.png";
 import anhkeo3 from "../../assets/image/anhkeo3.jpg";
 import SuccessStories from "../navbar-page/success";
-import PremiumPlansSection from "../../components/modal-package";
+import PackagePage from "../package";
 
 
 function HomePage() {
@@ -232,6 +232,12 @@ function HomePage() {
               từ chuyên gia, hành trình cai thuốc của bạn sẽ trở nên dễ dàng
               hơn.
             </p>
+            <button
+              className="mt-6 px-8 py-3 bg-[#3498db] text-white rounded-lg font-bold hover:bg-[#2980b9] transition-colors shadow-lg"
+              onClick={() => navigate('/service/quit-plan-free')}
+            >
+              Lập kế hoạch ngay
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -252,21 +258,12 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Sau section giới thiệu về nền tảng, thêm section các dịch vụ */}
       <section className="py-8 bg-white">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
-              Các Gói Dịch Vụ Hỗ Trợ Cai Thuốc
-            </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Chọn giải pháp phù hợp với bạn – từ tự quản lý đến hỗ trợ chuyên
-              sâu từ chuyên gia.
-            </p>
-          </div>
-          <PremiumPlansSection />
+          <PackagePage/>
         </div>
       </section>
+      <hr />
 
       {/* Câu chuyện thành công */}
       <section className="py-8 bg-white">

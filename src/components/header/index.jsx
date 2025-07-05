@@ -127,14 +127,7 @@ const Header = () => {
             <div className="hidden md:flex items-center space-x-4">
               {user ? (
                 <>
-                  {user.role === "ADMIN" && (
-                    <button
-                      onClick={() => navigate("/dashboard")}
-                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 duration-300"
-                    >
-                      Dashboard
-                    </button>
-                  )}
+                  {/* Đã bỏ nút Dashboard ở header */}
                   <button
                     onClick={() => navigate("/achievements")}
                     className="relative p-2 rounded-full hover:bg-yellow-100"
@@ -175,7 +168,11 @@ const Header = () => {
               className="md:hidden p-2 rounded-lg hover:bg-[#2980b9] text-white"
               aria-label="Toggle menu"
             >
-              {isOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
+              {isOpen ? (
+                <FiX className="w-6 h-6" />
+              ) : (
+                <FiMenu className="w-6 h-6" />
+              )}
             </button>
           </div>
           {/* ---------- END TOP BAR ---------- */}
@@ -223,17 +220,7 @@ const Header = () => {
 
                 {user ? (
                   <>
-                    {user.role === "ADMIN" && (
-                      <button
-                        onClick={() => {
-                          navigate("/dashboard");
-                          toggleMenu();
-                        }}
-                        className="text-white hover:text-gray-200 text-left"
-                      >
-                        Dashboard
-                      </button>
-                    )}
+                    {/* Đã bỏ nút Dashboard ở đây */}
                     <div className="flex items-center pt-4 border-t border-[#2573a7]">
                       <UserAvatar fullName={user.username} size={32} />
                     </div>
