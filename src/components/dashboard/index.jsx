@@ -36,7 +36,7 @@ function getItem(label, key, icon, children) {
 const items = [
   getItem("Notifications", "notifications", <BellOutlined />),
   getItem("Blog Moderation", "blogModeration", <FileOutlined />),
-  getItem("Upgrade Suggestions", "upgradeSuggestions", <DollarOutlined />),
+  getItem("Booking Management", "bookingManagement", <DollarOutlined />),
   getItem("User Management", "userManagement", <UserOutlined />),
   getItem("Coach Management", "coachManagement", <UserOutlined />),
   getItem("Manage Package ", "managePackage", <AppstoreOutlined />),

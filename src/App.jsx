@@ -12,7 +12,7 @@ import { persistor, store } from "./redux/store";
 import { PersistGate } from "redux-persist/integration/react";
 import Notifications from "./pages/dashboard-admin/notifications/index";
 import BlogModeration from "./pages/dashboard-admin/blog-moderation";
-import UpgradeSuggestions from "./pages/dashboard-admin/upgrade-suggestions/index";
+
 import UserManagement from "./pages/dashboard-admin/user-management";
 import Footer from "./components/footer";
 import InformationPage from "./pages/navbar-page/about";
@@ -28,7 +28,6 @@ import ProductPage from "./pages/navbar-page/service";
 import UserProfile from "./pages/navbar-page/profile";
 import LogSmoking from "./pages/navbar-page/journal";
 import AchievementsPage from "./pages/navbar-page/achievements";
-import Payment from "./pages/payment";
 import ForgotPassword from "./pages/auth/forgot-password/index.";
 import UserProfileDropdown from "./components/user-profile-dropdown";
 import OtpVerify from "./pages/auth/otp-verify";
@@ -40,10 +39,10 @@ import QuitPlanFree from "./pages/service/quit-plan-free";
 import PackagePage from "./pages/package";
 import ResetPassword from "./pages/auth/reset-password";
 import ManagePackage from "./pages/dashboard-admin/manage-package";
+import BookingManagement from "./pages/dashboard-admin/booking-management";
 import PaymentPage from "./pages/payment";
 import ProfileInitialCondition from "./components/profile-initial-condition";
 import InitialCondition from "./pages/initial-condition";
-
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -143,7 +142,6 @@ function App() {
           path: "reset-password",
           element: <ResetPassword />,
         },
-
       ],
     },
     {
@@ -160,7 +158,7 @@ function App() {
       children: [
         { path: "notifications", element: <Notifications /> },
         { path: "blogModeration", element: <BlogModeration /> },
-        { path: "upgradeSuggestions", element: <UpgradeSuggestions /> },
+        { path: "bookingManagement", element: <BookingManagement /> },
         { path: "userManagement", element: <UserManagement /> },
         { path: "coachManagement", element: <CoachManagement /> },
         { path: "managePackage", element: <ManagePackage /> },
