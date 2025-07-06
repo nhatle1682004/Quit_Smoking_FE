@@ -141,6 +141,12 @@ function UserManagement() {
       key: "email",
     },
     {
+      title: "Số điện thoại",
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
+      render: (text) => text || "N/A",
+    },
+    {
       title: "Giới tính",
       dataIndex: "gender",
       key: "gender",
@@ -156,17 +162,17 @@ function UserManagement() {
         </Tag>
       ),
     },
-    {
-      title: "Premium",
-      dataIndex: "premium",
-      key: "premium",
-      render: (premium) =>
-        premium ? (
-          <CheckCircleOutlined style={{ color: "green", fontSize: 18 }} />
-        ) : (
-          <CloseCircleOutlined style={{ color: "red", fontSize: 18 }} />
-        ),
-    },
+    // {
+    //   title: "Premium",
+    //   dataIndex: "premium",
+    //   key: "premium",
+    //   render: (premium) =>
+    //     premium ? (
+    //       <CheckCircleOutlined style={{ color: "green", fontSize: 18 }} />
+    //     ) : (
+    //       <CloseCircleOutlined style={{ color: "red", fontSize: 18 }} />
+    //     ),
+    // },
     {
       title: "Thao tác",
       key: "actions",
@@ -226,7 +232,7 @@ function UserManagement() {
               form.setFieldsValue({
                 gender: "MALE",
                 active: true,
-                premium: false,
+                // premium: false,
               });
             }}
           >
@@ -298,6 +304,19 @@ function UserManagement() {
           </Form.Item>
 
           <Form.Item
+            label="Số điện thoại"
+            name="phoneNumber"
+            rules={[
+              {
+                pattern: /^(0[3|5|7|8|9])+([0-9]{8})\b$/,
+                message: "Số điện thoại không hợp lệ!",
+              },
+            ]}
+          >
+            <Input placeholder="Nhập số điện thoại" />
+          </Form.Item>
+
+          <Form.Item
             label="Avatar URL"
             name="avatarUrl"
             rules={[
@@ -346,13 +365,13 @@ function UserManagement() {
             </Form.Item>
           )}
 
-          <Form.Item
+          {/* <Form.Item
             label="Tài khoản Premium"
             name="premium"
             valuePropName="checked"
           >
             <Checkbox>Premium</Checkbox>
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item name="role" initialValue="CUSTOMER" hidden>
             <Input />
