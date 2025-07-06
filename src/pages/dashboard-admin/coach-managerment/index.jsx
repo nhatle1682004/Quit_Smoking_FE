@@ -1,16 +1,16 @@
 import {
   Button,
   Form,
+  Image,
   Input,
   Modal,
   Popconfirm,
-  Select,
+  Radio,
   Space,
   Table,
   Tag,
   Typography,
   Card,
-  Switch, // Vẫn có thể giữ lại hoặc xóa đi nếu không dùng ở đâu khác
 } from "antd";
 import {
   PlusOutlined,
@@ -18,29 +18,33 @@ import {
   DeleteOutlined,
   RollbackOutlined,
 } from "@ant-design/icons";
-import { toast } from "react-toastify";
 import React, { useEffect, useState } from "react";
 import api from "./../../../configs/axios";
+import { toast } from "react-toastify";
 import { useForm } from "antd/es/form/Form";
 
 function CoachManagement() {
   const { Title, Text } = Typography;
   const [form] = useForm();
   const [open, setOpen] = useState(false);
-  const [coaches, setCoaches] = useState([]);
-  const [editingId, setEditingId] = useState(null);
+  const [datas, setDatas] = useState([]);
+  const [editingUserId, setEditingUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isModalLoading, setIsModalLoading] = useState(false);
 
   const fetchCoaches = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/user");
-      const data = res.data.filter((u) => u.role === "COACH");
-      setCoaches(data);
-    } catch (err) {
-      toast.error("Không thể tải danh sách coach. Vui lòng thử lại.");
-      console.error("Fetch coaches error:", err);
+      const response = await api.get("user");
+      const coaches = response.data
+        .filter((user) => user.role === "COACH")
+        .map((user) => ({
+          ...user,
+          active: user.active === true || user.active === "true",
+        }));
+      setDatas(coaches);
+    } catch {
+      toast.error("Lỗi tải dữ liệu Huấn luyện viên!");
     } finally {
       setLoading(false);
     }
@@ -52,28 +56,19 @@ function CoachManagement() {
 
   const handleSubmit = async (values) => {
     setIsModalLoading(true);
+    const payload = { ...values, role: "COACH" };
     try {
-      // THAY ĐỔI QUAN TRỌNG: Thêm cứng "premium: true" vào payload
-      const payload = { ...values, role: "COACH", premium: true };
-
-      if (editingId) {
-        delete payload.password;
-        await api.put(`/user/${editingId}`, payload);
-        toast.success("Cập nhật coach thành công!");
+      if (editingUserId) {
+        await api.put(`user/${editingUserId}`, payload);
+        toast.success("Cập nhật Huấn luyện viên thành công!");
       } else {
-        await api.post("/user", payload);
-        toast.success("Thêm coach mới thành công!");
+        await api.post("user", payload);
+        toast.success("Tạo mới Huấn luyện viên thành công!");
       }
-      setOpen(false);
       fetchCoaches();
-      form.resetFields();
-      setEditingId(null);
-    } catch (err) {
-      const errorMessage =
-        err.response?.data?.message ||
-        "Lỗi khi lưu thông tin coach. Vui lòng kiểm tra lại dữ liệu.";
-      toast.error(errorMessage);
-      console.error("Submit form error:", err.response || err);
+      setOpen(false);
+    } catch {
+      toast.error("Thao tác thất bại!");
     } finally {
       setIsModalLoading(false);
     }
@@ -82,57 +77,59 @@ function CoachManagement() {
   const handleDelete = async (id) => {
     try {
       await api.delete(`/user/${id}`);
-      toast.success("Xoá coach thành công! Trạng thái đã được cập nhật.");
+      toast.success("Đã xoá Huấn luyện viên!");
       fetchCoaches();
-    } catch (err) {
-      const errorMessage =
-        err.response?.data?.message || err.message || "Không thể xoá coach.";
-      toast.error(errorMessage);
-      console.error("Delete coach error:", err);
+    } catch {
+      toast.error("Lỗi khi xoá!");
     }
   };
 
-  const handleRestore = async (id) => {
-    try {
-      await api.put(`/user/${id}/restore`);
-      toast.success("Khôi phục coach thành công!");
-      fetchCoaches();
-    } catch (err) {
-      const errorMessage =
-        err.response?.data?.message || "Lỗi khi khôi phục coach.";
-      toast.error(errorMessage);
-      console.error("Restore coach error:", err);
+  const handleRestoreUser = async (user) => {
+    if (!user.active) {
+      try {
+        await api.put(`/user/${user.id}/restore`);
+        toast.success("Khôi phục thành công!");
+        fetchCoaches();
+      } catch {
+        toast.error("Không thể khôi phục!");
+      }
+    } else {
+      toast.info("Tài khoản đang hoạt động.");
     }
   };
 
   const columns = [
+    { title: "ID", dataIndex: "id", key: "id", width: 60 },
     {
-      title: "Họ tên",
-      dataIndex: "fullName",
-      key: "fullName",
-      sorter: (a, b) => a.fullName.localeCompare(b.fullName),
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "Giới tính",
-      dataIndex: "gender",
-      key: "gender",
-      render: (gender) => (gender === "MALE" ? "Nam" : "Nữ"),
-    },
-    {
-      title: "Premium",
-      dataIndex: "premium",
-      key: "premium",
-      render: (premium) => (
-        // Cột này sẽ luôn hiển thị tag "Có" cho các coach
-        <Tag color={premium ? "gold" : "default"}>
-          {premium ? "Có" : "Không"}
-        </Tag>
+      title: "Avatar",
+      dataIndex: "avatarUrl",
+      key: "avatarUrl",
+      width: 100,
+      render: (avatarUrl) => (
+        <Image
+          width={60}
+          height={60}
+          src={avatarUrl}
+          alt="avatar"
+          style={{ objectFit: "cover", borderRadius: 8 }}
+          fallback="https://via.placeholder.com/60x60?text=No+Img"
+        />
       ),
+    },
+    { title: "Họ tên", dataIndex: "fullName", key: "fullName" },
+    { title: "Email", dataIndex: "email", key: "email" },
+    {
+      title: "Số điện thoại",
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
+      render: (text) => text || "N/A",
+    },
+    {
+      title: "Mô tả",
+      dataIndex: "coachDescription",
+      key: "coachDescription",
+      ellipsis: true,
+      render: (text) => text || "Chưa có mô tả",
     },
     {
       title: "Trạng thái",
@@ -143,73 +140,74 @@ function CoachManagement() {
           {active ? "Hoạt động" : "Tạm dừng"}
         </Tag>
       ),
-      filters: [
-        { text: "Hoạt động", value: true },
-        { text: "Tạm dừng", value: false },
-      ],
-      onFilter: (value, record) => record.active === value,
     },
     {
       title: "Thao tác",
       key: "actions",
+      width: 280,
       render: (_, record) => (
-        <Space size="middle">
+        <Space>
           <Button
-            type="primary"
             icon={<EditOutlined />}
+            type="primary"
             onClick={() => {
-              setEditingId(record.id);
-              form.setFieldsValue(record);
               setOpen(true);
+              setEditingUserId(record.id);
+              form.setFieldsValue({ ...record });
             }}
-          />
-          {record.active ? (
-            <Popconfirm
-              title="Xác nhận tạm dừng"
-              description={`Bạn có chắc muốn tạm dừng coach "${record.fullName}"?`}
-              onConfirm={() => handleDelete(record.id)}
-              okText="Đồng ý"
-              cancelText="Hủy"
-            >
-              <Button danger icon={<DeleteOutlined />} />
-            </Popconfirm>
-          ) : (
-            <Button
-              onClick={() => handleRestore(record.id)}
-              icon={<RollbackOutlined />}
-              style={{ color: "green", borderColor: "green" }}
-            />
-          )}
+            disabled={!record.active}
+          >
+            Sửa
+          </Button>
+          <Popconfirm
+            title="Bạn chắc chắn xoá HLV này?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Xoá"
+            cancelText="Hủy"
+            disabled={!record.active}
+          >
+            <Button icon={<DeleteOutlined />} danger disabled={!record.active}>
+              Xoá
+            </Button>
+          </Popconfirm>
+          <Button
+            icon={<RollbackOutlined />}
+            onClick={() => handleRestoreUser(record)}
+            disabled={record.active}
+          >
+            Khôi phục
+          </Button>
         </Space>
       ),
     },
   ];
 
   return (
-    <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
-      <Title level={2} style={{ textAlign: "center", marginBottom: "24px" }}>
-        Quản lý Coach
+    <div style={{ padding: 24, maxWidth: 1400, margin: "0 auto" }}>
+      <Title level={2} style={{ textAlign: "center" }}>
+        Quản lý Huấn luyện viên
       </Title>
 
       <Card
+        title="Danh sách Huấn luyện viên"
         extra={
           <Button
-            type="primary"
             icon={<PlusOutlined />}
+            type="primary"
             onClick={() => {
               setOpen(true);
+              setEditingUserId(null);
               form.resetFields();
-              setEditingId(null);
+              form.setFieldsValue({ gender: "MALE", active: true });
             }}
-            size="large"
           >
-            Thêm Coach Mới
+            Thêm Huấn luyện viên
           </Button>
         }
       >
         <Table
           columns={columns}
-          dataSource={coaches}
+          dataSource={datas}
           rowKey="id"
           loading={loading}
           pagination={{ pageSize: 10 }}
@@ -219,85 +217,148 @@ function CoachManagement() {
 
       <Modal
         title={
-          <Title level={4}>
-            {editingId ? "Chỉnh sửa Thông tin Coach" : "Thêm Coach Mới"}
-          </Title>
+          editingUserId
+            ? "Chỉnh sửa Huấn luyện viên"
+            : "Tạo Huấn luyện viên mới"
         }
         open={open}
-        onCancel={() => setOpen(false)}
-        afterClose={() => {
+        onCancel={() => {
+          setOpen(false);
           form.resetFields();
-          setEditingId(null);
+          setEditingUserId(null);
         }}
         footer={null}
         centered
-        maskClosable={!isModalLoading}
       >
-        <Form layout="vertical" form={form} onFinish={handleSubmit}>
+        <Form
+          form={form}
+          labelCol={{ span: 24 }}
+          onFinish={handleSubmit}
+          layout="vertical"
+        >
           <Form.Item
             label="Họ tên"
             name="fullName"
-            rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập họ tên!" },
+              { min: 5, message: "Tối thiểu 5 ký tự." },
+            ]}
           >
-            <Input placeholder="Nhập họ tên đầy đủ" />
+            <Input placeholder="Nguyễn Văn A" />
           </Form.Item>
 
           <Form.Item
             label="Tên đăng nhập"
             name="username"
             rules={[
-              { required: true, message: "Vui lòng nhập tên đăng nhập!" },
+              { required: true, message: "Bắt buộc!" },
+              {
+                pattern: /^[a-zA-Z0-9_]+$/,
+                message: "Không khoảng trắng hoặc ký tự đặc biệt!",
+              },
             ]}
           >
-            <Input placeholder="Nhập tên đăng nhập" disabled={!!editingId} />
+            <Input disabled={!!editingUserId} placeholder="nguyenvana" />
           </Form.Item>
 
           <Form.Item
             label="Email"
             name="email"
             rules={[
-              { required: true, message: "Vui lòng nhập email!" },
+              { required: true, message: "Bắt buộc!" },
               { type: "email", message: "Email không hợp lệ!" },
             ]}
           >
-            <Input placeholder="Nhập địa chỉ email" />
+            <Input placeholder="email@example.com" />
           </Form.Item>
 
-          {!editingId && (
+          <Form.Item
+            label="Số điện thoại"
+            name="phoneNumber"
+            rules={[
+              {
+                pattern: /^(0[3|5|7|8|9])+([0-9]{8})\b$/,
+                message: "Số điện thoại không hợp lệ!",
+              },
+            ]}
+          >
+            <Input placeholder="Nhập số điện thoại" />
+          </Form.Item>
+
+          <Form.Item
+            label="Mô tả"
+            name="coachDescription"
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng nhập mô tả cho huấn luyện viên!",
+              },
+            ]}
+          >
+            <Input.TextArea
+              rows={4}
+              placeholder="Nhập mô tả chi tiết về kinh nghiệm, chuyên môn..."
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Avatar URL"
+            name="avatarUrl"
+            rules={[
+              { required: true, message: "Hãy nhập liên kết ảnh!" },
+              { type: "url", message: "Phải là một URL hợp lệ!" },
+            ]}
+          >
+            <Input placeholder="https://..." />
+          </Form.Item>
+
+          {form.getFieldValue("avatarUrl") && (
+            <div style={{ textAlign: "center", marginBottom: 16 }}>
+              <Image
+                width={100}
+                height={100}
+                src={form.getFieldValue("avatarUrl")}
+                style={{ borderRadius: "50%", objectFit: "cover" }}
+              />
+            </div>
+          )}
+
+          <Form.Item
+            label="Giới tính"
+            name="gender"
+            rules={[{ required: true, message: "Chọn giới tính!" }]}
+          >
+            <Radio.Group>
+              <Radio value="MALE">Nam</Radio>
+              <Radio value="FEMALE">Nữ</Radio>
+            </Radio.Group>
+          </Form.Item>
+
+          {!editingUserId && (
             <Form.Item
               label="Mật khẩu"
               name="password"
               rules={[
                 { required: true, message: "Vui lòng nhập mật khẩu!" },
-                { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
+                { min: 6, message: "Tối thiểu 6 ký tự!" },
               ]}
             >
-              <Input.Password placeholder="Nhập mật khẩu" />
+              <Input.Password />
             </Form.Item>
           )}
 
-          <Form.Item
-            name="gender"
-            label="Giới tính"
-            rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
-          >
-            <Select placeholder="Chọn giới tính">
-              <Select.Option value="MALE">Nam</Select.Option>
-              <Select.Option value="FEMALE">Nữ</Select.Option>
-            </Select>
+          <Form.Item name="role" initialValue="COACH" hidden>
+            <Input />
           </Form.Item>
 
-          {/* XÓA BỎ: Đã xóa Form Item cho Premium ở đây */}
-
-          <Form.Item style={{ marginTop: "20px" }}>
+          <Form.Item>
             <Button
               type="primary"
               htmlType="submit"
               block
-              size="large"
               loading={isModalLoading}
             >
-              {editingId ? "Cập nhật" : "Thêm Mới"}
+              {editingUserId ? "Cập nhật" : "Tạo mới"}
             </Button>
           </Form.Item>
         </Form>

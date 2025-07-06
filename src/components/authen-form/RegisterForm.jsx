@@ -18,7 +18,10 @@ function RegisterForm() {
   const onFinish = async (values) => {
     console.log("Success:", values);
     try {
-      await api.post("register", values);
+      // Đổi tên trường phone thành phoneNumber cho đúng backend
+      const payload = { ...values, phoneNumber: values.phone };
+      delete payload.phone;
+      await api.post("register", payload);
       toast.success("Tạo tài khoản thành công!");
       navigate("/login");
     } catch (e) {
@@ -47,7 +50,7 @@ function RegisterForm() {
           name="fullName"
           rules={[
             { required: true, message: "Vui lòng nhập họ và tên!" },
-            { min: 5, message: "Mật khẩu phải có ít nhất 5 ký tự." },
+            { min: 5, message: "Họ và tên phải có ít nhất 5 ký tự!" },
             {
               pattern: /^(?!\s).+$/,
               message: "Họ và tên không được bắt đầu bằng khoảng trắng!",
@@ -94,20 +97,20 @@ function RegisterForm() {
           />
         </Form.Item>
         <Form.Item
-          // label="Số điện thoại"
-          name="phoneNumber"
+          label="Số điện thoại"
+          name="phone"
           rules={[
+            { required: true, message: "Vui lòng nhập số điện thoại!" },
             {
-              required: true,
-              message: "Vui lòng nhập số điện thoại!",
-            },
-            {
-              pattern: /^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/,
+              pattern: /^(0[3|5|7|8|9])+([0-9]{8})\b$/,
               message: "Số điện thoại không hợp lệ!",
             },
           ]}
         >
-          <Input prefix={<PhoneOutlined className="text-gray-400" />} placeholder="Nhập số điện thoại" />
+          <Input
+            prefix={<PhoneOutlined className="text-gray-400" />}
+            placeholder="Nhập số điện thoại"
+          />
         </Form.Item>
 
         <Form.Item
@@ -119,7 +122,6 @@ function RegisterForm() {
             {
               pattern: /^\S+$/,
               message: "Không được chứa khoảng trắng!",
-
             },
           ]}
           hasFeedback
@@ -131,7 +133,7 @@ function RegisterForm() {
         </Form.Item>
 
         <Form.Item
-        // label="Xác nhận mật khẩu"
+          // label="Xác nhận mật khẩu"
           name="confirm"
           dependencies={["password"]}
           hasFeedback
@@ -169,15 +171,18 @@ function RegisterForm() {
             Đăng Ký
           </Button>
         </Form.Item>
-      
-      <Form.Item className="!mb-0">
-        <div className="text-center mt-[-4px]">
-          <span className="text-gray-600">Đã có tài khoản? </span>
-          <Link to="/login" className="text-blue-600 font-semibold hover:underline">
-            Đăng nhập
-          </Link>
-        </div>
-      </Form.Item>
+
+        <Form.Item className="!mb-0">
+          <div className="text-center mt-4">
+            <span className="text-gray-600">Đã có tài khoản? </span>
+            <Link
+              to="/login"
+              className="text-blue-600 font-semibold hover:underline"
+            >
+              Đăng nhập
+            </Link>
+          </div>
+        </Form.Item>
       </Form>
     </div>
   );
