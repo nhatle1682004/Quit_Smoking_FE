@@ -1,224 +1,160 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Card, Progress, Typography, Button, Space, Divider, Tag } from 'antd';
-import { 
-  CalendarOutlined, 
-  TrophyOutlined, 
-  FireOutlined, 
-  HeartOutlined,
-  ArrowLeftOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined
-} from '@ant-design/icons';
-import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import api from '../../../configs/axios';
+import { Button, Form, Progress, Card } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs'; // Import dayjs để tính toán ngày tháng
+import { HomeOutlined } from '@ant-design/icons';
 
-const { Title, Paragraph, Text } = Typography;
 
 function ProcessTracking() {
-  const location = useLocation();
+  const [planData, setPlanData] = useState(null); // Khởi tạo với null cho rõ ràng, thay vì []
+  const [progress, setProgress] = useState(0); // Trạng thái cho phần trăm tiến trình
+  const [form] = Form.useForm();
   const navigate = useNavigate();
-  const [currentDate] = useState(dayjs());
-  
-  // Get plan data from navigation state or use default values
-  const planData = location.state || {
-    startDate: '2025-07-01',
-    targetDate: '2025-08-15',
-    notes: ''
-  };
 
-  const startDate = dayjs(planData.startDate);
-  const targetDate = dayjs(planData.targetDate);
-  
-  // Calculate journey progress
-  const totalDays = targetDate.diff(startDate, 'day');
-  const daysElapsedRaw = currentDate.diff(startDate, 'day');
-  const daysRemainingRaw = targetDate.diff(currentDate, 'day');
-  const daysElapsed = Math.max(0, daysElapsedRaw);
-  const daysRemaining = Math.max(0, daysRemainingRaw);
-  const progressPercentage = Math.min((daysElapsed / totalDays) * 100, 100);
-
-  // Determine current phase and message
-  const getCurrentPhase = () => {
-    if (daysElapsedRaw < 0) return { phase: 'preparation', message: 'Chuẩn bị bắt đầu hành trình cai thuốc!' };
-    if (daysElapsedRaw === 0) return { phase: 'start', message: 'Hôm nay là ngày đầu tiên! Bạn đã sẵn sàng chưa?' };
-    if (daysRemainingRaw === 0) return { phase: 'target', message: 'Chúc mừng! Hôm nay là ngày bạn chạm tới mục tiêu cai thuốc!' };
-    if (daysRemainingRaw < 0) return { phase: 'completed', message: 'Tuyệt vời! Bạn đã vượt qua mục tiêu!' };
-    return { phase: 'ongoing', message: `Tiếp tục kiên trì! Bạn đang làm rất tốt!` };
-  };
-
-  const { phase, message } = getCurrentPhase();
-
-  const getMotivationalMessage = () => {
-    const messages = {
-      preparation: 'Hãy chuẩn bị tinh thần và sẵn sàng cho hành trình mới!',
-      start: 'Bước đầu tiên luôn là bước quan trọng nhất. Hãy tin vào bản thân!',
-      ongoing: [
-        'Mỗi ngày không hút thuốc là một chiến thắng nhỏ!',
-        'Sức khỏe của bạn đang được cải thiện từng ngày!',
-        'Bạn đang tiết kiệm tiền và bảo vệ sức khỏe!',
-        'Gia đình và bạn bè sẽ tự hào về bạn!',
-        'Hơi thở của bạn đang trở nên trong lành hơn!'
-      ],
-      target: 'Bạn đã đạt được mục tiêu! Đây là thành tựu tuyệt vời!',
-      completed: 'Bạn là tấm gương sáng cho những người khác!'
-    };
-
-    if (phase === 'ongoing') {
-      const randomIndex = Math.floor(Math.random() * messages.ongoing.length);
-      return messages.ongoing[randomIndex];
+  const fetchFreePlan = async () => {
+    try {
+      const response = await api.get('/free-plan/active');
+      setPlanData(response.data);
+      calculateProgress(response.data); // Tính toán tiến trình sau khi lấy dữ liệu
+      toast.success('Dữ liệu kế hoạch được tải thành công!');
+    } catch (error) {
+      toast.error('Lỗi khi tải dữ liệu kế hoạch!');
+      console.error('Lỗi khi lấy kế hoạch miễn phí:', error);
+      setPlanData(null); // Đảm bảo planData là null khi có lỗi
     }
-    return messages[phase];
   };
 
-  const getPhaseColor = () => {
-    const colors = {
-      preparation: 'blue',
-      start: 'green',
-      ongoing: 'orange',
-      target: 'gold',
-      completed: 'purple'
-    };
-    return colors[phase];
+  useEffect(() => {
+    fetchFreePlan();
+  }, []);
+
+  // Hàm tính toán tiến trình
+  const calculateProgress = (plan) => {
+    if (!plan || !plan.startDate || !plan.endDate) {
+      setProgress(0);
+      return;
+    }
+
+    const startDate = dayjs(plan.startDate);
+    const endDate = dayjs(plan.endDate);
+    const now = dayjs();
+
+    // Nếu ngày hiện tại trước ngày bắt đầu, tiến trình là 0
+    if (now.isBefore(startDate)) {
+      setProgress(0);
+      return;
+    }
+
+    // Nếu ngày hiện tại sau ngày kết thúc, tiến trình là 100
+    if (now.isAfter(endDate)) {
+      setProgress(100);
+      return;
+    }
+
+    const totalDuration = endDate.diff(startDate, 'day'); // Tổng số ngày của kế hoạch
+    const elapsedDuration = now.diff(startDate, 'day'); // Số ngày đã trôi qua
+
+    if (totalDuration > 0) {
+      const calculatedProgress = (elapsedDuration / totalDuration) * 100;
+      // Đảm bảo tiến trình nằm trong khoảng 0 đến 100
+      setProgress(Math.min(100, Math.max(0, parseFloat(calculatedProgress.toFixed(2)))));
+    } else {
+      setProgress(0); // Xử lý trường hợp ngày bắt đầu và kết thúc giống nhau
+    }
   };
 
-  const getPhaseIcon = () => {
-    const icons = {
-      preparation: <ClockCircleOutlined />,
-      start: <FireOutlined />,
-      ongoing: <HeartOutlined />,
-      target: <TrophyOutlined />,
-      completed: <CheckCircleOutlined />
-    };
-    return icons[phase];
+  const handleCancel = async () => {
+    try {
+      await api.put('/free-plan/cancel');
+      toast.success('Kế hoạch đã được hủy thành công!');
+      // Sau khi hủy thành công, bạn có thể xóa planData và cập nhật tiến trình
+      setPlanData(null);
+      setProgress(0);
+      navigate('/service/quit-plan-free');
+    } catch (err) {
+      toast.error('Lỗi khi hủy kế hoạch!');
+      console.error('Lỗi khi hủy kế hoạch:', err);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        {/* Header */}
-        <div className="mb-8">
-          <Button 
-            icon={<ArrowLeftOutlined />} 
-            onClick={() => navigate('/service/quit-plan-free')}
-            className="mb-4"
+    <div className="min-h-screen p-8 bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col items-center">
+      <h1 className="text-3xl font-extrabold text-gray-800 text-center mb-8 drop-shadow-md">
+        🚭 Hành Trình Cai Thuốc - Khởi Đầu Cuộc Sống Mới
+      </h1>
+
+
+      {planData ? (
+        <Card className="w-full max-w-2xl p-6 shadow-xl rounded-lg bg-white transform transition-all duration-300 hover:scale-105">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">Thông Tin Kế Hoạch Hiện Tại</h2>
+          <div className="space-y-3 text-gray-600 mb-6">
+            <p>
+              <strong>Ngày Bắt Đầu:</strong> {dayjs(planData.startDate).format('DD/MM/YYYY')}
+            </p>
+            <p>
+              <strong>Ngày Kết Thúc:</strong> {dayjs(planData.endDate).format('DD/MM/YYYY')}
+            </p>
+            <p>
+              <strong>Mục Tiêu:</strong> {planData.goal}
+            </p>
+            <p>
+              <strong>Lý Do Thúc Đẩy:</strong> {planData.motivationReason}
+            </p>
+            <p>
+              <strong>Ghi Chú:</strong> {planData.note || 'Không có ghi chú.'}
+            </p>
+          </div>
+
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2 text-gray-700">Tiến Trình Hoàn Thành</h3>
+            <Progress percent={progress} status={progress === 100 ? 'success' : 'active'} strokeColor={{
+              '0%': '#108ee9',
+              '100%': '#87d068',
+            }} />
+            <p className="text-sm text-gray-500 mt-2">
+              {progress === 100
+                ? 'Chúc mừng! Bạn đã hoàn thành kế hoạch!'
+                : `Còn lại ${dayjs(planData.endDate).diff(dayjs(), 'day')} ngày để đạt được mục tiêu.`}
+            </p>
+          </div>
+
+          <Form layout="vertical" form={form} onFinish={handleCancel}>
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                danger
+                className="w-full h-10 text-lg rounded-md hover:bg-red-600 transition-colors"
+              >
+                Hủy Kế Hoạch Cai Thuốc
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      ) : (
+        <div className="text-center text-gray-600 text-lg mt-10 p-4 bg-white rounded-lg shadow-md">
+          <p>Hiện tại không có kế hoạch cai thuốc nào đang hoạt động.</p>
+          <Button
+            type="primary"
+            className="mt-4 bg-blue-500 hover:bg-blue-600 rounded-md"
+            onClick={() => navigate('/service/quit-plan-free')} // Ví dụ: điều hướng đến trang tạo kế hoạch
+            
           >
-            Quay lại
+            Tạo Kế Hoạch Mới
+            
           </Button>
-          <Title level={1} className="text-center text-green-600 mb-2">
-            🚀 HÀNH TRÌNH BỎ THUỐC CỦA BẠN
-          </Title>
+          <Button
+            icon={<HomeOutlined />}
+            className="mb-4"
+            onClick={() => navigate('/')} // Navigate to home page
+          >
+
+            Quay Lại Trang Chủ
+          </Button>
         </div>
-
-        {/* Main Journey Card */}
-        <Card className="shadow-lg border-0 mb-6">
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-              {getPhaseIcon()}
-            </div>
-            <Title level={2} className={`text-${getPhaseColor()}-600 mb-2`}>
-              {message}
-            </Title>
-            <Paragraph className="text-lg text-gray-600">
-              {getMotivationalMessage()}
-            </Paragraph>
-          </div>
-
-          <Divider />
-
-          {/* Progress Section */}
-          <div className="mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div className="text-center">
-                <CalendarOutlined className="text-blue-500 text-2xl mb-2" />
-                <Text strong className="block text-gray-700">Ngày bắt đầu</Text>
-                <Text className="text-lg text-blue-600">
-                  {startDate.format('DD/MM/YYYY')}
-                </Text>
-              </div>
-              <div className="text-center">
-                <TrophyOutlined className="text-green-500 text-2xl mb-2" />
-                <Text strong className="block text-gray-700">Ngày mục tiêu</Text>
-                <Text className="text-lg text-green-600">
-                  {targetDate.format('DD/MM/YYYY')}
-                </Text>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-xl mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
-                <div>
-                  <Text strong className="block text-gray-700 mb-1">🗓️ Hôm nay là</Text>
-                  <Text className="text-xl font-bold text-blue-600">
-                    Ngày thứ {Math.max(0, daysElapsed)} / {totalDays}
-                  </Text>
-                </div>
-                <div>
-                  <Text strong className="block text-gray-700 mb-1">⏳ Còn lại</Text>
-                  <Text className="text-xl font-bold text-green-600">
-                    {Math.max(0, daysRemaining)} ngày nữa đến mục tiêu
-                  </Text>
-                </div>
-              </div>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <Text strong>Tiến độ hành trình</Text>
-                <Text className="text-green-600 font-bold">
-                  {Math.round(progressPercentage)}%
-                </Text>
-              </div>
-              <Progress 
-                percent={progressPercentage} 
-                strokeColor={{
-                  '0%': '#108ee9',
-                  '100%': '#87d068',
-                }}
-                size="large"
-              />
-            </div>
-          </div>
-
-          {/* Phase Tag */}
-          <div className="text-center mb-6">
-            <Tag color={getPhaseColor()} size="large" className="text-lg px-4 py-2">
-              {phase === 'preparation' && '🔄 Chuẩn bị'}
-              {phase === 'start' && '🚀 Bắt đầu'}
-              {phase === 'ongoing' && '🔥 Đang thực hiện'}
-              {phase === 'target' && '🎯 Đạt mục tiêu'}
-              {phase === 'completed' && '🏆 Hoàn thành'}
-            </Tag>
-          </div>
-
-          {/* Notes Section */}
-          {planData.notes && (
-            <div className="bg-yellow-50 p-4 rounded-lg">
-              <Text strong className="block text-yellow-700 mb-2">
-                📝 Ghi chú của bạn:
-              </Text>
-              <Text className="text-gray-700">{planData.notes}</Text>
-            </div>
-          )}
-        </Card>
-
-        {/* Daily Tips Card */}
-        <Card className="shadow-lg border-0">
-          <Title level={3} className="text-center text-purple-600 mb-4">
-            💡 Lời khuyên hôm nay
-          </Title>
-          <div className="bg-purple-50 p-6 rounded-lg">
-            <Paragraph className="text-lg text-gray-700 text-center">
-              {daysElapsed < 3 && 'Những ngày đầu tiên có thể khó khăn, nhưng hãy nhớ lý do bạn bắt đầu!'}
-              {daysElapsed >= 3 && daysElapsed < 7 && 'Tuần đầu tiên đã qua! Cơ thể bạn đang thích nghi với việc không có nicotine.'}
-              {daysElapsed >= 7 && daysElapsed < 14 && 'Một tuần rồi! Khứu giác và vị giác của bạn đang dần hồi phục.'}
-              {daysElapsed >= 14 && daysElapsed < 30 && 'Hai tuần! Nguy cơ tái phát đã giảm đáng kể. Tiếp tục kiên trì!'}
-              {daysElapsed >= 30 && daysElapsed < 90 && 'Một tháng! Bạn đã vượt qua giai đoạn khó khăn nhất.'}
-              {daysElapsed >= 90 && 'Ba tháng! Bạn đã thành công thay đổi thói quen. Hãy duy trì!'}
-            </Paragraph>
-          </div>
-        </Card>
-      </div>
+      )}
     </div>
   );
 }

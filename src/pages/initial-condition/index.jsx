@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { toast } from 'react-toastify';
 import api from "../../configs/axios";
 import { DatePicker, Form, Input, InputNumber, Radio, Button, Card, Typography, Divider, Select } from 'antd';
@@ -55,13 +55,6 @@ function InitialCondition() {
               <InputNumber style={{ width: '100%' }} min={0} max={100} placeholder="Ví dụ: 10" />
             </Form.Item>
 
-            <Form.Item
-              name="startSmokingAge"
-              label="Tuổi bắt đầu hút thuốc *"
-              rules={[{ required: true, message: 'Vui lòng nhập tuổi bắt đầu hút thuốc' }]}
-            >
-              <InputNumber style={{ width: '100%' }} min={10} max={80} placeholder="Ví dụ: 18" />
-            </Form.Item>
 
             <Form.Item
               name="firstSmokeTime"
@@ -104,14 +97,6 @@ function InitialCondition() {
               ]}
             >
               <TextArea rows={2} placeholder="Ví dụ: Bảo vệ sức khỏe, tiết kiệm tiền, gia đình..." />
-            </Form.Item>
-
-            <Form.Item
-              name="intentionSince"
-              label="Bạn có ý định bỏ thuốc từ khi nào? *"
-              rules={[{ required: true, message: 'Vui lòng chọn ngày' }]}
-            >
-              <DatePicker className="w-full" format="YYYY-MM-DD" placeholder="Chọn ngày" />
             </Form.Item>
 
             <Form.Item
@@ -186,24 +171,6 @@ function InitialCondition() {
                 <Radio value={false}>Không</Radio>
               </Radio.Group>
             </Form.Item>
-
-            <Form.Item
-              name="desiredQuitDate"
-              label="Ngày mong muốn bắt đầu cai thuốc *"
-
-              rules={[
-                { required: true, message: 'Vui lòng chọn ngày' },
-                {
-                  validator: (_, value) =>
-                    value && value.isBefore(dayjs(), 'day')
-                      ? Promise.reject('Không chọn ngày trong quá khứ')
-                      : Promise.resolve(),
-                },
-              ]}
-            >
-              <DatePicker className="w-full" format="YYYY-MM-DD" placeholder="Chọn ngày bắt đầu" />
-            </Form.Item>
-
             <div className="text-center">
               <Button type="primary" htmlType="submit" size="large">
                 Gửi khai báo

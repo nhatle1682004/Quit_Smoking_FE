@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import api from '../../configs/axios';
 import { toast } from 'react-toastify';
-import { Button, Card, DatePicker, Divider, Form, Input, InputNumber, Radio, Select } from 'antd';
+import { Button, Card, DatePicker, Divider, Form, Input, InputNumber, Radio, Select, Space } from 'antd';
+import { EditOutlined } from '@ant-design/icons';
 import TextArea from 'antd/es/input/TextArea';
 import Title from 'antd/es/skeleton/Title';
 import dayjs from 'dayjs';
@@ -14,13 +15,8 @@ function ProfileInitialCondition() {
   const fetchInitialCondition = async () => {
     try {
       const response = await api.get("/initial-condition/active");
-      const data = {
-        ...response.data,
-        desiredQuitDate: response.data.desiredQuitDate ? dayjs(response.data.desiredQuitDate) : null,
-        intentionSince: response.data.intentionSince ? dayjs(response.data.intentionSince) : null,
-      };
-      setInitialCondition(data);
-      form.setFieldsValue(data);
+      setInitialCondition();
+      form.setFieldsValue();
       toast.success("Lấy dữ liệu thành công");
     } catch (err) {
       console.log(err);
@@ -35,13 +31,9 @@ function ProfileInitialCondition() {
   const handleSubmit = async (values) => {
     try {
       const response = await api.put("/initial-condition", values);
-      const data = {
-        ...response.data,
-        desiredQuitDate: response.data.desiredQuitDate ? dayjs(response.data.desiredQuitDate) : null,
-        intentionSince: response.data.intentionSince ? dayjs(response.data.intentionSince) : null,
-      };
-      setInitialCondition(data);
-      form.setFieldsValue(data);
+
+      setInitialCondition();
+      form.setFieldsValue();
       toast.success("Cập nhật dữ liệu thành công");
       setEditing(false);
     } catch (err) {
@@ -58,7 +50,6 @@ function ProfileInitialCondition() {
             form={form}
             layout="vertical"
             onFinish={handleSubmit}
-            className="space-y-6"
           >
             <Form.Item
               name="cigarettesPerDay"
@@ -66,13 +57,6 @@ function ProfileInitialCondition() {
               rules={[{ required: true, message: 'Vui lòng nhập số điếu mỗi ngày' }]}
             >
               <InputNumber style={{ width: '100%' }} min={0} max={100} placeholder="Ví dụ: 10" disabled={!editing} />
-            </Form.Item>
-            <Form.Item
-              name="startSmokingAge"
-              label="Tuổi bắt đầu hút thuốc *"
-              rules={[{ required: true, message: 'Vui lòng nhập tuổi bắt đầu hút thuốc' }]}
-            >
-              <InputNumber style={{ width: '100%' }} min={10} max={80} placeholder="Ví dụ: 18" disabled={!editing} />
             </Form.Item>
             <Form.Item
               name="firstSmokeTime"
@@ -113,13 +97,6 @@ function ProfileInitialCondition() {
               ]}
             >
               <TextArea rows={2} placeholder="Ví dụ: Bảo vệ sức khỏe, tiết kiệm tiền, gia đình..." disabled={!editing} />
-            </Form.Item>
-            <Form.Item
-              name="intentionSince"
-              label="Bạn có ý định bỏ thuốc từ khi nào? *"
-              rules={[{ required: true, message: 'Vui lòng chọn ngày' }]}
-            >
-              <DatePicker className="w-full" format="YYYY-MM-DD" placeholder="Chọn ngày" disabled={!editing} />
             </Form.Item>
             <Form.Item
               name="readinessScale"
@@ -193,27 +170,11 @@ function ProfileInitialCondition() {
                 <Radio value={false}>Không</Radio>
               </Radio.Group>
             </Form.Item>
-            <Form.Item
-              name="desiredQuitDate"
-              label="Ngày mong muốn bắt đầu cai thuốc *"
-              rules={[
-                { required: true, message: 'Vui lòng chọn ngày' },
-                {
-                  validator: (_, value) =>
-                    value && value.isBefore(dayjs(), 'day')
-                      ? Promise.reject('Không chọn ngày trong quá khứ')
-                      : Promise.resolve(),
-                },
-              ]}
-            >
-              <DatePicker className="w-full" format="YYYY-MM-DD" placeholder="Chọn ngày bắt đầu" disabled={!editing} />
-            </Form.Item>
-            <div>
+            <Space>
               {editing ? (
                 <>
-                  <Button type="primary" onClick={() => form.submit()} htmlType="submit">Lưu</Button>
+                  <Button type="primary" htmlType="submit">Lưu</Button>
                   <Button
-                    style={{ marginLeft: 8 }}
                     onClick={() => {
                       form.setFieldsValue(initialCondition);
                       setEditing(false);
@@ -223,11 +184,11 @@ function ProfileInitialCondition() {
                   </Button>
                 </>
               ) : (
-                <Button type="primary" onClick={() => setEditing(true)}>
+                <Button icon={<EditOutlined />} onClick={() => setEditing(true)}>
                   Chỉnh sửa
                 </Button>
               )}
-            </div>
+            </Space>
           </Form>
         </Card>
       </div>

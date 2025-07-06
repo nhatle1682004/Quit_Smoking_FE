@@ -96,14 +96,15 @@ function RegisterForm() {
         <Form.Item
           // label="Số điện thoại"
           name="phoneNumber"
-          rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" },
+          rules={[
             {
-              pattern: /^[0-9]+$/,
-              message: "Số điện thoại không hợp lệ!",
+              required: true,
+              message: "Vui lòng nhập số điện thoại!",
             },
             {
-              min: 10,
-            }
+              pattern: /^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/,
+              message: "Số điện thoại không hợp lệ!",
+            },
           ]}
         >
           <Input prefix={<PhoneOutlined className="text-gray-400" />} placeholder="Nhập số điện thoại" />
