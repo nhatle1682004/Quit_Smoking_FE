@@ -10,13 +10,14 @@ import {
   Tag,
   Typography,
   Card,
-  Switch, // Vẫn có thể giữ lại hoặc xóa đi nếu không dùng ở đâu khác
+  Avatar as AntdAvatar,
 } from "antd";
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   RollbackOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import React, { useEffect, useState } from "react";
@@ -24,7 +25,7 @@ import api from "./../../../configs/axios";
 import { useForm } from "antd/es/form/Form";
 
 function CoachManagement() {
-  const { Title, Text } = Typography;
+  const { Title } = Typography;
   const [form] = useForm();
   const [open, setOpen] = useState(false);
   const [coaches, setCoaches] = useState([]);
@@ -53,7 +54,6 @@ function CoachManagement() {
   const handleSubmit = async (values) => {
     setIsModalLoading(true);
     try {
-      // THAY ĐỔI QUAN TRỌNG: Thêm cứng "premium: true" vào payload
       const payload = { ...values, role: "COACH", premium: true };
 
       if (editingId) {
@@ -107,6 +107,24 @@ function CoachManagement() {
 
   const columns = [
     {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      sorter: (a, b) => a.id - b.id,
+    },
+    {
+      title: "Avatar",
+      dataIndex: "avatarUrl",
+      key: "avatarUrl",
+      render: (avatar, record) => (
+        <AntdAvatar
+          src={avatar}
+          icon={<UserOutlined />}
+          alt={`Avatar of ${record.fullName}`}
+        />
+      ),
+    },
+    {
       title: "Họ tên",
       dataIndex: "fullName",
       key: "fullName",
@@ -116,6 +134,11 @@ function CoachManagement() {
       title: "Email",
       dataIndex: "email",
       key: "email",
+    },
+    {
+      title: "Số điện thoại",
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
     },
     {
       title: "Giới tính",
@@ -128,7 +151,6 @@ function CoachManagement() {
       dataIndex: "premium",
       key: "premium",
       render: (premium) => (
-        // Cột này sẽ luôn hiển thị tag "Có" cho các coach
         <Tag color={premium ? "gold" : "default"}>
           {premium ? "Có" : "Không"}
         </Tag>
@@ -152,6 +174,8 @@ function CoachManagement() {
     {
       title: "Thao tác",
       key: "actions",
+      fixed: "right",
+      width: 120,
       render: (_, record) => (
         <Space size="middle">
           <Button
@@ -186,7 +210,7 @@ function CoachManagement() {
   ];
 
   return (
-    <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
+    <div style={{ padding: "24px", maxWidth: "1500px", margin: "0 auto" }}>
       <Title level={2} style={{ textAlign: "center", marginBottom: "24px" }}>
         Quản lý Coach
       </Title>
@@ -214,6 +238,7 @@ function CoachManagement() {
           loading={loading}
           pagination={{ pageSize: 10 }}
           bordered
+          scroll={{ x: 1300 }}
         />
       </Card>
 
@@ -243,6 +268,19 @@ function CoachManagement() {
           </Form.Item>
 
           <Form.Item
+            label="Avatar"
+            name="avatar"
+            rules={[
+              {
+                type: "url",
+                message: "Vui lòng nhập một URL hợp lệ cho avatar!",
+              },
+            ]}
+          >
+            <Input placeholder="Nhập URL hình ảnh avatar" />
+          </Form.Item>
+
+          <Form.Item
             label="Tên đăng nhập"
             name="username"
             rules={[
@@ -261,6 +299,16 @@ function CoachManagement() {
             ]}
           >
             <Input placeholder="Nhập địa chỉ email" />
+          </Form.Item>
+
+          <Form.Item
+            label="Số điện thoại"
+            name="phoneNumber"
+            rules={[
+              { required: true, message: "Vui lòng nhập số điện thoại!" },
+            ]}
+          >
+            <Input placeholder="Nhập số điện thoại" />
           </Form.Item>
 
           {!editingId && (
@@ -286,8 +334,6 @@ function CoachManagement() {
               <Select.Option value="FEMALE">Nữ</Select.Option>
             </Select>
           </Form.Item>
-
-          {/* XÓA BỎ: Đã xóa Form Item cho Premium ở đây */}
 
           <Form.Item style={{ marginTop: "20px" }}>
             <Button
