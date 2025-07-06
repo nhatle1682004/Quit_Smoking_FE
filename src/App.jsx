@@ -28,7 +28,6 @@ import ProductPage from "./pages/navbar-page/service";
 import UserProfile from "./pages/navbar-page/profile";
 import LogSmoking from "./pages/navbar-page/journal";
 import AchievementsPage from "./pages/navbar-page/achievements";
-import Payment from "./pages/payment";
 import ForgotPassword from "./pages/auth/forgot-password/index.";
 import UserProfileDropdown from "./components/user-profile-dropdown";
 import OtpVerify from "./pages/auth/otp-verify";
@@ -40,14 +39,10 @@ import QuitPlanFree from "./pages/service/quit-plan-free";
 import PackagePage from "./pages/package";
 import ResetPassword from "./pages/auth/reset-password";
 import ManagePackage from "./pages/dashboard-admin/manage-package";
-<<<<<<< HEAD
 import BookingManagement from "./pages/dashboard-admin/booking-management";
-=======
 import PaymentPage from "./pages/payment";
 import ProfileInitialCondition from "./components/profile-initial-condition";
 import InitialCondition from "./pages/initial-condition";
-
->>>>>>> 88d56c5bc2027d76e06bd4ae18bffcfba5f61a45
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
