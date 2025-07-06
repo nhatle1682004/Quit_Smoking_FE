@@ -39,14 +39,14 @@ function RegisterForm() {
       <Form
         name="basic"
         layout="vertical"
-        labelCol={{ span: 24 }}
+        // labelCol={{ span: 24 }}
         initialValues={{ remember: true }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
-        autoComplete="off"
+        // autoComplete="off"
       >
         <Form.Item
-          label="Họ và tên"
+          // label="Họ và tên"
           name="fullName"
           rules={[
             { required: true, message: "Vui lòng nhập họ và tên!" },
@@ -64,7 +64,7 @@ function RegisterForm() {
         </Form.Item>
 
         <Form.Item
-          label="Email"
+          // label="Email"
           name="email"
           rules={[
             { required: true, message: "Vui lòng nhập email!" },
@@ -78,7 +78,7 @@ function RegisterForm() {
         </Form.Item>
 
         <Form.Item
-          label="Tên đăng nhập"
+          // label="Tên đăng nhập"
           name="username"
           rules={[
             { required: true, message: "Vui lòng nhập tên đăng nhập!" },
@@ -97,16 +97,27 @@ function RegisterForm() {
           />
         </Form.Item>
         <Form.Item
+<<<<<<< HEAD
           label="Số điện thoại"
           name="phone"
           rules={[
             { required: true, message: "Vui lòng nhập số điện thoại!" },
+=======
+          // label="Số điện thoại"
+          name="phoneNumber"
+          rules={[
+>>>>>>> 88d56c5bc2027d76e06bd4ae18bffcfba5f61a45
             {
-              pattern: /^[0-9]+$/,
-              message: "Số điện thoại không hợp lệ!",
+              required: true,
+              message: "Vui lòng nhập số điện thoại!",
             },
             {
+<<<<<<< HEAD
               min: 10,
+=======
+              pattern: /^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/,
+              message: "Số điện thoại không hợp lệ!",
+>>>>>>> 88d56c5bc2027d76e06bd4ae18bffcfba5f61a45
             },
           ]}
         >
@@ -117,7 +128,7 @@ function RegisterForm() {
         </Form.Item>
 
         <Form.Item
-          label="Mật khẩu"
+          // label="Mật khẩu"
           name="password"
           rules={[
             { required: true, message: "Vui lòng nhập mật khẩu!" },
@@ -136,7 +147,7 @@ function RegisterForm() {
         </Form.Item>
 
         <Form.Item
-          label="Xác nhận mật khẩu"
+        // label="Xác nhận mật khẩu"
           name="confirm"
           dependencies={["password"]}
           hasFeedback
@@ -174,6 +185,7 @@ function RegisterForm() {
             Đăng Ký
           </Button>
         </Form.Item>
+<<<<<<< HEAD
 
         <Form.Item className="!mb-0">
           <div className="text-center mt-4">
@@ -186,6 +198,17 @@ function RegisterForm() {
             </Link>
           </div>
         </Form.Item>
+=======
+      
+      <Form.Item className="!mb-0">
+        <div className="text-center mt-[-4px]">
+          <span className="text-gray-600">Đã có tài khoản? </span>
+          <Link to="/login" className="text-blue-600 font-semibold hover:underline">
+            Đăng nhập
+          </Link>
+        </div>
+      </Form.Item>
+>>>>>>> 88d56c5bc2027d76e06bd4ae18bffcfba5f61a45
       </Form>
     </div>
   );
