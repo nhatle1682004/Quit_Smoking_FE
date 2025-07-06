@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { toast } from 'react-toastify';
 import api from "../../configs/axios";
 import { DatePicker, Form, Input, InputNumber, Radio, Button, Card, Typography, Divider, Select } from 'antd';
-import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 
 const { TextArea } = Input;

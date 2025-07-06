@@ -1,7 +1,7 @@
 import { Button, Form, Input, InputNumber, Modal, Popconfirm, Switch, Table } from 'antd';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import api from '../../../configs/axios';
 
 
 
@@ -13,7 +13,7 @@ function ManagePackage() {
 
     const fetchPackages = async () => {
         try {
-            const response = await axios.get('https://685b9c6789952852c2da2b80.mockapi.io/package');
+            const response = await api.get('/package');
             console.log(response.data);
             setInitialPackages(response.data);
         } catch (err) {
@@ -29,7 +29,7 @@ function ManagePackage() {
             if (isUpdate) {
                 // Gọi PUT nếu đang cập nhật
                 try {
-                    await axios.put(`https://685b9c6789952852c2da2b80.mockapi.io/package/${isUpdate}`, values);
+                    await api.put(`/package/${id}`, values);
                     toast.success("Cập nhật gói thành công");
                 } catch (err) {
                     console.log(err);
@@ -38,7 +38,7 @@ function ManagePackage() {
             } else {
                 // Gọi POST nếu đang thêm mới
                 try {
-                    await axios.post('https://685b9c6789952852c2da2b80.mockapi.io/package', values);
+                    await api.post('/package', values);
                     toast.success("Thêm gói thành công");
                 } catch (err) {
                     console.log(err);
@@ -55,7 +55,7 @@ function ManagePackage() {
     };
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`https://685b9c6789952852c2da2b80.mockapi.io/package/${id}`);
+            await api.delete(`/package/${id}`);
             toast.success("Xóa gói thành công");
             fetchPackages();// Reload lại danh sách
         } catch (err) {

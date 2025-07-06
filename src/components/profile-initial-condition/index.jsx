@@ -5,18 +5,26 @@ import { Button, Card, DatePicker, Divider, Form, Input, InputNumber, Radio, Sel
 import { EditOutlined } from '@ant-design/icons';
 import TextArea from 'antd/es/input/TextArea';
 import Title from 'antd/es/skeleton/Title';
-import dayjs from 'dayjs';
+
 
 function ProfileInitialCondition() {
   const [initialCondition, setInitialCondition] = useState({});
   const [form] = Form.useForm();
   const [editing, setEditing] = useState(false);
 
+  const addictionLevelMap = {
+    LIGHT: "Nhẹ",
+    MODERATE: "Trung bình",
+    SEVERE: "Nặng",
+  };
+  
+
   const fetchInitialCondition = async () => {
     try {
       const response = await api.get("/initial-condition/active");
-      setInitialCondition();
-      form.setFieldsValue();
+      setInitialCondition(response.data);
+      form.setFieldsValue(response.data);
+      console.log(response.data);
       toast.success("Lấy dữ liệu thành công");
     } catch (err) {
       console.log(err);
@@ -31,7 +39,7 @@ function ProfileInitialCondition() {
   const handleSubmit = async (values) => {
     try {
       const response = await api.put("/initial-condition", values);
-
+      console.log(response.data);
       setInitialCondition();
       form.setFieldsValue();
       toast.success("Cập nhật dữ liệu thành công");
@@ -147,7 +155,7 @@ function ProfileInitialCondition() {
               label="Mức độ nghiện *"
               rules={[{ required: true, message: 'Vui lòng chọn mức độ nghiện' }]}
             >
-              <Input disabled />
+              <Input disabled value={addictionLevelMap[initialCondition.addictionLevel] } />
             </Form.Item>
             <Divider />
             <Form.Item

@@ -172,7 +172,7 @@ const UserProfileDropdown = ({ onMenuClick }) => {
           </Avatar>
           <div>
             <Title level={5} className="!mb-0">
-              {user?.fullName || user?.name || "User"}
+              {user?.username}
             </Title>
             <Text type="secondary">Gói Miễn Phí</Text>
           </div>
@@ -216,7 +216,7 @@ const UserProfileDropdown = ({ onMenuClick }) => {
           {avatarText}
         </Avatar>
         <span className="font-semibold hidden sm:inline text-white">
-          {user?.fullName || user?.name || "User"}
+          {user?.username}
         </span>
       </a>
     </Dropdown>
