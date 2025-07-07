@@ -1,8 +1,7 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { toast } from 'react-toastify';
 import api from "../../configs/axios";
 import { DatePicker, Form, Input, InputNumber, Radio, Button, Card, Typography, Divider, Select } from 'antd';
-import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 
 const { TextArea } = Input;
@@ -11,21 +10,18 @@ const { Option } = Select;
 
 function InitialCondition() {
 
-  const [initialCondition, setInitialCondition] = useState([]);
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
   const handleSubmit = async (values) => {
     try {
-      const response = await api.post("/initial-condition", values);
-      setInitialCondition(response.data);
+      await api.post("/initial-condition", values);
       toast.success("Khai báo thành công!");
       navigate('/');
     } catch (err) {
       console.log(err.response.data);
       toast.error("Lỗi khi khai báo thông tin");
-
-    };
+    }
   }
 
   return (
@@ -49,7 +45,7 @@ function InitialCondition() {
           >
             <Form.Item
               name="cigarettesPerDay"
-              label="Số lượng thuốc lá hút mỗi ngày *"
+              label="Số lượng thuốc lá hút mỗi ngày"
               rules={[{ required: true, message: 'Vui lòng nhập số điếu mỗi ngày' }]}
             >
               <InputNumber style={{ width: '100%' }} min={0} max={100} placeholder="Ví dụ: 10" />
@@ -58,7 +54,7 @@ function InitialCondition() {
 
             <Form.Item
               name="firstSmokeTime"
-              label="Thời điểm hút điếu đầu tiên *"
+              label="Thời điểm hút điếu đầu tiên"
               rules={[{ required: true, message: 'Vui lòng chọn thời điểm' }]}
             >
               <Select placeholder="-- Chọn thời gian --">
@@ -79,7 +75,7 @@ function InitialCondition() {
 
             <Form.Item
               name="reasonForStarting"
-              label="Lý do bắt đầu hút thuốc *"
+              label="Lý do bắt đầu hút thuốc"
               rules={[
                 { required: true, message: 'Vui lòng nhập lý do' },
                 { min: 5, message: 'Tối thiểu 5 ký tự' },
@@ -90,7 +86,7 @@ function InitialCondition() {
 
             <Form.Item
               name="quitReason"
-              label="Lý do muốn bỏ thuốc *"
+              label="Lý do muốn bỏ thuốc"
               rules={[
                 { required: true, message: 'Vui lòng nhập lý do' },
                 { min: 5, message: 'Tối thiểu 5 ký tự' },
@@ -101,7 +97,7 @@ function InitialCondition() {
 
             <Form.Item
               name="readinessScale"
-              label="Mức độ sẵn sàng bỏ thuốc (1-10) *"
+              label="Mức độ sẵn sàng bỏ thuốc (1-10)"
               rules={[{ required: true, message: 'Vui lòng nhập mức độ từ 1 đến 10' }]}
             >
               <InputNumber className="w-full" min={1} max={10} placeholder="Ví dụ: 7" />
@@ -109,7 +105,7 @@ function InitialCondition() {
 
             <Form.Item
               name="emotion"
-              label="Cảm xúc khi hút thuốc *"
+              label="Cảm xúc khi hút thuốc"
               rules={[{ required: true, message: 'Vui lòng nhập cảm xúc' }]}
             >
               <Input className='w-full' placeholder="Ví dụ: Thư giãn, căng thẳng, lo lắng, tự tin..." />
@@ -119,7 +115,7 @@ function InitialCondition() {
 
             <Form.Item
               name="pricePerCigarette"
-              label="Giá mỗi điếu thuốc (VNĐ) *"
+              label="Giá mỗi điếu thuốc (VNĐ)"
               rules={[{ required: true, message: 'Vui lòng nhập giá' }]}
             >
               <InputNumber
@@ -134,7 +130,7 @@ function InitialCondition() {
 
             <Form.Item
               name="cigarettesPerPack"
-              label="Số điếu trong một bao *"
+              label="Số điếu trong một bao"
               rules={[{ required: true, message: 'Vui lòng nhập số điếu' }]}
             >
               <InputNumber style={{ width: '100%' }} min={1} max={100} placeholder="Thường là 20" />
@@ -142,7 +138,7 @@ function InitialCondition() {
 
             <Form.Item
               name="weightKg"
-              label="Cân nặng hiện tại (kg) *"
+              label="Cân nặng hiện tại (kg)"
               rules={[{ required: true, message: 'Vui lòng nhập cân nặng' }]}
             >
               <InputNumber style={{ width: '100%' }} step={0.1} min={1} max={300} placeholder="Ví dụ: 65.5" />
@@ -152,7 +148,7 @@ function InitialCondition() {
 
             <Form.Item
               name="hasTriedToQuit"
-              label="Bạn đã từng cố bỏ thuốc? *"
+              label="Bạn đã từng cố bỏ thuốc?"
               rules={[{ required: true, message: 'Vui lòng chọn' }]}
             >
               <Radio.Group>
@@ -163,7 +159,7 @@ function InitialCondition() {
 
             <Form.Item
               name="hasHealthIssues"
-              label="Bạn có vấn đề sức khỏe liên quan? *"
+              label="Bạn có vấn đề sức khỏe liên quan?"
               rules={[{ required: true, message: 'Vui lòng chọn' }]}
             >
               <Radio.Group>

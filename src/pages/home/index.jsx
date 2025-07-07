@@ -22,6 +22,7 @@ import anhkeo2 from "../../assets/image/anhkeo2.png";
 import anhkeo3 from "../../assets/image/anhkeo3.jpg";
 import SuccessStories from "../navbar-page/success";
 import PackagePage from "../package";
+import CurrentPlanCard from "../../components/current-plan-card";
 
 
 function HomePage() {
@@ -216,6 +217,13 @@ function HomePage() {
           >
             <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V100C0,67.23,91.18,56.44,150,47.48,222.19,36.5,280.09,63.84,321.39,56.44Z"></path>
           </svg>
+        </div>
+      </section>
+
+      {/* Gói hiện tại của bạn */}
+      <section className="py-8 bg-white">
+        <div className="container mx-auto px-6">
+          <CurrentPlanCard />
         </div>
       </section>
 
