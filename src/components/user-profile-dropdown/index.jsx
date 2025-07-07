@@ -134,7 +134,7 @@ const UserProfileDropdown = ({ onMenuClick }) => {
         navigate("/schedule");
         break;
       case "my-package":
-        navigate("/my-package");
+        navigate("/user-package");
         break;
       case "settings":
         navigate("/settings");

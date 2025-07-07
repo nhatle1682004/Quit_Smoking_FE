@@ -1,8 +1,9 @@
-import { Button, Card, Col, Row, Tag } from 'antd';
-import axios from 'axios';
+import { Button, Card, Col, Row, Divider, Badge } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import api from '../../configs/axios';
+import { GiftOutlined, CheckCircleOutlined } from '@ant-design/icons';
 
 function PackagePage() {
   const [initialPackages, setInitialPackages] = useState([]);
@@ -10,12 +11,11 @@ function PackagePage() {
 
   const fetchPackages = async () => {
     try {
-      const response = await axios.get('https://685b9c6789952852c2da2b80.mockapi.io/package');
-      console.log(response.data);
+      const response = await api.get('/package');
       setInitialPackages(response.data);
-    } catch (err) {
-      console.log(err);
-      toast.error("Lỗi khi mua gói");
+      toast.success("Lấy dữ liệu thành công");
+    } catch {
+      toast.error("Lấy dữ liệu thất bại");
     }
   };
 
@@ -23,65 +23,102 @@ function PackagePage() {
     fetchPackages();
   }, []);
 
-  return (
-    <div className="p-6 bg-white"> {/* Đổi màu nền thành trắng */}
-      <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold mb-4 text-center">Danh sách gói hỗ trợ</h2>
-      </div>
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(price);
+  };
 
-      <Row gutter={[16, 16]}>
-        {initialPackages
-          .filter((pkg) => pkg.isActive)
-          .map((pkg) => (
-            <Col key={pkg.id} xs={24} sm={12} md={8} lg={6}>
+  const formatDuration = (days) => {
+    return `${days} ngày`;
+  };
+
+  return (
+    <div className="min-h-screen bg-white py-10 px-4 md:px-10 lg:px-20">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-4xl font-extrabold text-center mb-10 text-black">
+          🎁 Danh sách gói hỗ trợ
+        </h2>
+        <Row gutter={[32, 32]} justify="center">
+          {initialPackages.map((pkg) => (
+            <Col
+              xs={24}
+              sm={12}
+              md={8}
+              lg={6}
+              key={pkg.id}
+              style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+            >
               <Card
-              
-                className="  shadow-lg rounded-lg border-0 transition-transform transform hover:scale-105"
+                className="rounded-2xl shadow-xl border-0 hover:shadow-2xl transition-shadow duration-200 h-full flex flex-col"
+                style={{
+                  minHeight: 420,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'stretch',
+                  background: 'white',
+                  border: '2px solid #2563eb',
+                  flex: 1
+                }}
+                bodyStyle={{
+                  padding: 24,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  flex: 1
+                }}
+                hoverable
                 title={
-                  <div>
-                  <span className={pkg.name === "Basic" ? "line-through text-gray-500" : ""}>
-                    {pkg.name}
-                  </span>
-                  {pkg.name === "Basic" && (
-                       <div className="border-b border-black w-1/2 mx-auto mt-1" />
-                      )}
+                  <div className="flex items-center gap-2 text-black">
+                    <GiftOutlined style={{ fontSize: 28, color: '#2563eb' }} />
+                    <span className="text-xl font-bold text-black">{pkg.name}</span>
                   </div>
                 }
-                
-                extra={
-                  <Tag color={pkg.isActive ? 'green' : 'red'}>
-                    
-                  </Tag>
-                }
-                style={{ height: "100%" }}
               >
-                <p className="font-semibold">Mô tả:</p>
-                <ul className="pl-5">
-                  {(pkg.description ? pkg.description.split(/;|\n/) : []).map((item, idx) => (
-                    <li key={idx} className="list-none mb-2">
-                      <span role="img" aria-label="tick">✅</span> {item.trim()}
-                    </li>
+                <div style={{ minHeight: 40, marginBottom: 4, flex: 1 }}>
+                  {pkg.description.split('\n').map((line, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-start gap-2 mb-2 text-black"
+                      style={{ whiteSpace: 'pre-line' }}
+                    >
+                      <CheckCircleOutlined style={{ fontSize: 18, color: '#22c55e', marginTop: 3 }} />
+                      <span className="text-black">{line}</span>
+                    </div>
                   ))}
-                </ul>
-                <p><strong>Thời gian:</strong> {pkg.durationInDays} ngày</p>
-                <p><strong>Giá:</strong> {pkg.price?.toLocaleString()} VNĐ</p>
-                <p><strong>Cấp độ:</strong> {pkg.level}</p>
-                <Button 
-                  type="primary"
-                  block
-                  className='mt-4'
-                  disabled={!pkg.isActive}
-                  onClick={() => {
-                    toast.success(`Bạn đã chọn gói: ${pkg.name}`);
-                    navigate('/payment');
-                  }}
-                >
-                  Mua ngay
-                </Button>
+                </div>
+                <Divider dashed style={{ margin: '8px 0' }} />
+                <div className="mb-2 flex items-center gap-2 text-black">
+                  <Badge color="blue" />
+                  <span className="font-semibold text-black">Giá:</span>
+                  <span className="font-bold text-black text-lg">{formatPrice(pkg.price)}</span>
+                </div>
+                <div className="mb-2 flex items-center gap-2 text-black">
+                  <Badge color="purple" />
+                  <span className="font-semibold text-black">Thời hạn:</span>
+                  <span className="font-bold text-black">{formatDuration(pkg.duration)}</span>
+                </div>
+                <div style={{ marginTop: 'auto' }}>
+                  <Button
+                    type="primary"
+                    size="large"
+                    className="w-full mt-4 rounded-lg bg-gradient-to-r from-indigo-500 to-blue-500 border-0 font-bold"
+                    style={{
+                      background: 'linear-gradient(90deg, #2563eb 0%, #3b82f6 100%)',
+                      color: '#fff'
+                    }}
+                    onClick={() => navigate('/payment-result')}
+                  >
+                    Mua ngay
+                  </Button>
+                </div>
               </Card>
             </Col>
           ))}
-      </Row>
+        </Row>
+      </div>
     </div>
   );
 }

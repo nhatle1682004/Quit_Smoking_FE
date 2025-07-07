@@ -40,9 +40,10 @@ import PackagePage from "./pages/package";
 import ResetPassword from "./pages/auth/reset-password";
 import ManagePackage from "./pages/dashboard-admin/manage-package";
 import BookingManagement from "./pages/dashboard-admin/booking-management";
-import PaymentPage from "./pages/payment";
 import ProfileInitialCondition from "./components/profile-initial-condition";
 import InitialCondition from "./pages/initial-condition";
+import PaymentPage from "./pages/payment-result";
+import UserPackage from "./pages/package/userPackage";
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -142,6 +143,10 @@ function App() {
           path: "reset-password",
           element: <ResetPassword />,
         },
+        {
+          path: "user-package",
+          element: <UserPackage/>
+        },
       ],
     },
     {
@@ -165,7 +170,7 @@ function App() {
       ],
     },
     {
-      path: "/payment",
+      path: "/payment-result",
       element: <PaymentPage />,
     },
     {

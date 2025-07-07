@@ -17,7 +17,7 @@ function ProfileInitialCondition() {
     MODERATE: "Trung bình",
     SEVERE: "Nặng",
   };
-  
+
 
   const fetchInitialCondition = async () => {
     try {
@@ -34,14 +34,20 @@ function ProfileInitialCondition() {
 
   useEffect(() => {
     fetchInitialCondition();
-  }, [])
+  }, []);
+  const handleEdit = () => {
+    setEditing(true);
+  }
+  const handleCancel = () => {
+    setEditing(false);
+  }
 
   const handleSubmit = async (values) => {
     try {
       const response = await api.put("/initial-condition", values);
       console.log(response.data);
-      setInitialCondition();
-      form.setFieldsValue();
+      setInitialCondition(response.data);
+      form.setFieldsValue(response.data);
       toast.success("Cập nhật dữ liệu thành công");
       setEditing(false);
     } catch (err) {
@@ -61,14 +67,14 @@ function ProfileInitialCondition() {
           >
             <Form.Item
               name="cigarettesPerDay"
-              label="Số lượng thuốc lá hút mỗi ngày *"
+              label="Số lượng thuốc lá hút mỗi ngày"
               rules={[{ required: true, message: 'Vui lòng nhập số điếu mỗi ngày' }]}
             >
               <InputNumber style={{ width: '100%' }} min={0} max={100} placeholder="Ví dụ: 10" disabled={!editing} />
             </Form.Item>
             <Form.Item
               name="firstSmokeTime"
-              label="Thời điểm hút điếu đầu tiên *"
+              label="Thời điểm hút điếu đầu tiên"
               rules={[{ required: true, message: 'Vui lòng chọn thời điểm' }]}
             >
               <Select placeholder="-- Chọn thời gian --" disabled={!editing}>
@@ -88,7 +94,7 @@ function ProfileInitialCondition() {
             </Form.Item>
             <Form.Item
               name="reasonForStarting"
-              label="Lý do bắt đầu hút thuốc *"
+              label="Lý do bắt đầu hút thuốc"
               rules={[
                 { required: true, message: 'Vui lòng nhập lý do' },
                 { min: 5, message: 'Tối thiểu 5 ký tự' },
@@ -98,7 +104,7 @@ function ProfileInitialCondition() {
             </Form.Item>
             <Form.Item
               name="quitReason"
-              label="Lý do muốn bỏ thuốc *"
+              label="Lý do muốn bỏ thuốc"
               rules={[
                 { required: true, message: 'Vui lòng nhập lý do' },
                 { min: 5, message: 'Tối thiểu 5 ký tự' },
@@ -108,14 +114,14 @@ function ProfileInitialCondition() {
             </Form.Item>
             <Form.Item
               name="readinessScale"
-              label="Mức độ sẵn sàng bỏ thuốc (1-10) *"
+              label="Mức độ sẵn sàng bỏ thuốc (1-10)"
               rules={[{ required: true, message: 'Vui lòng nhập mức độ từ 1 đến 10' }]}
             >
               <InputNumber className="w-full" min={1} max={10} placeholder="Ví dụ: 7" disabled={!editing} />
             </Form.Item>
             <Form.Item
               name="emotion"
-              label="Cảm xúc khi hút thuốc *"
+              label="Cảm xúc khi hút thuốc"
               rules={[{ required: true, message: 'Vui lòng nhập cảm xúc' }]}
             >
               <Input className='w-full' placeholder="Ví dụ: Thư giãn, căng thẳng, lo lắng, tự tin..." disabled={!editing} />
@@ -123,7 +129,7 @@ function ProfileInitialCondition() {
             <Divider />
             <Form.Item
               name="pricePerCigarette"
-              label="Giá mỗi điếu thuốc (VNĐ) *"
+              label="Giá mỗi điếu thuốc (VNĐ)"
               rules={[{ required: true, message: 'Vui lòng nhập giá' }]}
             >
               <InputNumber
@@ -138,29 +144,28 @@ function ProfileInitialCondition() {
             </Form.Item>
             <Form.Item
               name="cigarettesPerPack"
-              label="Số điếu trong một bao *"
+              label="Số điếu trong một bao"
               rules={[{ required: true, message: 'Vui lòng nhập số điếu' }]}
             >
               <InputNumber style={{ width: '100%' }} min={1} max={100} placeholder="Thường là 20" disabled={!editing} />
             </Form.Item>
             <Form.Item
               name="weightKg"
-              label="Cân nặng hiện tại (kg) *"
+              label="Cân nặng hiện tại (kg)"
               rules={[{ required: true, message: 'Vui lòng nhập cân nặng' }]}
             >
               <InputNumber style={{ width: '100%' }} step={0.1} min={1} max={300} placeholder="Ví dụ: 65.5" disabled={!editing} />
             </Form.Item>
             <Form.Item
-              name="addictionLevel"
-              label="Mức độ nghiện *"
-              rules={[{ required: true, message: 'Vui lòng chọn mức độ nghiện' }]}
+              // name="addictionLevel"
+              label="Mức độ nghiện"
             >
-              <Input disabled value={addictionLevelMap[initialCondition.addictionLevel] } />
+              <Input disabled value={addictionLevelMap[initialCondition.addictionLevel] || "Đang tải..."} />
             </Form.Item>
             <Divider />
             <Form.Item
               name="hasTriedToQuit"
-              label="Bạn đã từng cố bỏ thuốc? *"
+              label="Bạn đã từng cố bỏ thuốc?"
               rules={[{ required: true, message: 'Vui lòng chọn' }]}
             >
               <Radio.Group disabled={!editing}>
@@ -170,7 +175,7 @@ function ProfileInitialCondition() {
             </Form.Item>
             <Form.Item
               name="hasHealthIssues"
-              label="Bạn có vấn đề sức khỏe liên quan? *"
+              label="Bạn có vấn đề sức khỏe liên quan?"
               rules={[{ required: true, message: 'Vui lòng chọn' }]}
             >
               <Radio.Group disabled={!editing}>
@@ -181,22 +186,22 @@ function ProfileInitialCondition() {
             <Space>
               {editing ? (
                 <>
-                  <Button type="primary" htmlType="submit">Lưu</Button>
-                  <Button
-                    onClick={() => {
-                      form.setFieldsValue(initialCondition);
-                      setEditing(false);
-                    }}
-                  >
-                    Hủy
-                  </Button>
+                  <Button type="primary" onClick={()=>{
+                    form.submit();
+                  }}>Lưu</Button>
+                  <Button htmlType="button" onClick={handleCancel}>Hủy</Button>
                 </>
               ) : (
-                <Button icon={<EditOutlined />} onClick={() => setEditing(true)}>
+                <Button
+                  icon={<EditOutlined />}
+                  htmlType="button"
+                  onClick={handleEdit}
+                >
                   Chỉnh sửa
                 </Button>
               )}
             </Space>
+
           </Form>
         </Card>
       </div>
