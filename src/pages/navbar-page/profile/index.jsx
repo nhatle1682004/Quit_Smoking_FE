@@ -50,6 +50,8 @@ const UserProfile = () => {
       console.log(response.data.phoneNumber)
       form.setFieldsValue(response.data);
       toast.success("Cập nhật thông tin cá nhân thành công!");
+      setEditing(false);
+
     } catch (err) {
       console.log(err);
       toast.error("Cập nhật thông tin cá nhân không thành công");
