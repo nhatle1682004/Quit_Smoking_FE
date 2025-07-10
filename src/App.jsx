@@ -44,6 +44,7 @@ import ProfileInitialCondition from "./components/profile-initial-condition";
 import InitialCondition from "./pages/initial-condition";
 import PaymentPage from "./pages/payment-result";
 import UserPackage from "./pages/package/userPackage";
+import PlanHistoryPreview from "./components/plan-history-preview";
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -146,6 +147,10 @@ function App() {
         {
           path: "user-package",
           element: <UserPackage/>
+        },
+        {
+          path: "plan-history-preview",
+          element: <PlanHistoryPreview/>
         },
       ],
     },
