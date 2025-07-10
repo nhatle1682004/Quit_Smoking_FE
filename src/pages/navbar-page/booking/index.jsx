@@ -37,7 +37,7 @@ function BookingPage() {
   useEffect(() => {
     setIsLoading(true);
     api
-      .get("/coaches") // Thay đổi: Gọi đến API chuyên lấy danh sách coach
+      .get("/coach/coaches") // Thay đổi: Gọi đến API chuyên lấy danh sách coach
       .then((res) => {
         // Giả định API trả về đúng danh sách coach đã được lọc
         const coachList = res.data.map((coach) => ({
