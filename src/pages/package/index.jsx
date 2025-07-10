@@ -3,11 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import api from '../../configs/axios';
 import { GiftOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-
 function PackagePage() {
   const [initialPackages, setInitialPackages] = useState([]);
-  const navigate = useNavigate();
+
 
   const fetchPackages = async () => {
     try {

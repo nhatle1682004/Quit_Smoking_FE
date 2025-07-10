@@ -8,8 +8,7 @@ import { GiftOutlined, CheckCircleOutlined } from '@ant-design/icons';
 function UserPackage() {
   const [packages, setPackages] = useState([]);
   const navigate = useNavigate();
-
-  // Lấy danh sách gói đã mua
+  // Gọi API lấy danh sách gói đã mua
   const fetchUserPackage = async () => {
     try {
       const response = await api.get('/purchased-plan/my');
@@ -29,13 +28,21 @@ function UserPackage() {
     try {
       const response = await api.post(`/purchased-plan/${planId}/activate`);
       toast.success('Kích hoạt gói thành công');
-      fetchUserPackage(); // reload lại danh sách
+      fetchUserPackage(); // Reload lại sau khi kích hoạt
+      console.log(response.data);
     } catch (err) {
       console.error(err);
       toast.error('Không thể kích hoạt gói');
     }
   };
-
+  const handlePreviewPackage = async (id) => {
+    try {
+      const response = await api.get(`/purchased-plan/${id}`);
+      console.log(response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   // Badge trạng thái gói
   const renderStatusBadge = (status) => {
     switch (status) {
@@ -120,8 +127,19 @@ function UserPackage() {
                   </span>
                 </div>
 
-                {/* Nút kích hoạt nếu gói chưa ACTIVE */}
-                {pkg.status !== 'ACTIVE' && (
+                {/*  Nút tiếp tục thanh toán nếu chưa thanh toán */}
+                {pkg.paymentStatus === 'PENDING' && pkg.paymentUrl && (
+                  <Button
+                    type="default"
+                    onClick={() => window.open(pkg.paymentUrl, '_blank')}
+                    className="mt-auto mb-2"
+                  >
+                    Tiếp tục thanh toán
+                  </Button>
+                )}
+
+                {/* Chỉ hiển thị nút kích hoạt nếu đã thanh toán và chưa active */}
+                {pkg.status !== 'ACTIVE' && pkg.paymentStatus === 'PAID' && (
                   <Button
                     type="primary"
                     icon={<CheckCircleOutlined />}
@@ -130,6 +148,24 @@ function UserPackage() {
                   >
                     Kích hoạt ngay
                   </Button>
+                )}
+                {/* "Xem chi tiết" nếu gói đang hoạt động */}
+                {pkg.status === 'ACTIVE' && (
+                  <Button
+                    type="default"
+                    className="mt-2"
+                    onClick={() => handlePreviewPackage(pkg.id)}
+                  >
+                    Xem chi tiết
+                  </Button>
+                )}
+
+
+                {/*  Cảnh báo nếu chưa thanh toán mà user cố kích hoạt */}
+                {pkg.status !== 'ACTIVE' && pkg.paymentStatus !== 'PAID' && (
+                  <span className="text-sm text-red-500 mt-2">
+                    Vui lòng thanh toán trước khi kích hoạt
+                  </span>
                 )}
               </div>
             ))}

@@ -30,7 +30,7 @@ const Header = () => {
     { id: 2, label: "Giới thiệu", href: "/about" },
     { id: 3, label: "Đặt lịch tư vấn chuyên gia", href: "/booking" },
     { id: 4, label: "Công cụ hỗ trợ", href: "/service", hasDropdown: true },
-    { id: 5, label: "Gói dịch vụ", href: "/package" }, // KHÔNG dropdown
+    { id: 5, label: "Gói dịch vụ", href: "/package" }, 
     { id: 6, label: "Nhật ký", href: "/journal" },
     { id: 7, label: "Tấm gương", href: "/success" },
     { id: 8, label: "Kế hoạch của bạn", href: "/my-plan" },
@@ -94,7 +94,7 @@ const Header = () => {
             </button>
 
             {/* Desktop menu */}
-            <nav className="hidden md:flex space-x-8">
+            <nav className="hidden md:flex space-x-4 lg:space-x-6">
               {menuItems.map((item) =>
                 item.hasDropdown ? (
                   /* chỉ còn dropdown cho id = 4 */
@@ -124,7 +124,7 @@ const Header = () => {
             </nav>
 
             {/* Right side */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
               {user ? (
                 <>
                   {/* Đã bỏ nút Dashboard ở header */}

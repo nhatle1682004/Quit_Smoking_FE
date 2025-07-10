@@ -15,7 +15,7 @@ const PaymentPage = () => {
   });
 
   const getParam = useGetParams();
-  const txnRef = getParam("vnp_TxnRef"); // ✅ Sử dụng đúng tên tham số từ VNPAY
+  const txnRef = getParam("vnp_TxnRef"); 
 
   useEffect(() => {
     if (!txnRef) {
