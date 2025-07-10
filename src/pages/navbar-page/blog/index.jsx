@@ -14,12 +14,7 @@ import {
   Tooltip,
   Divider,
 } from "antd";
-import {
-  UserOutlined,
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
+import { UserOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import api from "../../../configs/axios"; // Đảm bảo đường dẫn này đúng
 import { useSelector } from "react-redux";
 
@@ -33,7 +28,7 @@ const BlogCard = ({ blog, feedbackStats, onViewDetail }) => {
   const { count = 0, avgRating = 0 } = feedbackStats || {};
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden flex flex-col h-full group">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col h-full group">
       <div className="relative overflow-hidden">
         <img
           alt={blog.title}
@@ -74,15 +69,17 @@ const BlogCard = ({ blog, feedbackStats, onViewDetail }) => {
                 disabled
                 allowHalf
                 value={avgRating}
-                className="!text-sm !text-amber-500 mr-1.5"
+                className="!text-xl !text-amber-500 mr-2"
               />
-              <Text type="secondary">({count} đánh giá)</Text>
+              <Text type="secondary" className="text-base">
+                ({count} đánh giá)
+              </Text>
             </div>
           </div>
           <Button
             type="primary"
             ghost
-            className="w-full !border-purple-600 !text-purple-600 hover:!bg-purple-600 hover:!text-white"
+            className="w-full !border-purple-600 !text-purple-600 hover:!bg-purple-600 hover:!text-white transition-colors duration-300"
             onClick={() => onViewDetail(blog)}
           >
             Đọc thêm & Bình luận
@@ -105,15 +102,6 @@ function BlogPage() {
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState(null);
 
-  // State cho Modal tạo bài viết
-  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
-  const [newBlogData, setNewBlogData] = useState({
-    title: "",
-    content: "",
-    imageUrl: "",
-  });
-  const [createLoading, setCreateLoading] = useState(false);
-
   // State cho Modal sửa feedback
   const [isEditFeedbackModalVisible, setIsEditFeedbackModalVisible] =
     useState(false);
@@ -128,7 +116,6 @@ function BlogPage() {
 
   // Hàm tải dữ liệu
   const fetchBlogsAndFeedbacks = useCallback(async () => {
-    // Không set loading ở đây để tránh giật màn hình khi refresh
     try {
       const blogResponse = await api.get("/blogs");
       const fetchedBlogs = blogResponse.data;
@@ -151,7 +138,7 @@ function BlogPage() {
       console.error("Failed to fetch data:", error);
       message.error("Không thể tải dữ liệu trang blog.");
     } finally {
-      setPageLoading(false); // Chỉ tắt loading chính ở lần đầu
+      setPageLoading(false);
     }
   }, []);
 
@@ -172,36 +159,13 @@ function BlogPage() {
     setInteractionRating(0);
   };
 
-  // --- Xử lý Modal Tạo bài viết ---
-  const showCreateModal = () => setIsCreateModalVisible(true);
-  const handleCancelCreateModal = () => {
-    setIsCreateModalVisible(false);
-    setNewBlogData({ title: "", content: "", imageUrl: "" });
-  };
-  const handleCreateBlog = async () => {
-    if (!user) return message.error("Bạn cần đăng nhập.");
-    if (!newBlogData.title.trim() || !newBlogData.content.trim()) {
-      return message.warning("Vui lòng nhập đủ tiêu đề và nội dung.");
-    }
-    setCreateLoading(true);
-    try {
-      await api.post("/blogs", { ...newBlogData, accountId: user.id });
-      message.success("Đăng bài viết thành công!");
-      handleCancelCreateModal();
-      await fetchBlogsAndFeedbacks();
-    } catch (error) {
-      message.error("Đăng bài viết thất bại.");
-    } finally {
-      setCreateLoading(false);
-    }
-  };
-
   // --- Xử lý tương tác Feedback (bên trong Modal chi tiết) ---
   const handleSubmitFeedback = async () => {
     if (!selectedBlog) return;
-    if (!interactionRating) return message.warning("Vui lòng chọn số sao.");
+    if (!interactionRating)
+      return message.warning("Vui lòng chọn số sao đánh giá.");
     if (!interactionComment.trim())
-      return message.warning("Vui lòng nhập nhận xét.");
+      return message.warning("Vui lòng nhập nội dung nhận xét.");
 
     setInteractionLoading(true);
     try {
@@ -291,17 +255,6 @@ function BlogPage() {
             Nơi chia sẻ kiến thức, kinh nghiệm và những câu chuyện truyền cảm
             hứng.
           </Paragraph>
-          {user && (
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              size="large"
-              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 border-0"
-              onClick={showCreateModal}
-            >
-              Viết bài mới
-            </Button>
-          )}
         </div>
 
         {/* Grid */}
@@ -328,54 +281,18 @@ function BlogPage() {
 
       {/* --- CÁC MODAL --- */}
 
-      {/* 1. Modal Tạo bài viết mới */}
-      <Modal
-        title="Tạo bài viết mới"
-        visible={isCreateModalVisible}
-        onOk={handleCreateBlog}
-        onCancel={handleCancelCreateModal}
-        confirmLoading={createLoading}
-        okText="Đăng bài"
-        cancelText="Hủy"
-        destroyOnClose
-      >
-        <Form layout="vertical">
-          <Form.Item label="Tiêu đề" required>
-            <Input
-              value={newBlogData.title}
-              onChange={(e) =>
-                setNewBlogData({ ...newBlogData, title: e.target.value })
-              }
-            />
-          </Form.Item>
-          <Form.Item label="Nội dung" required>
-            <TextArea
-              rows={8}
-              value={newBlogData.content}
-              onChange={(e) =>
-                setNewBlogData({ ...newBlogData, content: e.target.value })
-              }
-            />
-          </Form.Item>
-          <Form.Item label="URL Hình ảnh">
-            <Input
-              value={newBlogData.imageUrl}
-              onChange={(e) =>
-                setNewBlogData({ ...newBlogData, imageUrl: e.target.value })
-              }
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
-
       {/* 2. Modal Chi tiết bài viết */}
       {selectedBlog && (
         <Modal
-          title={selectedBlog.title}
-          visible={isDetailModalVisible}
+          title={
+            <Title level={3} className="!m-0">
+              {selectedBlog.title}
+            </Title>
+          }
+          open={isDetailModalVisible}
           onCancel={handleCloseDetailModal}
-          footer={null} // Tắt footer mặc định
-          width={800} // Modal rộng hơn
+          footer={null}
+          width={800}
           destroyOnClose
           className="blog-detail-modal"
         >
@@ -410,27 +327,40 @@ function BlogPage() {
             <Divider />
 
             {/* Phần tương tác */}
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <Title level={4}>Để lại đánh giá của bạn</Title>
+            <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+              <Title level={4} className="!mb-4">
+                Để lại đánh giá của bạn
+              </Title>
               {user ? (
                 <Spin spinning={interactionLoading} tip="Đang gửi...">
-                  <Rate
-                    allowHalf
-                    value={interactionRating}
-                    onChange={setInteractionRating}
-                    className="!text-2xl !text-amber-500 mb-4"
-                  />
+                  <div
+                    className={`
+                    mb-4 text-center p-4 bg-white rounded-lg border-2 border-dashed border-gray-300
+                    [&_.ant-rate-star-zero_span]:!text-gray-400
+                  `}
+                  >
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Chạm vào sao để đánh giá
+                    </label>
+                    <Rate
+                      value={interactionRating}
+                      onChange={setInteractionRating}
+                      className="!text-3xl md:!text-4xl !text-amber-400"
+                    />
+                  </div>
+
                   <TextArea
-                    rows={3}
-                    placeholder="Viết nhận xét..."
+                    rows={4}
+                    placeholder="Chia sẻ cảm nhận của bạn về bài viết này..."
                     value={interactionComment}
                     onChange={(e) => setInteractionComment(e.target.value)}
+                    className="!rounded-md focus:!border-purple-500 focus:!shadow-outline-purple"
                   />
                   <Button
                     type="primary"
                     onClick={handleSubmitFeedback}
                     loading={interactionLoading}
-                    className="mt-4 w-full bg-purple-600"
+                    className="mt-4 w-full !h-12 !text-base !font-semibold bg-purple-600 hover:!bg-purple-700 !rounded-lg"
                   >
                     Gửi đánh giá
                   </Button>
@@ -443,53 +373,74 @@ function BlogPage() {
             </div>
 
             {/* Danh sách feedback */}
-            <div className="mt-8">
+            <div className="mt-10">
               <Title level={4}>
                 Bình luận ({feedbacks[selectedBlog.id]?.length || 0})
               </Title>
-              <div className="mt-4 space-y-6">
-                {(feedbacks[selectedBlog.id] || []).map((fb) => (
-                  <div key={fb.id} className="flex items-start space-x-4">
-                    <Avatar src={fb.user?.avatarUrl} icon={<UserOutlined />} />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <Text strong>{fb.user?.fullName}</Text>
-                        {user?.id === fb.accountId && (
-                          <Space>
-                            <Tooltip title="Sửa">
-                              <Button
-                                type="text"
-                                size="small"
-                                icon={<EditOutlined />}
-                                onClick={() => handleEditFeedback(fb)}
-                              />
-                            </Tooltip>
-                            <Popconfirm
-                              title="Chắc chắn xóa?"
-                              onConfirm={() => handleDeleteFeedback(fb.id)}
-                            >
-                              <Tooltip title="Xóa">
+              <div className="mt-6 space-y-6">
+                {(feedbacks[selectedBlog.id] || []).length > 0 ? (
+                  (feedbacks[selectedBlog.id] || []).map((fb) => (
+                    <div
+                      key={fb.id}
+                      className="flex items-start space-x-4 p-4 bg-white rounded-lg border border-gray-100"
+                    >
+                      <Avatar
+                        src={fb.user?.avatarUrl}
+                        icon={<UserOutlined />}
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Text strong className="mr-2">
+                              {fb.user?.fullName}
+                            </Text>
+                            <Text type="secondary" className="text-xs">
+                              {new Date(fb.createdAt).toLocaleString("vi-VN")}
+                            </Text>
+                          </div>
+                          {user?.id === fb.accountId && (
+                            <Space>
+                              <Tooltip title="Sửa">
                                 <Button
                                   type="text"
-                                  danger
                                   size="small"
-                                  icon={<DeleteOutlined />}
+                                  icon={<EditOutlined />}
+                                  onClick={() => handleEditFeedback(fb)}
                                 />
                               </Tooltip>
-                            </Popconfirm>
-                          </Space>
-                        )}
+                              <Popconfirm
+                                title="Chắc chắn xóa?"
+                                onConfirm={() => handleDeleteFeedback(fb.id)}
+                              >
+                                <Tooltip title="Xóa">
+                                  <Button
+                                    type="text"
+                                    danger
+                                    size="small"
+                                    icon={<DeleteOutlined />}
+                                  />
+                                </Tooltip>
+                              </Popconfirm>
+                            </Space>
+                          )}
+                        </div>
+                        <Rate
+                          disabled
+                          allowHalf
+                          value={fb.rating}
+                          className="!text-sm !text-amber-500 my-1"
+                        />
+                        <Paragraph className="mt-1 mb-0 text-gray-700">
+                          {fb.comment}
+                        </Paragraph>
                       </div>
-                      <Rate
-                        disabled
-                        allowHalf
-                        value={fb.rating}
-                        className="text-xs !text-amber-500"
-                      />
-                      <Paragraph className="mt-1">{fb.comment}</Paragraph>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    Chưa có bình luận nào. Hãy là người đầu tiên!
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
@@ -499,24 +450,26 @@ function BlogPage() {
       {/* 3. Modal Sửa Feedback */}
       <Modal
         title="Chỉnh sửa phản hồi"
-        visible={isEditFeedbackModalVisible}
+        open={isEditFeedbackModalVisible}
         onCancel={() => setIsEditFeedbackModalVisible(false)}
         confirmLoading={editLoading}
         destroyOnClose
+        okText="Lưu thay đổi"
+        cancelText="Hủy"
         onOk={() => {
           editForm.submit();
-        }} // Trigger form submit
+        }}
       >
         <Form form={editForm} layout="vertical" onFinish={handleUpdateFeedback}>
-          <Form.Item name="rating" label="Đánh giá">
-            <Rate allowHalf />
+          <Form.Item name="rating" label="Đánh giá của bạn">
+            <Rate className="!text-2xl !text-amber-500" />
           </Form.Item>
           <Form.Item
             name="comment"
-            label="Nội dung"
+            label="Nội dung nhận xét"
             rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
           >
-            <TextArea rows={4} />
+            <TextArea rows={4} placeholder="Cập nhật nhận xét của bạn..." />
           </Form.Item>
         </Form>
       </Modal>

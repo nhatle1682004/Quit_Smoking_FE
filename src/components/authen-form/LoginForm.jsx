@@ -11,57 +11,64 @@ import { UserOutlined, LockOutlined } from "@ant-design/icons";
 
 function LoginForm() {
   const navigate = useNavigate();
-
   const dispatch = useDispatch();
+
   const onFinish = async (values) => {
     console.log("Success:", values);
     try {
-      // values nguoi dung nhap
-      const response = await api.post("login", values);
-      console.log(response.data);
-      // luu thong tin nguoi dung nhap vao 1 cho nao do ma bat ky dau cung su dung duoc
-      // cai do goi la redux === session ben mon prj
-      const { role, token } = response.data;
-      console.log(role, token);
+      const response = await api.post("/login", values);
+      const userData = response.data;
+      const { role } = userData;
 
-      //Gửi một action có tên login đến Redux store để cập nhật trạng thái đăng nhập.
-      // action la 1 doi tuong co 2 thuoc tinh la type va payload
-      // type: la ten cua action
-      //payload: Là dữ liệu bạn muốn gửi kèm hành động, dùng để cập nhật vào state
-      dispatch(login(response.data));
-      localStorage.setItem("token", response.data.token);
+      // Gửi action để lưu thông tin user vào Redux store
+      dispatch(login(userData));
+      // Lưu token vào localStorage để duy trì đăng nhập
+      localStorage.setItem("token", userData.token);
+
       toast.success("Đăng nhập thành công!");
 
-
-      if (role === "ADMIN" || role === "COACH") {
-        navigate("/dashboard");
+      // Điều hướng dựa trên vai trò (role)
+      if (role === "ADMIN") {
+        navigate("/dashboard"); // Điều hướng ADMIN đến dashboard chung
+      } else if (role === "COACH") {
+        navigate("/coach/dashboard"); // Điều hướng COACH đến dashboard riêng
       } else if (role === "CUSTOMER") {
+        // Kiểm tra xem CUSTOMER đã điền thông tin ban đầu chưa
         try {
-          const response = await api.get('/initial-condition/active');
-          if (response.data) {
-            console.log("Init condition:", response.data)
-            navigate('/');
-          } else {
-            if (error.response?.status == 403) {
-              navigate('/initial-condition');
-            }
-          }
+          // Tạo config riêng cho request này để đảm bảo có token
+          const apiConfig = {
+            headers: { Authorization: `Bearer ${userData.token}` },
+          };
+          await api.get("/initial-condition/active", apiConfig);
+          // Nếu request thành công (không ném lỗi 403/404), tức là đã có dữ liệu
+          navigate("/"); // Điều hướng về trang chủ
         } catch (error) {
-          if (error.response?.status == 403 || error.response?.status == 500) {
-            navigate('/initial-condition');
-            console.log("Init condition:", response.data)
+          // Nếu API trả về lỗi (ví dụ 403/404/500), tức là chưa có dữ liệu
+          if (
+            error.response?.status === 403 ||
+            error.response?.status === 404 ||
+            error.response?.status === 500
+          ) {
+            navigate("/initial-condition"); // Điều hướng đến trang điền thông tin
+          } else {
+            // Xử lý các lỗi mạng hoặc lỗi không mong muốn khác
+            navigate("/");
           }
         }
       }
     } catch (e) {
-      console.log(e);
-      if (e.response && (e.response.status === 401 || e.response.status === 400)) {
+      console.error(e);
+      if (
+        e.response &&
+        (e.response.status === 401 || e.response.status === 400)
+      ) {
         toast.error("Tên đăng nhập hoặc mật khẩu không đúng!");
       } else {
         toast.error("Đăng nhập thất bại!");
       }
     }
   };
+
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
@@ -101,8 +108,7 @@ function LoginForm() {
           />
         </Form.Item>
         <Form.Item label={null}>
-           <Link to="/forgot-password">Quên mật khẩu?</Link>
-
+          <Link to="/forgot-password">Quên mật khẩu?</Link>
         </Form.Item>
 
         <Form.Item label={null}>
