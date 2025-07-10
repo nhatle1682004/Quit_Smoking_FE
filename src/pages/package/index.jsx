@@ -3,11 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import api from '../../configs/axios';
 import { GiftOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-
 function PackagePage() {
   const [initialPackages, setInitialPackages] = useState([]);
-  const navigate = useNavigate();
+
 
   const fetchPackages = async () => {
     try {
@@ -27,23 +25,13 @@ function PackagePage() {
       const response = await api.post('/purchased-plan/buy', {
         packageCode: String(packageCode)
       });
-  
-      const result = response.data;
-      const { packageInfo, paymentUrl } = result;
-  
-      if (packageInfo?.coachSupport) {
-        navigate(`/booking?packageId=${packageInfo.code}`);
-      } else {
-        window.open(paymentUrl, '_blank');
-      }
+      window.open(response.data.paymentUrl, '_blank');
+      toast.success("Mua gói thành công");
     } catch (error) {
-      console.error("Lỗi khi mua gói:", error?.response?.data || error);
+      console.error(error);
       toast.error("Mua gói thất bại");
     }
   };
-  
-  
-
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -64,7 +52,7 @@ function PackagePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {initialPackages.map((pkg) => (
             <div
-              key={pkg.packageCode}
+              key={pkg.code}
               className="flex flex-col h-full rounded-2xl shadow-xl border-2 border-[#2563eb] bg-white p-4"
             >
               <div className="flex items-center gap-2 mb-2">
@@ -102,7 +90,7 @@ function PackagePage() {
                   background: 'linear-gradient(90deg, #2563eb 0%, #3b82f6 100%)',
                   color: '#fff'
                 }}
-                onClick={() => handleBuyPackage(pkg.id, pkg.coachId)}
+                onClick={() => handleBuyPackage(pkg.code)}
               >
                 Mua ngay
               </Button>
