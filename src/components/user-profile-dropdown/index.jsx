@@ -79,15 +79,16 @@ const UserProfileDropdown = ({ onMenuClick }) => {
       icon: <UserOutlined style={{ fontSize: "20px", color: "#222" }} />,
       label: "Trang cá nhân",
     },
-    // Thêm Dashboard cho admin
-    ...(user?.role === "ADMIN"
+    // Thêm Dashboard cho admin hoặc coach
+    ...(user?.role === "ADMIN" || user?.role === "COACH"
       ? [
           {
             key: "dashboard",
             icon: (
               <SettingOutlined style={{ fontSize: "20px", color: "#222" }} />
             ),
-            label: "Dashboard",
+            label:
+              user.role === "COACH" ? "Coach Dashboard" : "Admin Dashboard",
           },
         ]
       : []),
@@ -128,7 +129,11 @@ const UserProfileDropdown = ({ onMenuClick }) => {
         navigate("/profile");
         break;
       case "dashboard":
-        navigate("/dashboard");
+        if (user?.role === "COACH") {
+          navigate("/dashboard-coach");
+        } else {
+          navigate("/dashboard");
+        }
         break;
       case "schedule":
         navigate("/schedule");

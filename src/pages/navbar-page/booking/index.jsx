@@ -1,15 +1,14 @@
-// BookingPage.jsx
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import api from "../../../configs/axios";
 import {
   HiCheckCircle,
   HiArrowLeft,
   HiExclamationCircle,
+  HiOutlineClock,
 } from "react-icons/hi";
 
+// Giữ nguyên các khối 2 giờ ban đầu
 const TIME_SLOTS = [
   { label: "08:00 - 10:00", startTime: "08:00", endTime: "10:00" },
   { label: "10:00 - 12:00", startTime: "10:00", endTime: "12:00" },
@@ -18,7 +17,6 @@ const TIME_SLOTS = [
 ];
 
 function BookingPage() {
-  // ✅ STEP 1: Đổi tên state để lưu accountId
   const [selectedCoachAccountId, setSelectedCoachAccountId] = useState(null);
   const [form, setForm] = useState({ date: "", startTime: "", endTime: "" });
   const [coaches, setCoaches] = useState([]);
@@ -29,86 +27,103 @@ function BookingPage() {
   const [latestBooking, setLatestBooking] = useState(null);
   const [confirmedAppointment, setConfirmedAppointment] = useState(null);
 
-  const currentUser = useSelector((state) => state.user);
-  const navigate = useNavigate();
+  // State để lưu các startTime đã bị đặt
+  const [bookedSlots, setBookedSlots] = useState([]);
+  const [isCheckingSlots, setIsCheckingSlots] = useState(false);
 
-  // ✅ STEP 2: Cập nhật logic tìm coach bằng accountId
+  const currentUser = useSelector((state) => state.user);
   const selectedCoach = coaches.find(
     (c) => c.accountId === selectedCoachAccountId
   );
 
-  useEffect(() => {
-    if (!currentUser) {
+  const fetchInitialData = useCallback(async () => {
+    if (!currentUser?.id) {
       setIsLoading(false);
       setUserBlockMessage("Vui lòng đăng nhập để đặt lịch hẹn.");
       return;
     }
-
+    setIsLoading(true);
     const apiConfig = {
       headers: { Authorization: `Bearer ${currentUser.token}` },
     };
-
-    Promise.all([
-      api.get("/coach/coaches", apiConfig),
-      api.get("/bookings/appointments", apiConfig),
-    ])
-      .then(([coachesRes, bookingsRes]) => {
-        const allCoaches = coachesRes.data;
-        const allBookings = bookingsRes.data;
-
-        const userActiveBooking = allBookings.find(
-          (b) =>
-            b.customerId === currentUser.id &&
-            ["pending", "confirmed", "completed"].includes(b.status)
+    try {
+      const coachesRes = await api.get("/coach/coaches", apiConfig);
+      const userBookingsRes = await api.get(
+        `/bookings/user/${currentUser.id}`,
+        apiConfig
+      );
+      const allCoaches = coachesRes.data;
+      const userBookings = userBookingsRes.data;
+      const userActiveBooking = userBookings.find((b) =>
+        ["pending", "confirmed"].includes(b.status)
+      );
+      if (userActiveBooking) {
+        const matchedCoach = allCoaches.find(
+          (c) => c.accountId === userActiveBooking.coachId
         );
-
-        if (userActiveBooking) {
-          // Sửa logic tìm coach khớp với booking đang có (dùng accountId)
-          const matchedCoach = allCoaches.find(
-            (c) => c.accountId === userActiveBooking.coachId
-          );
-          const coachName = matchedCoach?.fullName || "chưa rõ";
-
-          if (userActiveBooking.status === "confirmed") {
-            setConfirmedAppointment({ ...userActiveBooking, coachName });
-            setIsLoading(false);
-            return;
-          }
-
+        const coachName = matchedCoach?.fullName || "chưa rõ";
+        const detailedBooking = { ...userActiveBooking, coachName };
+        if (userActiveBooking.status === "confirmed") {
+          setConfirmedAppointment(detailedBooking);
+        } else {
           setUserBlockMessage(
-            `Bạn đã có lịch hẹn (${userActiveBooking.status.toLowerCase()}) với Coach ${coachName}.`
+            `Bạn đã có lịch hẹn đang chờ duyệt với Coach ${coachName}.`
           );
-          setCoaches([]);
-          setIsLoading(false);
-          return;
         }
-
-        const availableCoaches = allCoaches.filter((coach) => {
-          const activeCustomers = new Set();
-          allBookings.forEach((booking) => {
-            // Sửa logic lọc coach (dùng accountId)
-            if (
-              booking.coachId === coach.accountId &&
-              ["pending", "confirmed", "completed"].includes(booking.status)
-            ) {
-              activeCustomers.add(booking.customerId);
-            }
-          });
-          return activeCustomers.size < 4;
-        });
-
-        const coachList = availableCoaches.map((coach) => ({
+      } else {
+        const coachList = allCoaches.map((coach) => ({
           ...coach,
           specialization: "Life & Relationship Coach",
-          aboutMe: `Chuyên gia với hơn 10 năm kinh nghiệm. ${coach.fullName} cam kết đồng hành cùng bạn.`,
+          aboutMe: `Chuyên gia với hơn 10 năm kinh nghiệm.`,
         }));
         setCoaches(coachList);
-      })
-      .catch(() => setError("Không thể tải dữ liệu."))
-      .finally(() => setIsLoading(false));
+      }
+    } catch (err) {
+      setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
+    } finally {
+      setIsLoading(false);
+    }
   }, [currentUser]);
 
-  // ✅ STEP 3: Cập nhật hàm để nhận và lưu accountId
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
+
+  // useEffect để lấy các khung giờ đã bị đặt khi chọn Coach và Ngày
+  useEffect(() => {
+    if (selectedCoachAccountId && form.date) {
+      const fetchBookedSlots = async () => {
+        setIsCheckingSlots(true);
+        try {
+          const apiConfig = {
+            headers: { Authorization: `Bearer ${currentUser.token}` },
+          };
+          const res = await api.get("/bookings/appointments", {
+            params: {
+              coachId: selectedCoachAccountId,
+              date: form.date,
+            },
+            headers: apiConfig.headers,
+          });
+
+          // Sửa lỗi định dạng giờ: Cắt chuỗi từ "08:00:00" thành "08:00" để so sánh
+          const slots = res.data.map((booking) =>
+            booking.startTime ? booking.startTime.substring(0, 5) : ""
+          );
+          setBookedSlots(slots);
+        } catch (error) {
+          console.error("Failed to fetch booked slots:", error);
+          setBookedSlots([]);
+        } finally {
+          setIsCheckingSlots(false);
+        }
+      };
+      fetchBookedSlots();
+    } else {
+      setBookedSlots([]);
+    }
+  }, [selectedCoachAccountId, form.date, currentUser?.token]);
+
   const handleSelectCoach = (accountId) => {
     setSelectedCoachAccountId(accountId);
     setForm({ date: "", startTime: "", endTime: "" });
@@ -120,44 +135,14 @@ function BookingPage() {
     setError(null);
   };
 
-  // ✅ STEP 4: Cập nhật hàm handleSubmit để gửi đi accountId
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-
-    if (!currentUser) {
-      setError("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại.");
-      setIsLoading(false);
-      return;
-    }
-
     try {
       const apiConfig = {
         headers: { Authorization: `Bearer ${currentUser.token}` },
       };
-
-      // Gửi đi accountId để kiểm tra
-      const check = await api.get("/bookings/appointments", {
-        params: {
-          coachId: selectedCoach.accountId,
-          date: form.date,
-          time: form.startTime,
-        },
-        headers: apiConfig.headers,
-      });
-
-      const isBooked = check.data.some((b) =>
-        ["pending", "confirmed"].includes(b.status)
-      );
-
-      if (isBooked) {
-        setError("Khung giờ này đã có người đặt.");
-        setIsLoading(false);
-        return;
-      }
-
-      // Gửi đi accountId trong body của request
       const body = {
         userId: currentUser.id,
         coachId: selectedCoach.accountId,
@@ -166,7 +151,6 @@ function BookingPage() {
         endTime: form.endTime,
         status: "pending",
       };
-
       const res = await api.post("/bookings", body, apiConfig);
       setSuccess(true);
       setLatestBooking(res.data);
@@ -178,38 +162,36 @@ function BookingPage() {
   };
 
   useEffect(() => {
-    if (success && latestBooking?.status === "pending") {
-      const interval = setInterval(async () => {
-        try {
-          const apiConfig = {
-            headers: { Authorization: `Bearer ${currentUser.token}` },
-          };
-          const res = await api.get("/bookings/appointments", apiConfig);
-          // Cập nhật logic polling để tìm đúng booking
-          const updated = res.data.find(
-            (b) =>
-              b.customerId === currentUser.id &&
-              b.coachId === selectedCoach.accountId &&
-              b.date === form.date &&
-              b.startTime === form.startTime
-          );
-          if (updated?.status === "confirmed") {
-            setLatestBooking(updated);
-            clearInterval(interval);
-          }
-        } catch (err) {
-          console.error("Polling error:", err);
+    if (!success || !latestBooking || latestBooking.status !== "pending")
+      return;
+    const interval = setInterval(async () => {
+      try {
+        const apiConfig = {
+          headers: { Authorization: `Bearer ${currentUser.token}` },
+        };
+        const res = await api.get(
+          `/bookings/user/${currentUser.id}`,
+          apiConfig
+        );
+        const updatedBooking = res.data.find(
+          (b) => b.bookingId === latestBooking.bookingId
+        );
+        if (updatedBooking?.status === "confirmed") {
+          setLatestBooking(updatedBooking);
+          clearInterval(interval);
         }
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [success, latestBooking, currentUser, selectedCoach, form]);
+      } catch (err) {
+        console.error("Polling error:", err);
+        clearInterval(interval);
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [success, latestBooking, currentUser]);
 
-  // PHẦN RENDER JSX (Không cần thay đổi logic ở đây)
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <span>Đang tải dữ liệu...</span>
+        <span>Đang tải...</span>
       </div>
     );
   }
@@ -239,7 +221,7 @@ function BookingPage() {
               Vui lòng tham gia cuộc hẹn đúng giờ.
             </p>
             <a
-              href="https://meet.google.com/tdk-kvpn-zww"
+              href="https://meet.google.com/"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block mt-2 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
@@ -257,7 +239,7 @@ function BookingPage() {
       <div className="flex justify-center items-center min-h-screen p-4">
         <div className="bg-white rounded-xl shadow-lg p-6 text-center max-w-md">
           <HiExclamationCircle className="text-yellow-500 text-5xl mx-auto" />
-          <h2 className="text-xl font-bold mt-4">Không thể đặt lịch</h2>
+          <h2 className="text-xl font-bold mt-4">Thông báo</h2>
           <p className="mt-2 text-gray-600">{userBlockMessage}</p>
         </div>
       </div>
@@ -268,30 +250,45 @@ function BookingPage() {
     return (
       <div className="flex justify-center items-center min-h-screen p-4">
         <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full text-center">
-          <HiCheckCircle className="text-green-500 text-5xl mx-auto" />
-          <h2 className="text-2xl font-bold mt-4">Đặt lịch thành công!</h2>
+          {latestBooking?.status === "confirmed" ? (
+            <HiCheckCircle className="text-green-500 text-5xl mx-auto" />
+          ) : (
+            <HiOutlineClock className="text-blue-500 text-5xl mx-auto" />
+          )}
+          <h2 className="text-2xl font-bold mt-4">
+            {latestBooking?.status === "confirmed"
+              ? "Lịch hẹn đã được xác nhận!"
+              : "Đã gửi yêu cầu đặt lịch!"}
+          </h2>
+          <p className="mt-2 text-gray-600">
+            {latestBooking?.status !== "confirmed" &&
+              "Vui lòng chờ Coach xác nhận. Trạng thái sẽ được tự động cập nhật."}
+          </p>
           <div className="text-left mt-4 bg-gray-50 p-4 rounded-lg">
             <p className="text-gray-700">
               <strong>Trạng thái:</strong>{" "}
-              <span className="font-semibold capitalize text-indigo-600">
+              <span
+                className={`font-semibold capitalize ${
+                  latestBooking?.status === "confirmed"
+                    ? "text-green-600"
+                    : "text-blue-600"
+                }`}
+              >
                 {latestBooking?.status}
               </span>
             </p>
             <p className="text-gray-700">
-              <strong>Ngày:</strong> {form.date}
+              <strong>Ngày:</strong> {latestBooking.date}
             </p>
             <p className="text-gray-700">
-              <strong>Giờ:</strong> {form.startTime} - {form.endTime}
+              <strong>Giờ:</strong> {latestBooking.startTime} -{" "}
+              {latestBooking.endTime}
             </p>
           </div>
-
           {latestBooking?.status === "confirmed" && (
             <div className="mt-6">
-              <p className="text-gray-600 mb-2">
-                Lịch hẹn đã được xác nhận. Vui lòng tham gia đúng giờ.
-              </p>
               <a
-                href="https://meet.google.com/tdk-kvpn-zww"
+                href="https://meet.google.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block mt-2 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
@@ -326,35 +323,53 @@ function BookingPage() {
               type="date"
               className="border rounded w-full p-2 mb-4"
               value={form.date}
-              onChange={(e) => setForm({ ...form, date: e.target.value })}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  date: e.target.value,
+                  startTime: "",
+                  endTime: "",
+                })
+              }
               required
               min={new Date().toISOString().split("T")[0]}
             />
             <label className="block mb-2 font-semibold text-gray-700">
               Chọn khung giờ
             </label>
+            {isCheckingSlots && (
+              <p className="text-center text-gray-500 mb-4">Đang kiểm tra...</p>
+            )}
+
             <div className="grid grid-cols-2 gap-4 mb-6">
-              {TIME_SLOTS.map((slot) => (
-                <button
-                  key={slot.startTime}
-                  type="button"
-                  onClick={() =>
-                    setForm({
-                      ...form,
-                      startTime: slot.startTime,
-                      endTime: slot.endTime,
-                    })
-                  }
-                  className={`p-3 rounded-lg border-2 transition-all ${
-                    form.startTime === slot.startTime
-                      ? "bg-indigo-600 text-white border-indigo-600"
-                      : "bg-white hover:bg-indigo-50 hover:border-indigo-400"
-                  }`}
-                >
-                  {slot.label}
-                </button>
-              ))}
+              {TIME_SLOTS.map((slot) => {
+                const isBooked = bookedSlots.includes(slot.startTime);
+                return (
+                  <button
+                    key={slot.startTime}
+                    type="button"
+                    onClick={() =>
+                      setForm({
+                        ...form,
+                        startTime: slot.startTime,
+                        endTime: slot.endTime,
+                      })
+                    }
+                    disabled={isBooked}
+                    className={`p-3 rounded-lg border-2 transition-all font-semibold ${
+                      isBooked
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed border-gray-300"
+                        : form.startTime === slot.startTime
+                        ? "bg-indigo-600 text-white border-indigo-600"
+                        : "bg-white hover:bg-indigo-50 hover:border-indigo-400"
+                    }`}
+                  >
+                    {slot.label}
+                  </button>
+                );
+              })}
             </div>
+
             <button
               type="submit"
               disabled={isLoading || !form.date || !form.startTime}
@@ -377,11 +392,11 @@ function BookingPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {coaches.map((coach) => (
           <div
-            key={coach.id}
+            key={coach.accountId}
             className="bg-white rounded-xl p-6 shadow-md text-center transform hover:scale-105 transition-transform"
           >
             <img
-              src={coach.avatarUrl} // Sửa lại để dùng avatarUrl từ API
+              src={coach.avatarUrl}
               alt={coach.fullName}
               className="w-24 h-24 rounded-full mx-auto object-cover mb-4 border-4 border-indigo-200"
             />
@@ -389,7 +404,6 @@ function BookingPage() {
               {coach.fullName}
             </h3>
             <p className="text-sm text-gray-500 mb-4">{coach.specialization}</p>
-            {/* ✅ STEP 3.2: Truyền vào accountId khi click */}
             <button
               onClick={() => handleSelectCoach(coach.accountId)}
               className="mt-4 px-5 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"

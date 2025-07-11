@@ -1,13 +1,31 @@
-// src/pages/CoachDashboard.jsx
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import api from "../../configs/axios";
+
+// --- START: NEW IMPORTS FROM ANT DESIGN ---
 import {
-  HiOutlineSearch,
-  HiOutlineChatAlt2,
-  HiChevronDown,
-} from "react-icons/hi";
+  Table,
+  Button,
+  Input,
+  Space,
+  Modal,
+  Tag,
+  Select,
+  Dropdown,
+  Menu,
+  message,
+  Typography,
+} from "antd";
+import {
+  EyeOutlined,
+  SearchOutlined,
+  DownOutlined,
+  SyncOutlined,
+} from "@ant-design/icons";
+// --- END: NEW IMPORTS FROM ANT DESIGN ---
+
+import { HiOutlineChatAlt2, HiChevronDown } from "react-icons/hi";
 
 // Component Card cho mỗi chỉ số (Không thay đổi)
 const StatCard = ({ title, value, colorClass }) => (
@@ -32,7 +50,7 @@ const ClientCard = ({ client }) => {
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-4">
           <img
-            src={client.avatar}
+            src={client.avatarUrl}
             alt={client.fullName}
             className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
           />
@@ -41,7 +59,11 @@ const ClientCard = ({ client }) => {
               {client.fullName}
             </h3>
             <p className="text-sm text-gray-500">{client.email}</p>
-            <p className="text-xs text-gray-400">Joined: {client.joinedDate}</p>
+            {client.joinedDate && (
+              <p className="text-xs text-gray-400">
+                Joined: {client.joinedDate}
+              </p>
+            )}
           </div>
         </div>
         {client.plan === "Premium" && (
@@ -96,85 +118,214 @@ const ClientCard = ({ client }) => {
   );
 };
 
+// --- START: NEW CONSTANTS FOR BOOKING MANAGEMENT ---
+const { Title, Text, Paragraph } = Typography;
+const { Option } = Select;
+
+const STATUS_COLORS = {
+  PENDING: "orange",
+  CONFIRMED: "green",
+  CANCELED: "red",
+  COMPLETED: "blue",
+};
+
+const AVAILABLE_STATUSES = ["PENDING", "CONFIRMED", "CANCELED", "COMPLETED"];
+// --- END: NEW CONSTANTS ---
+
 function CoachDashboard() {
   const [clients, setClients] = useState([]);
-  const [appointments, setAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const currentUser = useSelector((state) => state.user);
 
-  useEffect(() => {
-    // Bỏ comment và sử dụng API thật
-    const fetchDashboardData = async () => {
-      try {
-        setIsLoading(true);
-        const apiConfig = {
-          headers: { Authorization: `Bearer ${currentUser.token}` },
-        };
+  // --- START: NEW STATE FOR BOOKING MANAGEMENT ---
+  const [bookings, setBookings] = useState([]);
+  const [allBookings, setAllBookings] = useState([]); // Store all fetched bookings
+  const [viewingBooking, setViewingBooking] = useState(null);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 5,
+    total: 0,
+  });
+  const [filters, setFilters] = useState({ keyword: "", status: null });
+  // --- END: NEW STATE ---
 
-        // Gọi API duy nhất bạn đã cung cấp
-        const response = await api.get(
-          `/api/bookings/coach/${currentUser.id}`,
-          apiConfig
-        );
-        const bookings = response.data;
-
-        // --- XỬ LÝ DỮ LIỆU ---
-
-        // 1. Tạo danh sách lịch hẹn để hiển thị
-        const formattedAppointments = bookings.map((booking) => ({
-          id: booking.id,
-          customerName: booking.name || `Customer ID: ${booking.customerId}`, // Dùng tạm nếu API không trả về tên
-          date: booking.date,
-          time: `${booking.startTime} - ${booking.endTime}`,
-          status:
-            booking.status.charAt(0).toUpperCase() + booking.status.slice(1), // Viết hoa chữ cái đầu
-        }));
-        setAppointments(formattedAppointments);
-
-        // 2. Tạo danh sách khách hàng duy nhất từ danh sách booking
-        const clientMap = new Map();
-        bookings.forEach((booking) => {
-          if (!clientMap.has(booking.customerId)) {
-            clientMap.set(booking.customerId, {
-              id: booking.customerId,
-              fullName: booking.name || `Customer ID: ${booking.customerId}`,
-              email: "email@example.com", // API booking không có email, cần bổ sung
-              avatar:
-                booking.avatar ||
-                `https://i.pravatar.cc/150?u=${booking.customerId}`,
-              joinedDate: "2025-01-01", // API booking không có ngày tham gia, cần bổ sung
-              plan: "Premium", // Cần có thông tin này từ API
-              progress: {
-                // Dữ liệu này cần được lấy từ API riêng về progress của client
-                smokeFreeDays: 15,
-                cigarettesAvoided: 300,
-                moneySaved: 200,
-                cravingIntensity: 80,
-              },
-            });
-          }
-        });
-        const uniqueClients = Array.from(clientMap.values());
-        setClients(uniqueClients);
-      } catch (err) {
-        setError("Failed to load dashboard data. Please try again.");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (currentUser && currentUser.id) {
-      fetchDashboardData();
-    } else {
-      // Nếu không có user, dừng loading và có thể hiện thông báo
+  const fetchCoachData = useCallback(async () => {
+    if (!currentUser?.id) {
       setIsLoading(false);
       setError("Please log in to view the dashboard.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const apiConfig = {
+        headers: { Authorization: `Bearer ${currentUser.token}` },
+      };
+      const response = await api.get(
+        `/bookings/coach/${currentUser.id}`,
+        apiConfig
+      );
+      const coachBookings = response.data;
+
+      // 1. Process unique clients (same as before)
+      const clientMap = new Map();
+      coachBookings.forEach((booking) => {
+        const userInfo = booking.user;
+        if (userInfo && !clientMap.has(userInfo.customerId)) {
+          clientMap.set(userInfo.customerId, {
+            id: userInfo.customerId,
+            fullName: userInfo.fullName,
+            email: userInfo.email,
+            avatarUrl: userInfo.avatarUrl,
+            joinedDate: userInfo.joinedDate || null,
+            plan: userInfo.plan || "Basic",
+            progress: {
+              smokeFreeDays: 15,
+              cigarettesAvoided: 300,
+              moneySaved: 200,
+              cravingIntensity: 76,
+            }, // Dummy data
+          });
+        }
+      });
+      setClients(Array.from(clientMap.values()));
+
+      // 2. Format and store all bookings for filtering
+      const formattedBookings = coachBookings.map((booking) => ({
+        ...booking,
+        key: booking.bookingId, // Ant Design table needs a unique 'key' prop
+        customerName: booking.user.fullName,
+        status: booking.status.toUpperCase(), // Standardize status to uppercase
+      }));
+      setAllBookings(formattedBookings); // Store the original list
+    } catch (err) {
+      setError("Failed to load dashboard data. Please try again.");
+      console.error("Error fetching dashboard data:", err);
+    } finally {
+      setIsLoading(false);
     }
   }, [currentUser]);
 
-  if (isLoading) {
+  // Initial data fetch
+  useEffect(() => {
+    fetchCoachData();
+  }, [fetchCoachData]);
+
+  // --- START: NEW EFFECT FOR FILTERING ---
+  // This effect runs whenever filters or the source of bookings change
+  useEffect(() => {
+    let filteredData = [...allBookings];
+
+    // Apply keyword filter
+    if (filters.keyword) {
+      const keywordLower = filters.keyword.toLowerCase();
+      filteredData = filteredData.filter(
+        (b) =>
+          b.customerName.toLowerCase().includes(keywordLower) ||
+          b.bookingId.toString().includes(keywordLower)
+      );
+    }
+
+    // Apply status filter
+    if (filters.status) {
+      filteredData = filteredData.filter((b) => b.status === filters.status);
+    }
+
+    setBookings(filteredData);
+    setPagination((p) => ({ ...p, total: filteredData.length, current: 1 }));
+  }, [filters, allBookings]);
+  // --- END: NEW EFFECT FOR FILTERING ---
+
+  // --- START: NEW HANDLER FUNCTIONS ---
+  const handleTableChange = (pagination) => setPagination(pagination);
+  const handleSearch = (value) => setFilters({ ...filters, keyword: value });
+  const handleStatusFilterChange = (value) =>
+    setFilters({ ...filters, status: value });
+  const viewBookingDetails = (booking) => setViewingBooking(booking);
+  const closeBookingDetails = () => setViewingBooking(null);
+
+  const handleUpdateStatus = async (bookingId, newStatus) => {
+    try {
+      await api.put(
+        `/bookings/${bookingId}`,
+        { status: newStatus.toLowerCase() },
+        {
+          headers: { Authorization: `Bearer ${currentUser.token}` },
+        }
+      );
+      message.success(`Đã cập nhật trạng thái thành ${newStatus}`);
+      fetchCoachData(); // Refresh all data to get the latest status
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      message.error("Không thể cập nhật trạng thái. Vui lòng thử lại.");
+    }
+  };
+  // --- END: NEW HANDLER FUNCTIONS ---
+
+  // --- START: NEW TABLE COLUMNS DEFINITION ---
+  const columns = [
+    { title: "ID", dataIndex: "bookingId", key: "bookingId", width: 80 },
+    { title: "Customer", dataIndex: "customerName", key: "customerName" },
+    {
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
+      render: (text) => new Date(text).toLocaleDateString("vi-VN"),
+    },
+    {
+      title: "Time",
+      key: "time",
+      render: (_, record) => `${record.startTime} - ${record.endTime}`,
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => (
+        <Tag color={STATUS_COLORS[status] || "default"} key={status}>
+          {status}
+        </Tag>
+      ),
+    },
+    {
+      title: "Action",
+      key: "action",
+      width: 220,
+      render: (_, record) => {
+        const menu = (
+          <Menu
+            onClick={({ key }) => handleUpdateStatus(record.bookingId, key)}
+            items={AVAILABLE_STATUSES.map((status) => ({
+              key: status,
+              label: `Chuyển thành ${status}`,
+              disabled: record.status === status,
+            }))}
+          />
+        );
+        return (
+          <Space size="small">
+            <Button
+              type="default"
+              icon={<EyeOutlined />}
+              onClick={() => viewBookingDetails(record)}
+            >
+              View
+            </Button>
+            <Dropdown overlay={menu}>
+              <Button type="primary">
+                Approve <DownOutlined />
+              </Button>
+            </Dropdown>
+          </Space>
+        );
+      },
+    },
+  ];
+  // --- END: NEW TABLE COLUMNS DEFINITION ---
+
+  if (isLoading && !clients.length) {
+    // Adjusted loading condition
     return <div className="p-8 text-center">Loading dashboard...</div>;
   }
 
@@ -193,77 +344,127 @@ function CoachDashboard() {
             Welcome back, Coach! Here's an overview of your clients.
           </p>
         </header>
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-6">
-          <div className="relative w-full sm:w-auto">
-            <HiOutlineSearch
-              className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400"
-              size={20}
-            />
-            <input
-              type="text"
-              placeholder="Search by name or email..."
-              className="pl-10 pr-4 py-2 border rounded-lg w-full sm:w-64"
-            />
-          </div>
-          <div className="relative">
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg">
-              <span>All Clients</span>
-              <HiChevronDown />
-            </button>
-          </div>
+
+        <div className="flex gap-4 mb-6">
+          <Link
+            to="/"
+            className="px-4 py-2 bg-white border border-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            Về Homepage
+          </Link>
+          <Link
+            to="/dashboard-coach"
+            className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Quản lý khách hàng
+          </Link>
         </div>
+
+        {/* Client Cards List */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-          {clients.map((client) => (
-            <ClientCard key={client.id} client={client} />
-          ))}
+          {clients.length > 0 ? (
+            clients.map((client) => (
+              <ClientCard key={client.id} client={client} />
+            ))
+          ) : (
+            <p className="lg:col-span-2 text-center text-gray-500">
+              No clients to display.
+            </p>
+          )}
         </div>
+
+        {/* --- START: UPDATED APPOINTMENTS SECTION --- */}
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Upcoming Appointments
+            My Appointments
           </h2>
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="p-4 font-semibold text-gray-600">
-                      Customer
-                    </th>
-                    <th className="p-4 font-semibold text-gray-600">Date</th>
-                    <th className="p-4 font-semibold text-gray-600">Time</th>
-                    <th className="p-4 font-semibold text-gray-600">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointments.map((appt, index) => (
-                    <tr
-                      key={appt.id}
-                      className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                    >
-                      <td className="p-4 font-medium text-gray-800">
-                        {appt.customerName}
-                      </td>
-                      <td className="p-4 text-gray-600">{appt.date}</td>
-                      <td className="p-4 text-gray-600">{appt.time}</td>
-                      <td className="p-4">
-                        <span
-                          className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                            appt.status === "Confirmed"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {appt.status}
-                        </span>
-                      </td>
-                    </tr>
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+              <Space wrap>
+                <Input.Search
+                  placeholder="Search by name, ID..."
+                  onSearch={handleSearch}
+                  enterButton={<SearchOutlined />}
+                  className="w-full md:w-64"
+                />
+                <Select
+                  placeholder="Filter by status"
+                  onChange={handleStatusFilterChange}
+                  allowClear
+                  className="w-full md:w-52"
+                >
+                  {AVAILABLE_STATUSES.map((status) => (
+                    <Option key={status} value={status}>
+                      {status}
+                    </Option>
                   ))}
-                </tbody>
-              </table>
+                </Select>
+              </Space>
+              <Button
+                type="default"
+                icon={<SyncOutlined />}
+                onClick={fetchCoachData}
+                loading={isLoading}
+              >
+                Refresh
+              </Button>
             </div>
+
+            <Table
+              columns={columns}
+              dataSource={bookings}
+              rowKey="key"
+              pagination={pagination}
+              loading={isLoading}
+              onChange={handleTableChange}
+              scroll={{ x: "max-content" }}
+              className="rounded-lg"
+            />
           </div>
         </div>
+        {/* --- END: UPDATED APPOINTMENTS SECTION --- */}
       </div>
+
+      {/* --- START: NEW MODAL FOR VIEWING DETAILS --- */}
+      <Modal
+        title={
+          <Title level={4}>Booking Details #{viewingBooking?.bookingId}</Title>
+        }
+        open={viewingBooking !== null}
+        onCancel={closeBookingDetails}
+        footer={[
+          <Button key="back" onClick={closeBookingDetails}>
+            Close
+          </Button>,
+        ]}
+      >
+        {viewingBooking && (
+          <div>
+            <Paragraph>
+              <Text strong>Customer:</Text> {viewingBooking.customerName}
+            </Paragraph>
+            <Paragraph>
+              <Text strong>Date:</Text>{" "}
+              {new Date(viewingBooking.date).toLocaleDateString("vi-VN")}
+            </Paragraph>
+            <Paragraph>
+              <Text strong>Time:</Text> {viewingBooking.startTime} -{" "}
+              {viewingBooking.endTime}
+            </Paragraph>
+            <Paragraph>
+              <Text strong>Status:</Text>{" "}
+              <Tag color={STATUS_COLORS[viewingBooking.status] || "default"}>
+                {viewingBooking.status}
+              </Tag>
+            </Paragraph>
+            <Paragraph>
+              <Text strong>Created At:</Text>{" "}
+              {new Date(viewingBooking.createdAt).toLocaleString("vi-VN")}
+            </Paragraph>
+          </div>
+        )}
+      </Modal>
+      {/* --- END: NEW MODAL --- */}
     </div>
   );
 }

@@ -187,7 +187,7 @@ function App() {
       element: <InitialCondition />,
     },
     {
-      path: "/coach/dashboard",
+      path: "/dashboard-coach",
       element: <CoachDashboard />,
     },
   ]);

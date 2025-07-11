@@ -31,7 +31,7 @@ function LoginForm() {
       if (role === "ADMIN") {
         navigate("/dashboard"); // Điều hướng ADMIN đến dashboard chung
       } else if (role === "COACH") {
-        navigate("/coach/dashboard"); // Điều hướng COACH đến dashboard riêng
+        navigate("/dashboard-coach"); // Điều hướng COACH đến dashboard riêng
       } else if (role === "CUSTOMER") {
         // Kiểm tra xem CUSTOMER đã điền thông tin ban đầu chưa
         try {
