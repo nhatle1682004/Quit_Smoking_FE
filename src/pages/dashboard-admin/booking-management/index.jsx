@@ -1,223 +1,335 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import api from "../../../configs/axios"; // Import api instance
-import { Table, Tag, Space, Button, message, Popconfirm, Avatar } from "antd";
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
+  Table,
+  Button,
+  Input,
+  Space,
+  Modal,
+  Tooltip,
+  Card,
+  Typography,
+  message,
+  Tag,
+  Select,
+  Dropdown,
+  Menu,
+} from "antd";
+import {
+  EyeOutlined,
+  SearchOutlined,
+  DownOutlined,
   SyncOutlined,
-  CheckSquareOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
+import api from "../../../configs/axios"; // FIXED: Reverted to use your original API configuration.
 
-const MOCK_API = "https://68512c568612b47a2c08e9af.mockapi.io/appointments";
+const { Title, Text, Paragraph } = Typography;
+const { Option } = Select;
+
+// Define status colors for visual representation (using uppercase keys for consistency)
+const STATUS_COLORS = {
+  PENDING: "orange",
+  CONFIRMED: "green",
+  CANCELED: "red",
+  COMPLETED: "blue",
+};
+
+// Define available statuses for filtering and updating (always uppercase)
+const AVAILABLE_STATUSES = ["PENDING", "CONFIRMED", "CANCELED", "COMPLETED"];
 
 function BookingManagement() {
+  // State variables for bookings, loading, pagination, filters, and modals
   const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [users, setUsers] = useState([]); // State để lưu danh sách người dùng
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
+  const [filters, setFilters] = useState({
+    keyword: "",
+    status: null, // New filter for booking status
+  });
+  const [viewingBooking, setViewingBooking] = useState(null);
 
-  // Hàm tìm thông tin người dùng bằng ID
-  const getUserDetails = (userId) => {
-    return users.find((user) => user.id === userId);
-  };
-
-  const fetchAllData = async () => {
+  const fetchBookings = useCallback(async () => {
     setLoading(true);
     try {
-      // Tải đồng thời danh sách lịch hẹn và người dùng
-      const [bookingsRes, usersRes] = await Promise.all([
-        axios.get(MOCK_API),
-        api.get("/user"), // Lấy user từ API thật
-      ]);
+      // API endpoint to get all bookings
+      const response = await api.get("/bookings");
+      let data = response.data;
 
-      setBookings(
-        bookingsRes.data.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        )
-      );
-      setUsers(usersRes.data); // Lưu danh sách người dùng vào state
+      // Filter data based on current status and keyword filters
+      const filteredData = data.filter((booking) => {
+        const keywordLower = filters.keyword.toLowerCase();
+        const matchKeyword =
+          !filters.keyword ||
+          booking.id.toString().toLowerCase().includes(keywordLower) ||
+          booking.userName?.toLowerCase().includes(keywordLower) ||
+          booking.coachName?.toLowerCase().includes(keywordLower);
+
+        // UPDATED: Consistently check status in uppercase
+        const matchStatus =
+          !filters.status ||
+          (booking.status && booking.status.toUpperCase() === filters.status);
+
+        return matchKeyword && matchStatus;
+      });
+
+      setBookings(filteredData);
+      setPagination((p) => ({
+        ...p,
+        total: filteredData.length,
+      }));
     } catch (error) {
-      message.error("Lỗi khi tải dữ liệu");
-      console.error("Fetch data error:", error);
+      console.error("Error fetching bookings:", error);
+      message.error("Không thể tải danh sách lịch hẹn");
     } finally {
       setLoading(false);
     }
+  }, [filters.keyword, filters.status]);
+
+  // Effect hook to fetch bookings when filters or pagination change
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
+
+  // Handle table pagination and sorting changes
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
   };
 
-  useEffect(() => {
-    fetchAllData();
-  }, []);
+  // Handle search input change
+  const handleSearch = (value) => {
+    setFilters({ ...filters, keyword: value });
+    setPagination({ ...pagination, current: 1 });
+  };
 
-  const handleUpdateStatus = async (id, newStatus) => {
+  // Handle status filter change
+  const handleStatusFilterChange = (value) => {
+    setFilters({ ...filters, status: value });
+    setPagination({ ...pagination, current: 1 });
+  };
+
+  // Set selected booking for detailed view
+  const viewBookingDetails = (booking) => {
+    setViewingBooking(booking);
+  };
+
+  // Close the booking details modal
+  const closeBookingDetails = () => {
+    setViewingBooking(null);
+  };
+
+  // Handle status update for a booking
+  const handleUpdateStatus = async (bookingId, newStatus) => {
     try {
-      await axios.put(`${MOCK_API}/${id}`, { status: newStatus });
-      message.success("Cập nhật trạng thái thành công!");
-      // Tải lại chỉ danh sách booking sau khi cập nhật
-      const res = await axios.get(MOCK_API);
-      setBookings(
-        res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      );
-    } catch {
-      message.error("Cập nhật trạng thái thất bại.");
+      // Convert the status to lowercase to match backend expectations.
+      await api.put(`/bookings/${bookingId}`, {
+        status: newStatus.toLowerCase(),
+      });
+      message.success(`Đã cập nhật trạng thái lịch hẹn thành ${newStatus}`);
+      fetchBookings(); // Refresh data after update
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      message.error("Không thể cập nhật trạng thái. Vui lòng thử lại.");
     }
   };
 
+  // Table columns definition - UPDATED to match new response body
   const columns = [
     {
-      title: "Khách hàng",
-      dataIndex: "customerId", // Dùng customerId để tra cứu
-      key: "customer",
-      render: (customerId) => {
-        const customer = getUserDetails(customerId);
-        return (
-          <Space>
-            <Avatar src={customer?.avatarUrl} icon={<UserOutlined />} />
-            <div>
-              <strong>{customer?.fullName || "N/A"}</strong>
-              <div style={{ color: "gray" }}>
-                @{customer?.username || "N/A"}
-              </div>
-            </div>
-          </Space>
-        );
-      },
+      title: "ID Lịch hẹn",
+      dataIndex: "id",
+      key: "id",
+      width: 120,
     },
     {
-      title: "Coach",
-      dataIndex: "coachId", // Dùng coachId để tra cứu
-      key: "coach",
-      render: (coachId) => {
-        const coach = getUserDetails(coachId);
-        return (
-          <Space>
-            <Avatar src={coach?.avatarUrl} icon={<UserOutlined />} />
-            <div>
-              <strong>{coach?.fullName || "N/A"}</strong>
-            </div>
-          </Space>
-        );
-      },
+      title: "Tên Khách hàng",
+      dataIndex: "userName",
+      key: "userName",
+      responsive: ["md"],
+    },
+    {
+      title: "Tên Coach",
+      dataIndex: "coachName",
+      key: "coachName",
+      responsive: ["md"],
     },
     {
       title: "Ngày hẹn",
       dataIndex: "date",
       key: "date",
-      render: (date) => new Date(date).toLocaleDateString("vi-VN"),
-      sorter: (a, b) => new Date(a.date) - new Date(b.date),
+      render: (text) =>
+        text ? new Date(text).toLocaleDateString("vi-VN") : "N/A",
     },
     {
-      title: "Giờ hẹn",
-      dataIndex: "time",
+      title: "Thời gian hẹn",
       key: "time",
+      render: (_, record) => `${record.startTime} - ${record.endTime}`,
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       render: (status) => {
-        let color, icon, text;
-        switch (status) {
-          case "BOOKED":
-            color = "purple";
-            icon = <SyncOutlined spin />;
-            text = "Mới đặt";
-            break;
-          case "ACCEPTED":
-            color = "green";
-            icon = <CheckCircleOutlined />;
-            text = "Đã duyệt";
-            break;
-          case "DENIED":
-            color = "red";
-            icon = <CloseCircleOutlined />;
-            text = "Đã từ chối";
-            break;
-          case "COMPLETED":
-            color = "blue";
-            icon = <CheckSquareOutlined />;
-            text = "Đã hoàn thành";
-            break;
-          default:
-            color = "default";
-            text = status || "Không xác định";
-        }
+        // Safely convert status to uppercase for display
+        const upperCaseStatus = status ? status.toUpperCase() : "UNKNOWN";
         return (
-          <Tag icon={icon} color={color}>
-            {text}
+          <Tag color={STATUS_COLORS[upperCaseStatus] || "default"} key={status}>
+            {upperCaseStatus}
           </Tag>
         );
       },
-      filters: [
-        { text: "Mới đặt", value: "BOOKED" },
-        { text: "Đã duyệt", value: "ACCEPTED" },
-        { text: "Đã từ chối", value: "DENIED" },
-        { text: "Đã hoàn thành", value: "COMPLETED" },
-      ],
-      onFilter: (value, record) => record.status.indexOf(value) === 0,
     },
     {
       title: "Hành động",
       key: "action",
-      render: (_, record) => (
-        <Space>
-          <Button
-            type="primary"
-            icon={<CheckCircleOutlined />}
-            onClick={() => handleUpdateStatus(record.id, "ACCEPTED")}
-            disabled={record.status !== "BOOKED"}
-          >
-            Duyệt
-          </Button>
-          <Popconfirm
-            title="Bạn có chắc muốn từ chối?"
-            onConfirm={() => handleUpdateStatus(record.id, "DENIED")}
-            okText="Chắc chắn"
-            cancelText="Hủy"
-          >
+      width: 240,
+      render: (_, record) => {
+        const menu = (
+          <Menu
+            onClick={({ key }) => handleUpdateStatus(record.id, key)}
+            items={AVAILABLE_STATUSES.map((status) => ({
+              key: status,
+              label: `Chuyển thành ${status}`,
+            }))}
+          />
+        );
+
+        return (
+          <Space size="small" className="flex flex-wrap gap-2">
             <Button
-              danger
-              icon={<CloseCircleOutlined />}
-              disabled={record.status !== "BOOKED"}
+              type="default"
+              icon={<EyeOutlined />}
+              onClick={() => viewBookingDetails(record)}
             >
-              Từ chối
+              Xem
             </Button>
-          </Popconfirm>
-          <Button
-            onClick={() => handleUpdateStatus(record.id, "COMPLETED")}
-            disabled={record.status !== "ACCEPTED"}
-            icon={<CheckSquareOutlined />}
-          >
-            Hoàn tất
-          </Button>
-        </Space>
-      ),
+            <Dropdown overlay={menu}>
+              <Button type="primary">
+                Duyệt <DownOutlined />
+              </Button>
+            </Dropdown>
+          </Space>
+        );
+      },
     },
   ];
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">
-          Quản lý Lịch hẹn Tư vấn
-        </h2>
-        <Button
-          onClick={fetchAllData}
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-6 font-inter">
+      <Card bordered={false} className="shadow-lg rounded-xl">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 border-gray-200">
+          <div>
+            <Title level={2} className="mb-1 text-gray-800">
+              Quản lý Lịch hẹn
+            </Title>
+            <Text
+              type="secondary"
+              className="text-gray-500 text-sm sm:text-base"
+            >
+              Duyệt và quản lý các lịch hẹn trên hệ thống.
+            </Text>
+          </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <Space wrap>
+            <Input.Search
+              placeholder="Tìm theo ID, tên..."
+              onSearch={handleSearch}
+              enterButton={<SearchOutlined />}
+              className="w-full md:w-64"
+            />
+            <Select
+              placeholder="Lọc theo trạng thái"
+              onChange={handleStatusFilterChange}
+              allowClear
+              className="w-full md:w-52"
+            >
+              {AVAILABLE_STATUSES.map((status) => (
+                <Option key={status} value={status}>
+                  {status}
+                </Option>
+              ))}
+            </Select>
+          </Space>
+          <Button
+            type="default"
+            icon={<SyncOutlined />}
+            onClick={fetchBookings}
+            loading={loading}
+          >
+            Làm mới
+          </Button>
+        </div>
+
+        <Table
+          columns={columns}
+          dataSource={bookings}
+          rowKey="id"
+          pagination={pagination}
           loading={loading}
-          icon={<SyncOutlined />}
-        >
-          Làm mới
-        </Button>
-      </div>
-      <Table
-        dataSource={bookings}
-        columns={columns}
-        rowKey="id"
-        loading={loading}
-        pagination={{ pageSize: 8, showSizeChanger: true }}
-        scroll={{ x: "max-content" }}
-        className="shadow-lg rounded-lg"
-      />
+          onChange={handleTableChange}
+          bordered={false}
+          className="rounded-lg overflow-hidden shadow-md"
+          scroll={{ x: "max-content" }}
+        />
+      </Card>
+
+      <Modal
+        title={
+          <Title level={4} className="mb-0 text-gray-800">
+            Chi tiết Lịch hẹn #{viewingBooking?.id}
+          </Title>
+        }
+        open={viewingBooking !== null}
+        onCancel={closeBookingDetails}
+        footer={[
+          <Button key="back" onClick={closeBookingDetails}>
+            Đóng
+          </Button>,
+        ]}
+        width={600}
+      >
+        {viewingBooking && (
+          <div className="p-4 bg-gray-50 rounded-lg shadow-inner">
+            <Paragraph>
+              <Text strong>Tên Khách hàng:</Text> {viewingBooking.userName}
+            </Paragraph>
+            <Paragraph>
+              <Text strong>Tên Coach:</Text> {viewingBooking.coachName}
+            </Paragraph>
+            <Paragraph>
+              <Text strong>Ngày hẹn:</Text>{" "}
+              {new Date(viewingBooking.date).toLocaleDateString("vi-VN")}
+            </Paragraph>
+            <Paragraph>
+              <Text strong>Thời gian hẹn:</Text> {viewingBooking.startTime} -{" "}
+              {viewingBooking.endTime}
+            </Paragraph>
+            <Paragraph>
+              <Text strong>Trạng thái:</Text>{" "}
+              <Tag
+                color={
+                  STATUS_COLORS[viewingBooking.status.toUpperCase()] ||
+                  "default"
+                }
+              >
+                {viewingBooking.status.toUpperCase()}
+              </Tag>
+            </Paragraph>
+            <Paragraph>
+              <Text strong>Ngày tạo:</Text>{" "}
+              {new Date(viewingBooking.createdAt).toLocaleString("vi-VN")}
+            </Paragraph>
+            <Paragraph>
+              <Text strong>Cập nhật lần cuối:</Text>{" "}
+              {new Date(viewingBooking.updatedAt).toLocaleString("vi-VN")}
+            </Paragraph>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
