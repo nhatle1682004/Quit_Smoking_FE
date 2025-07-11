@@ -42,14 +42,11 @@ function LoginForm() {
             console.log("Init condition:", response.data)
             navigate('/');
           } else {
-            if (error.response?.status == 403) {
-              navigate('/initial-condition');
-            }
+            navigate('/initial-condition');
           }
         } catch (error) {
           if (error.response?.status == 403 || error.response?.status == 500) {
             navigate('/initial-condition');
-            console.log("Init condition:", response.data)
           }
         }
       }

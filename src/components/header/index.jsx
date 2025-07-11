@@ -3,7 +3,7 @@ import { FiMenu, FiX, FiChevronDown } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Dropdown } from "antd";
-import logo from "../../assets/image/logo.jpg";
+import logo from "/logo.jpg";
 import UserAvatar from "../avatar";
 import { logout } from "../../redux/features/userSlice";
 import { FaBell, FaMedal } from "react-icons/fa";
@@ -17,7 +17,10 @@ const Header = () => {
 
   const user = useSelector((state) => state.user);
 
-  const handleLogout = () => dispatch(logout());
+  const handleLogout = () => {
+    dispatch(logout());
+    localStorage.removeItem('token');
+  }
 
   const handleHomeClick = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
