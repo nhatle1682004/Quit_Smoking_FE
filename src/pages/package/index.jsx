@@ -3,10 +3,12 @@ import { toast } from 'react-toastify';
 import api from '../../configs/axios';
 import { Button, Badge, Divider } from 'antd';
 import { GiftOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 function PackagePage() {
   const [initialPackages, setInitialPackages] = useState([]);
   const [userPlans, setUserPlans] = useState([]);
+  const navigate = useNavigate();
 
   // Lấy danh sách package public
   const fetchPackages = async () => {
@@ -42,6 +44,12 @@ function PackagePage() {
   };
 
   const handleBuyPackage = async (packageCode) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.info('Vui lòng đăng nhập để mua gói!');
+      navigate('/login');
+      return;
+    }
     if (hasPendingOrActivePlan(packageCode)) {
       toast.info('Bạn đã có gói này chưa hoàn tất. Vui lòng thanh toán hoặc kích hoạt trước khi mua thêm!');
       return;
