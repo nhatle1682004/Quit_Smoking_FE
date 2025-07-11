@@ -1,28 +1,41 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import api from '../../../configs/axios';
 import { useNavigate } from 'react-router-dom';
-
+import { Button, Popconfirm } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 function Plan() {
-  const [plan,setPlan]= useState(null);
+  const [plan, setPlan] = useState(null);
   const navigate = useNavigate();
 
   const fetchPlan = async () => {
-    try {   
+    try {
       const response = await api.get('/quit-plan/active');
       setPlan(response.data);
-      toast.success("Lấy kế hoạch thành công"); 
+      toast.success('Lấy kế hoạch thành công');
     } catch (error) {
-      console.error("Error fetching plan history:", error);
+      console.error('Lỗi khi lấy kế hoạch:', error);
       setPlan(null);
     }
   };
- useEffect(() => {
-    fetchPlan();
-  }, []);  
 
-  // Nếu chưa có kế hoạch
+  useEffect(() => {
+    fetchPlan();
+  }, []);
+
+  const handleDeletePlan = async (planId) => {
+    try {
+      const response = await api.put(`/quit-plan/${planId}/cancel`);
+      toast.success("Xóa kế hoạch thành công");
+      setPlan(response.data);
+    } catch (error) {
+      toast.error("Xóa kế hoạch thất bại");
+      console.log(error);
+    }
+  }
+
+
   if (!plan || !plan.createdAt) {
     return (
       <div className="bg-white p-8 rounded-lg shadow max-w-xl mx-auto my-10 text-black text-center flex flex-col items-center gap-6">
@@ -46,51 +59,74 @@ function Plan() {
     );
   }
 
+  // Parse planDetail
+  let parsedPlanDetail = [];
+  try {
+    parsedPlanDetail = JSON.parse(plan.planDetail);
+  } catch {
+    parsedPlanDetail = [];
+  }
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow max-w-xl mx-auto mt-6 text-black">
-      <h2 className="text-xl font-bold mb-4">Thông tin Kế Hoạch Cai Thuốc</h2>
-  
-      <ul className="space-y-2 text-sm">
-        <li>
-          <strong>Số điếu mỗi ngày:</strong> {plan.cigarettesPerDay}
-        </li>
-        <li>
-          <strong>Thời gian hút đầu tiên:</strong> {plan.firstSmokeTime}
-        </li>
-        <li>
-          <strong>Lý do bắt đầu hút:</strong> {plan.reasonForStarting}
-        </li>
-        <li>
-          <strong>Lý do muốn cai thuốc:</strong> {plan.quitReason}
-        </li>
-        <li>
-          <strong>Thang đo sẵn sàng:</strong> {plan.readinessScale}/10
-        </li>
-        <li>
-          <strong>Tình trạng sức khỏe:</strong> {plan.hasHealthIssues ? 'Có' : 'Không'}
-        </li>
-        <li>
-          <strong>Đã từng thử bỏ thuốc chưa:</strong> {plan.hasTriedToQuit ? 'Có' : 'Chưa'}
-        </li>
-        <li>
-          <strong>Giá 1 điếu:</strong> {plan.pricePerCigarette?.toLocaleString()} VNĐ
-        </li>
-        <li>
-          <strong>Số điếu 1 bao:</strong> {plan.cigarettesPerPack}
-        </li>
-        <li>
-          <strong>Cân nặng:</strong> {plan.weightKg} kg
-        </li>
-        <li>
-          <strong>Độ nghiện:</strong> {plan.addictionLevelLabel || plan.addictionLevel}
-        </li>
-        <li>
-          <strong>Ngày tạo kế hoạch:</strong> {new Date(plan.createdAt).toLocaleDateString()}
-        </li>
-      </ul>
+    <div className="bg-white p-6 rounded-lg shadow max-w-4xl mx-auto mt-6 text-black">
+      <h2 className="text-2xl font-bold mb-4 text-center">Thông tin Kế Hoạch Cai Thuốc</h2>
+
+      <div className="mb-6 space-y-2 text-sm">
+        <p><strong>Gói:</strong> {plan.packageInfo?.name}</p>
+        <p><strong>Ngày bắt đầu:</strong> {new Date(plan.startDate).toLocaleDateString()}</p>
+        <p><strong>Ngày mục tiêu:</strong> {new Date(plan.targetQuitDate).toLocaleDateString()}</p>
+        <p><strong>Trạng thái:</strong> {plan.status}</p>
+        <p><strong>Phương pháp:</strong> {plan.method}</p>
+      </div>
+
+      <h3 className="text-xl font-semibold mb-2">Chi tiết từng ngày:</h3>
+      <div className="overflow-x-auto">
+        <table className="min-w-full border text-sm text-left">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="px-4 py-2 border">Ngày</th>
+              <th className="px-4 py-2 border">Số điếu</th>
+              <th className="px-4 py-2 border">Ghi chú</th>
+            </tr>
+          </thead>
+          <tbody>
+            {parsedPlanDetail.map((item, index) => (
+              <tr key={index} className="border-b">
+                <td className="px-4 py-2 border">Ngày {item.day}</td>
+                <td className="px-4 py-2 border text-center">{item.cigarettes}</td>
+                <td className="px-4 py-2 border">{item.note}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex justify-end mt-8">
+        <Popconfirm
+          title={
+            <span>
+              <ExclamationCircleOutlined className="text-red-500 mr-2" />
+              Bạn có chắc chắn muốn <span className="text-red-600 font-bold">hủy kế hoạch</span>?
+            </span>
+          }
+          description="Sau khi hủy, bạn sẽ không thể tạo lại kế hoạch mới với gói hiện tại."
+          okText="Đồng ý"
+          cancelText="Không"
+          okButtonProps={{ danger: true, className: 'bg-red-600 hover:bg-red-700' }}
+          onConfirm={() => handleDeletePlan(plan.id)}
+        >
+          <Button
+            danger
+            size="large"
+            className="flex items-center gap-2 font-semibold border-2 border-red-500 hover:bg-red-600 hover:text-white transition"
+            icon={<ExclamationCircleOutlined />}
+          >
+            Hủy kế hoạch
+          </Button>
+        </Popconfirm>
+      </div>
     </div>
   );
-  
-}
+};
 
 export default Plan;

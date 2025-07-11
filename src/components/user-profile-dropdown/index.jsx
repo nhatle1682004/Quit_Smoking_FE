@@ -183,7 +183,6 @@ const UserProfileDropdown = ({ onMenuClick }) => {
             <Title level={5} className="!mb-0">
               {user?.username}
             </Title>
-            <Text type="secondary">Gói Miễn Phí</Text>
           </div>
         </Space>
       </div>
