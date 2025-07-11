@@ -39,9 +39,9 @@ function QuitPlanFree() {
   return (
     <div className="min-h-screen bg-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 p-10 bg-white rounded-lg shadow-xl">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Tạo Kế Hoạch Cai Thuốc Miễn Phí
-        </h2>
+        <h3 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Hướng dẫn tạo kế hoạch cai thuốc 
+        </h3>
 
         <div className="text-center">
           <p className="text-gray-600 mb-4">

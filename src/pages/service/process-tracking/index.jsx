@@ -97,9 +97,6 @@ function ProcessTracking() {
               <strong>Ngày Kết Thúc:</strong> {dayjs(planData.endDate).format('DD/MM/YYYY')}
             </p>
             <p>
-              <strong>Mục Tiêu:</strong> {planData.goal}
-            </p>
-            <p>
               <strong>Lý Do Thúc Đẩy:</strong> {planData.motivationReason}
             </p>
             <p>

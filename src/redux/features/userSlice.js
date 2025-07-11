@@ -39,7 +39,7 @@ export const userSlice = createSlice({ //tao nhanh 1 slice cua redux store, name
   },
 });
 
-// ⚠️ Nhớ export thêm updateAvatar
+
 export const { login, logout, updateUser } = userSlice.actions;
 
 export default userSlice.reducer;

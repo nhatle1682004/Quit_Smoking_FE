@@ -42,8 +42,10 @@ import ManagePackage from "./pages/dashboard-admin/manage-package";
 import BookingManagement from "./pages/dashboard-admin/booking-management";
 import ProfileInitialCondition from "./components/profile-initial-condition";
 import InitialCondition from "./pages/initial-condition";
-import PaymentPage from "./pages/payment-result";
 import UserPackage from "./pages/package/userPackage";
+import PlanHistoryPreview from "./components/plan-history-preview";
+import PaymentResultPage from "./pages/payment-result";
+import PremiumTracker from "./pages/premium-tracker";
 import CoachDashboard from "./pages/dashboard-coach";
 
 function App() {
@@ -80,7 +82,7 @@ function App() {
           element: <QuitPlanFree />,
         },
         {
-          path: "service/process-tracking",
+          path: "service/process",
           element: <ProcessTracking />,
         },
         {
@@ -148,6 +150,14 @@ function App() {
           path: "user-package",
           element: <UserPackage />,
         },
+        {
+          path: "plan-history-preview",
+          element: <PlanHistoryPreview />,
+        },
+        {
+          path: "premium-tracker",
+          element: <PremiumTracker />,
+        },
       ],
     },
     {
@@ -172,7 +182,7 @@ function App() {
     },
     {
       path: "/payment-result",
-      element: <PaymentPage />,
+      element: <PaymentResultPage />,
     },
     {
       path: "/forgot-password",

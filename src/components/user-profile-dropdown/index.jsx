@@ -8,6 +8,7 @@ import {
   SettingOutlined,
   FileTextOutlined,
   LogoutOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -103,6 +104,11 @@ const UserProfileDropdown = ({ onMenuClick }) => {
       label: "Gói của tôi",
     },
     {
+      key: "plan-history-preview",
+      icon: <HistoryOutlined style={{ fontSize: "20px", color: "#222" }} />,
+      label: "Lịch sử kế hoạch",
+    },
+    {
       key: "settings",
       icon: <SettingOutlined style={{ fontSize: "20px", color: "#222" }} />,
       label: "Cài đặt & Bảo mật",
@@ -119,7 +125,7 @@ const UserProfileDropdown = ({ onMenuClick }) => {
       key: "logout",
       icon: <LogoutOutlined style={{ fontSize: "20px" }} />,
       label: <span className="text-red-500">Đăng xuất</span>,
-      danger: true, // AntD sẽ tự động thêm style màu đỏ
+      danger: true, 
     },
   ];
 
@@ -140,6 +146,9 @@ const UserProfileDropdown = ({ onMenuClick }) => {
         break;
       case "my-package":
         navigate("/user-package");
+        break;
+      case "plan-history-preview":
+        navigate("/plan-history-preview");
         break;
       case "settings":
         navigate("/settings");
@@ -179,7 +188,6 @@ const UserProfileDropdown = ({ onMenuClick }) => {
             <Title level={5} className="!mb-0">
               {user?.username}
             </Title>
-            <Text type="secondary">Gói Miễn Phí</Text>
           </div>
         </Space>
       </div>

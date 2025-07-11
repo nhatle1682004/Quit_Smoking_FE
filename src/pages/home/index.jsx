@@ -9,6 +9,7 @@ import {
   FaComment,
   FaMedal,
   FaCalendarAlt,
+  FaRegEdit,
 } from "react-icons/fa";
 import { Tabs } from "antd";
 import { useSelector } from "react-redux";
@@ -74,8 +75,8 @@ function HomePage() {
   // Tính năng của nền tảng
   const features = [
     {
-      icon: <FaChartLine className="w-8 h-8 text-blue-500" />,
-      title: "Theo dõi tiến trình",
+      icon: <FaRegEdit className="w-8 h-8 text-blue-500" />,
+      title: "Nhật ký hàng ngày",
       description:
         "Ghi nhận tình trạng hút thuốc hiện tại: số lượng điếu thuốc, tần suất hút, giá tiền thuốc hút",
       navigateTo: "/journal",
@@ -85,12 +86,14 @@ function HomePage() {
       title: "Kế hoạch cai thuốc cá nhân",
       description:
         "Tùy chỉnh lộ trình cai thuốc dựa trên thói quen và mức độ phụ thuộc của bạn",
+      navigateTo: "/my-plan",
     },
     {
-      icon: <FaBell className="w-8 h-8 text-blue-500" />,
-      title: "Thông báo động viên",
+      icon: <FaChartLine className="w-8 h-8 text-blue-500" />,
+      title: "Theo dõi tiến trình",
       description:
         "Nhận thông báo định kỳ và nhắc nhở để duy trì động lực cai thuốc",
+        navigateTo:"/premium-tracker",
     },
     {
       icon: <FaMedal className="w-8 h-8 text-blue-500" />,
