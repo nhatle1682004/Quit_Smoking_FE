@@ -46,6 +46,7 @@ import UserPackage from "./pages/package/userPackage";
 import PlanHistoryPreview from "./components/plan-history-preview";
 import PaymentResultPage from "./pages/payment-result";
 import PremiumTracker from "./pages/premium-tracker";
+import CoachDashboard from "./pages/dashboard-coach";
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -147,15 +148,15 @@ function App() {
         },
         {
           path: "user-package",
-          element: <UserPackage/>
+          element: <UserPackage />,
         },
         {
           path: "plan-history-preview",
-          element: <PlanHistoryPreview/>
+          element: <PlanHistoryPreview />,
         },
         {
           path: "premium-tracker",
-          element: <PremiumTracker/>
+          element: <PremiumTracker />,
         },
       ],
     },
@@ -194,6 +195,10 @@ function App() {
     {
       path: "/initial-condition",
       element: <InitialCondition />,
+    },
+    {
+      path: "/dashboard-coach",
+      element: <CoachDashboard />,
     },
   ]);
   return (
