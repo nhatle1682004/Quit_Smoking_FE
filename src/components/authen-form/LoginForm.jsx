@@ -35,7 +35,7 @@ function LoginForm() {
       if (role === "ADMIN") {
         navigate("/dashboard");
       } else if (role === "COACH") {
-        navigate("/dashboard-coach");
+        navigate("/dashboard-coach"); // Điều hướng COACH đến dashboard riêng
       } else if (role === "CUSTOMER") {
         try {
           const response = await api.get("/initial-condition/active");
