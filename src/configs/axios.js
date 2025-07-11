@@ -4,9 +4,6 @@ const api = axios.create({
   baseURL: "http://14.225.218.46:8080/api/",
 });
 
-
-
-
 api.interceptors.request.use(
     function (config) {
       // Do something before request is sent
