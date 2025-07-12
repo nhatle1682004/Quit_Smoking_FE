@@ -16,6 +16,20 @@ const TIME_SLOTS = [
   { label: "15:00 - 17:00", startTime: "15:00", endTime: "17:00" },
 ];
 
+// Ánh xạ ID của Coach với link Google Meet tương ứng.
+const COACH_MEET_LINKS = {
+  22: "https://meet.google.com/pfw-oxjm-vpy",
+  23: "https://meet.google.com/uiu-hhqt-hwk",
+  24: "https://meet.google.com/avq-ryky-kph",
+  25: "https://meet.google.com/yho-wmay-jbe",
+  26: "https://meet.google.com/yuo-cfmk-fej",
+  27: "https://meet.google.com/hjf-khzm-tsn",
+  28: "https://meet.google.com/ddu-cdyn-ihk",
+  29: "https://meet.google.com/trg-setn-myv",
+  30: "https://meet.google.com/nqs-hrcf-gfh",
+  31: "https://meet.google.com/pmv-fnoh-zuu",
+};
+
 function BookingPage() {
   const [selectedCoachAccountId, setSelectedCoachAccountId] = useState(null);
   const [form, setForm] = useState({ date: "", startTime: "", endTime: "" });
@@ -27,7 +41,6 @@ function BookingPage() {
   const [latestBooking, setLatestBooking] = useState(null);
   const [confirmedAppointment, setConfirmedAppointment] = useState(null);
 
-  // State để lưu các startTime đã bị đặt
   const [bookedSlots, setBookedSlots] = useState([]);
   const [isCheckingSlots, setIsCheckingSlots] = useState(false);
 
@@ -47,20 +60,16 @@ function BookingPage() {
       headers: { Authorization: `Bearer ${currentUser.token}` },
     };
     try {
-      // --- MODIFIED CODE BLOCK ---
-      // Call the correct API to get the user's purchased plan
       const planRes = await api.get("/purchased-plan/my", apiConfig);
+      const activePlan = planRes.data.find((plan) => plan.status === "ACTIVE");
 
-      // Check if the package code allows booking.
-      // IMPORTANT: Please verify "Gói Coach" is the correct code for the coaching package.
-      if (planRes.data?.packageInfo?.code !== "Gói Coach") {
+      if (!activePlan || activePlan.packageInfo.code != 4) {
         setUserBlockMessage(
-          "Gói dịch vụ của bạn không hỗ trợ tính năng đặt lịch với Coach."
+          'Bạn cần đăng ký gói "Cao Cấp" để sử dụng tính năng này.'
         );
         setIsLoading(false);
         return;
       }
-      // --- END OF MODIFIED CODE BLOCK ---
 
       const coachesRes = await api.get("/coach/coaches", apiConfig);
       const userBookingsRes = await api.get(
@@ -111,7 +120,6 @@ function BookingPage() {
     fetchInitialData();
   }, [fetchInitialData]);
 
-  // useEffect để lấy các khung giờ đã bị đặt khi chọn Coach và Ngày
   useEffect(() => {
     if (selectedCoachAccountId && form.date) {
       const fetchBookedSlots = async () => {
@@ -218,6 +226,17 @@ function BookingPage() {
   }
 
   if (confirmedAppointment) {
+    // --- DÒNG KIỂM TRA MỚI ---
+    console.log(
+      "CHECKING - Lịch hẹn đã xác nhận (tải lại trang):",
+      confirmedAppointment
+    );
+    console.log(
+      "CHECKING - ID của Coach đang được dùng:",
+      confirmedAppointment.coachId
+    );
+    // -------------------------
+
     return (
       <div className="flex justify-center items-center min-h-screen p-4 bg-gray-50">
         <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full text-center">
@@ -242,7 +261,10 @@ function BookingPage() {
               Vui lòng tham gia cuộc hẹn đúng giờ.
             </p>
             <a
-              href="https://meet.google.com/"
+              href={
+                COACH_MEET_LINKS[confirmedAppointment.coachId] ||
+                "https://meet.google.com/error-link"
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block mt-2 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
@@ -308,8 +330,21 @@ function BookingPage() {
           </div>
           {latestBooking?.status === "confirmed" && (
             <div className="mt-6">
+              {/* --- DÒNG KIỂM TRA MỚI --- */}
+              {console.log(
+                "CHECKING - Lịch hẹn đã xác nhận (sau khi đặt):",
+                latestBooking
+              )}
+              {console.log(
+                "CHECKING - ID của Coach đang được dùng:",
+                latestBooking.coachId
+              )}
+              {/* ------------------------- */}
               <a
-                href="https://meet.google.com/"
+                href={
+                  COACH_MEET_LINKS[latestBooking.coachId] ||
+                  "https://meet.google.com/error-link"
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block mt-2 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
