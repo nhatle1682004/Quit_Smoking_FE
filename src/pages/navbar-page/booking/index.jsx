@@ -47,6 +47,21 @@ function BookingPage() {
       headers: { Authorization: `Bearer ${currentUser.token}` },
     };
     try {
+      // --- MODIFIED CODE BLOCK ---
+      // Call the correct API to get the user's purchased plan
+      const planRes = await api.get("/purchased-plan/my", apiConfig);
+
+      // Check if the package code allows booking.
+      // IMPORTANT: Please verify "Gói Coach" is the correct code for the coaching package.
+      if (planRes.data?.packageInfo?.code !== "Gói Coach") {
+        setUserBlockMessage(
+          "Gói dịch vụ của bạn không hỗ trợ tính năng đặt lịch với Coach."
+        );
+        setIsLoading(false);
+        return;
+      }
+      // --- END OF MODIFIED CODE BLOCK ---
+
       const coachesRes = await api.get("/coach/coaches", apiConfig);
       const userBookingsRes = await api.get(
         `/bookings/user/${currentUser.id}`,
@@ -79,7 +94,14 @@ function BookingPage() {
         setCoaches(coachList);
       }
     } catch (err) {
-      setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
+      if (err.response && err.response.status === 404) {
+        setUserBlockMessage(
+          "Bạn chưa đăng ký gói dịch vụ nào. Vui lòng đăng ký để đặt lịch."
+        );
+      } else {
+        setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
+        console.error("API Error:", err);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +128,6 @@ function BookingPage() {
             headers: apiConfig.headers,
           });
 
-          // Sửa lỗi định dạng giờ: Cắt chuỗi từ "08:00:00" thành "08:00" để so sánh
           const slots = res.data.map((booking) =>
             booking.startTime ? booking.startTime.substring(0, 5) : ""
           );
