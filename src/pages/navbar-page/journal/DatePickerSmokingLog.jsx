@@ -1,11 +1,9 @@
 import React from 'react';
-import { DatePicker } from 'antd';
-// import { CalendarOutlined } from '@ant-design/icons';
+import { DatePicker, Alert } from 'antd';
 
-const DatePickerSmokingLog = ({ onDateChange, defaultValue }) => {
+const DatePickerSmokingLog = ({ onDateChange, defaultValue, noLogMessage }) => {
   return (
     <div className="text-center">
-      {/* <CalendarOutlined className="text-blue-500 text-2xl mb-2" /> */}
       <DatePicker
         onChange={onDateChange}
         defaultValue={defaultValue}
@@ -14,8 +12,16 @@ const DatePickerSmokingLog = ({ onDateChange, defaultValue }) => {
         size="large"
         allowClear={false}
       />
+      {noLogMessage && (
+        <Alert
+          message={noLogMessage}
+          type="info"
+          showIcon
+          style={{ marginTop: 16 }}
+        />
+      )}
     </div>
   );
 };
 
-export default DatePickerSmokingLog; 
+export default DatePickerSmokingLog;

@@ -11,25 +11,10 @@ import { UserOutlined, LockOutlined } from "@ant-design/icons";
 function LoginForm() {
   const navigate = useNavigate();
 
-
   const dispatch = useDispatch();
   const onFinish = async (values) => {
     console.log("Success:", values);
     try {
-      // values nguoi dung nhap
-      const response = await api.post("login", values);
-      console.log(response.data);
-      // luu thong tin nguoi dung nhap vao 1 cho nao do ma bat ky dau cung su dung duoc
-      // cai do goi la redux === session ben mon prj
-      const { role, token } = response.data;
-      console.log(role, token);
-
-      //Gửi một action có tên login đến Redux store để cập nhật trạng thái đăng nhập.
-      // action la 1 doi tuong co 2 thuoc tinh la type va payload
-      // type: la ten cua action
-      //payload: Là dữ liệu bạn muốn gửi kèm hành động, dùng để cập nhật vào state
-      dispatch(login(response.data));
-      localStorage.setItem("token", response.data.token);
       // values nguoi dung nhap
       const response = await api.post("login", values);
       console.log(response.data);
