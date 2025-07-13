@@ -6,7 +6,6 @@ import api from "../../configs/axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { login } from "../../redux/features/userSlice";
-import GoogleLoginButton from "../authen-button/GoogleLoginButton";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 
 function LoginForm() {
@@ -32,31 +31,30 @@ function LoginForm() {
       localStorage.setItem("token", response.data.token);
       toast.success("Đăng nhập thành công!");
 
+
       if (role === "ADMIN") {
         navigate("/dashboard");
-      } else if (role === "COACH") {
+      } 
+      else if(role === "COACH"){
         navigate("/dashboard-coach");
-      } else if (role === "CUSTOMER") {
+      }else if(role === "CUSTOMER") {
         try {
-          const response = await api.get("/initial-condition/active");
+          const response = await api.get('/initial-condition/active');
           if (response.data) {
-            console.log("Init condition:", response.data);
-            navigate("/");
+            console.log("Init condition:", response.data)
+            navigate('/');
           } else {
-            navigate("/initial-condition");
+            navigate('/initial-condition');
           }
         } catch (error) {
           if (error.response?.status == 403 || error.response?.status == 500) {
-            navigate("/initial-condition");
+            navigate('/initial-condition');
           }
         }
       }
     } catch (e) {
       console.log(e);
-      if (
-        e.response &&
-        (e.response.status === 401 || e.response.status === 400)
-      ) {
+      if (e.response && (e.response.status === 401 || e.response.status === 400)) {
         toast.error("Tên đăng nhập hoặc mật khẩu không đúng!");
       } else {
         toast.error("Đăng nhập thất bại!");
@@ -102,7 +100,8 @@ function LoginForm() {
           />
         </Form.Item>
         <Form.Item label={null}>
-          <Link to="/forgot-password">Quên mật khẩu?</Link>
+           <Link to="/forgot-password">Quên mật khẩu?</Link>
+
         </Form.Item>
 
         <Form.Item label={null}>
@@ -115,8 +114,6 @@ function LoginForm() {
       <div className="divider">
         <span>hoặc</span>
       </div>
-
-      <GoogleLoginButton />
 
       <p className="mt-4 text-center text-sm">
         Nếu chưa có tài khoản?{" "}

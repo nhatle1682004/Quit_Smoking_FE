@@ -19,7 +19,6 @@ const Header = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-    localStorage.removeItem('token');
   }
 
   const handleHomeClick = () => {
@@ -158,7 +157,7 @@ const Header = () => {
             </nav>
 
             {/* Right side */}
-            <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
+            <div className="flex items-center space-x-2 lg:space-x-3">
               {user ? (
                 <>
                   {/* Đã bỏ nút Dashboard ở header */}
