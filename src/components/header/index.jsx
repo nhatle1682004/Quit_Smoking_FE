@@ -19,7 +19,6 @@ const Header = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-    localStorage.removeItem('token'); 
   }
 
   const handleHomeClick = () => {

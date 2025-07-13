@@ -18,6 +18,7 @@ export const userSlice = createSlice({ //tao nhanh 1 slice cua redux store, name
       return action.payload;
     },
     logout: () => {
+      // localStorage.removeItem("token"); 
       return initialState;// dat lai state ve null 
     },
     updateAvatar: (state, action) => {

@@ -29,7 +29,7 @@ function QuitPlanFree() {
       console.log(response.data);
       toast.success("Tạo kế hoạch thành công");
       form.resetFields();
-      navigate('/service/process-tracking');
+      navigate('/service/process');
     } catch (error) {
       toast.error("Lỗi khi tạo kế hoạch");
       console.log(error);
@@ -57,7 +57,7 @@ function QuitPlanFree() {
           </Button>
           <hr className="my-8 border-gray-200" />
           <p className="text-gray-600 mb-4">
-            Sau đó, điền thông tin vào biểu mẫu dưới đây để thiết lập thông báo cho kế hoạch của bạn:
+            Sau đó, điền thông tin vào biểu mẫu dưới đây để thiết lập kế hoạch của bạn:
           </p>
         </div>
 
@@ -151,7 +151,7 @@ function QuitPlanFree() {
               htmlType="submit"
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-blue-500 hover:bg-gradient-to-l focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Thiết Lập Kế Hoạch Thông Báo
+              Thiết Lập Kế Hoạch
             </Button>
           </Form.Item>
         </Form>

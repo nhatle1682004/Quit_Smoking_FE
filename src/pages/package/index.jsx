@@ -3,12 +3,9 @@ import { toast } from 'react-toastify';
 import api from '../../configs/axios';
 import { Button, Badge, Divider } from 'antd';
 import { GiftOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
 
 function PackagePage() {
   const [initialPackages, setInitialPackages] = useState([]);
-  const [userPlans, setUserPlans] = useState([]);
-  const navigate = useNavigate();
 
   // Lấy danh sách package public
   const fetchPackages = async () => {
@@ -20,58 +17,18 @@ function PackagePage() {
     }
   };
 
-  // Lấy danh sách plan đã mua của user (để biết đã mua gói nào)
-  const fetchUserPlans = async () => {
-    try {
-      const res = await api.get('/purchased-plan/my');
-      setUserPlans(res.data);
-    } catch {
-      // ignore
-    }
-  };
-
   useEffect(() => {
     fetchPackages();
-    fetchUserPlans();
   }, []);
 
-  // Kiểm tra có plan PENDING/ACTIVE với packageCode này không
-  const hasPendingOrActivePlan = (packageCode) => {
-    return userPlans.some(plan =>
-      (plan.packageInfo.code === packageCode || plan.packageInfo.packageCode === packageCode) &&
-      (plan.status === 'PENDING' || plan.status === 'ACTIVE')
-    );
-  };
-
   const handleBuyPackage = async (packageCode) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      toast.info('Vui lòng đăng nhập để mua gói!');
-      navigate('/login');
-      return;
-    }
-    if (hasPendingOrActivePlan(packageCode)) {
-      toast.info('Bạn đã có gói này chưa hoàn tất. Vui lòng thanh toán hoặc kích hoạt trước khi mua thêm!');
-      return;
-    }
     try {
       const response = await api.post('/purchased-plan/buy', {
         packageCode: String(packageCode)
       });
 
-      const { paymentUrl, id: planId, payments } = response.data;
-      let paymentId = null;
-      if (payments && payments.length > 0) {
-        paymentId = payments[payments.length - 1].id;
-      }
-      if (response.data.paymentId) paymentId = response.data.paymentId;
-
-      let redirectUrl = paymentUrl;
-      if (paymentId && planId) {
-        redirectUrl += (paymentUrl.includes('?') ? '&' : '?')
-          + `paymentId=${paymentId}&planId=${planId}`;
-      }
-      window.location.href = redirectUrl;
+      const { paymentUrl } = response.data;
+      window.open(paymentUrl, '_blank'); // Mở trang thanh toán ở tab mới
     } catch (error) {
       console.log(error);
       toast.error("Mua gói thất bại");

@@ -36,9 +36,19 @@ function UserPackage() {
   );
 
   const handleRetryPayment = (paymentUrl) => {
-  if (paymentUrl) window.location.href = paymentUrl;
-  else toast.error("Không tìm thấy link thanh toán lại!");
-};
+    console.log("=== DEBUG: handleRetryPayment called ===");
+    console.log("paymentUrl:", paymentUrl);
+    console.log("localStorage token before:", localStorage.getItem("token"));
+    console.log("Redux user before:", user);
+    
+    if (paymentUrl) {
+      console.log("Redirecting to payment URL...");
+      window.open(paymentUrl, '_blank'); // Mở trang thanh toán ở tab mới
+    } else {
+      console.error("No payment URL found!");
+      toast.error("Không tìm thấy link thanh toán lại!");
+    }
+  };
 
 
   // Sửa lại hàm kích hoạt: disable nút khi đang xử lý, reload xong mới show UI mới
