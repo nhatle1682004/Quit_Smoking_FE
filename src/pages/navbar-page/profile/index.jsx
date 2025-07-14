@@ -47,14 +47,24 @@ const UserProfile = () => {
     try {
       const response = await api.put("/user/me", values);
       setProfile(response.data);
-      console.log(response.data.phoneNumber)
+      console.log(response.data.phoneNumber);
       form.setFieldsValue(response.data);
       toast.success("Cập nhật thông tin cá nhân thành công!");
       setEditing(false);
-
     } catch (err) {
       console.log(err);
       toast.error("Cập nhật thông tin cá nhân không thành công");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await api.delete("/user/me");
+      toast.success("Xóa tài khoản thành công!");
+      navigate("/");
+    } catch (err) {
+      console.log(err);
+      toast.error("Xóa tài khoản không thành công");
     }
   };
 
@@ -69,12 +79,18 @@ const UserProfile = () => {
           <Tabs defaultActiveKey="1" className="mb-4">
             <Tabs.TabPane tab="Thông tin tài khoản" key="1">
               <Card bordered={false}>
-                <Form form={form} layout="vertical" onFinish={handleSubmitProfile}>
+                <Form
+                  form={form}
+                  layout="vertical"
+                  onFinish={handleSubmitProfile}
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Form.Item
                       name="fullName"
                       label="Họ và tên"
-                      rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
+                      rules={[
+                        { required: true, message: "Vui lòng nhập họ tên" },
+                      ]}
                     >
                       <Input placeholder="Nhập họ tên" disabled={!editing} />
                     </Form.Item>
@@ -82,7 +98,9 @@ const UserProfile = () => {
                     <Form.Item
                       name="gender"
                       label="Giới tính"
-                      rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
+                      rules={[
+                        { required: true, message: "Vui lòng chọn giới tính" },
+                      ]}
                     >
                       <Select placeholder="Chọn giới tính" disabled={!editing}>
                         <Option value="MALE">Nam</Option>
@@ -102,11 +120,20 @@ const UserProfile = () => {
                       name="phoneNumber"
                       label="Số điện thoại"
                       rules={[
-                        { required: true, message: "Vui lòng nhập số điện thoại" },
-                        { pattern: /^[0-9]{9,11}$/, message: "Số điện thoại không hợp lệ" }
+                        {
+                          required: true,
+                          message: "Vui lòng nhập số điện thoại",
+                        },
+                        {
+                          pattern: /^[0-9]{9,11}$/,
+                          message: "Số điện thoại không hợp lệ",
+                        },
                       ]}
                     >
-                      <Input placeholder="Nhập số điện thoại" disabled={!editing} />
+                      <Input
+                        placeholder="Nhập số điện thoại"
+                        disabled={!editing}
+                      />
                     </Form.Item>
                   </div>
 
@@ -130,7 +157,11 @@ const UserProfile = () => {
                   <Space>
                     {editing ? (
                       <>
-                        <Button type="primary" onClick={() => form.submit()} htmlType="submit">
+                        <Button
+                          type="primary"
+                          onClick={() => form.submit()}
+                          htmlType="submit"
+                        >
                           Lưu
                         </Button>
                         <Button
@@ -141,20 +172,26 @@ const UserProfile = () => {
                         >
                           Hủy
                         </Button>
+                        <Button danger onClick={handleDeleteAccount}>
+                          Xóa tài khoản
+                        </Button>
                       </>
                     ) : (
                       <>
-                        <Button 
+                        <Button
                           icon={<LockOutlined />}
-                          onClick={() => navigate('/reset-password')}
+                          onClick={() => navigate("/reset-password")}
                         >
                           Đổi mật khẩu
                         </Button>
-                        <Button 
+                        <Button
                           icon={<EditOutlined />}
                           onClick={() => setEditing(true)}
                         >
                           Chỉnh sửa thông tin cá nhân
+                        </Button>
+                        <Button danger onClick={handleDeleteAccount}>
+                          Xóa tài khoản
                         </Button>
                       </>
                     )}

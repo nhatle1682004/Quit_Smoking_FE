@@ -16,7 +16,6 @@ import BlogModeration from "./pages/dashboard-admin/blog-moderation";
 import UserManagement from "./pages/dashboard-admin/user-management";
 import Footer from "./components/footer";
 import InformationPage from "./pages/navbar-page/about";
-import ContactPage from "./pages/navbar-page/contact/index";
 
 import BlogPage from "./pages/navbar-page/blog";
 import SuccessStories from "./pages/navbar-page/success/index";
@@ -27,7 +26,6 @@ import Profile from "./pages/navbar-page/profile";
 import ProductPage from "./pages/navbar-page/service";
 import UserProfile from "./pages/navbar-page/profile";
 import LogSmoking from "./pages/navbar-page/journal";
-import AchievementsPage from "./pages/navbar-page/achievements";
 import ForgotPassword from "./pages/auth/forgot-password/index.";
 import UserProfileDropdown from "./components/user-profile-dropdown";
 import OtpVerify from "./pages/auth/otp-verify";
@@ -45,9 +43,9 @@ import InitialCondition from "./pages/initial-condition";
 import UserPackage from "./pages/package/userPackage";
 import PlanHistoryPreview from "./components/plan-history-preview";
 import PaymentResultPage from "./pages/payment-result";
-import PremiumTracker from "./pages/premium-tracker";
 import CoachDashboard from "./pages/dashboard-coach";
-import NotificationsPage from "./pages/notifications"; 
+import NotificationsPage from "./pages/notifications";
+import PremiumTracker from "./pages/service/premium-tracker"; // Thêm import còn thiếu
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -111,11 +109,6 @@ function App() {
           element: <BlogPage />,
         },
         {
-          path: "contact",
-          element: <ContactPage />,
-        },
-
-        {
           path: "profile",
           element: <UserProfile />,
         },
@@ -131,10 +124,7 @@ function App() {
           path: "journal",
           element: <LogSmoking />,
         },
-        {
-          path: "achievements",
-          element: <AchievementsPage />,
-        },
+
         {
           path: "my-plan",
           element: <Plan />,
@@ -159,7 +149,6 @@ function App() {
           path: "premium-tracker",
           element: <PremiumTracker />,
         },
-      
         {
           path: "notifications",
           element: <NotificationsPage />,

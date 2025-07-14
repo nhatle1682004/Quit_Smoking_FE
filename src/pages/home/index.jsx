@@ -25,7 +25,6 @@ import SuccessStories from "../navbar-page/success";
 import PackagePage from "../package";
 import CurrentPlanCard from "../../components/current-plan-card";
 
-
 function HomePage() {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
@@ -72,7 +71,7 @@ function HomePage() {
     arrows: true,
   };
 
-  // Tính năng của nền tảng
+  // Tính năng của nền tảng - chia thành 2 card trên, 2 card dưới
   const features = [
     {
       icon: <FaRegEdit className="w-8 h-8 text-blue-500" />,
@@ -87,20 +86,6 @@ function HomePage() {
       description:
         "Tùy chỉnh lộ trình cai thuốc dựa trên thói quen và mức độ phụ thuộc của bạn",
       navigateTo: "/my-plan",
-    },
-    {
-      icon: <FaChartLine className="w-8 h-8 text-blue-500" />,
-      title: "Theo dõi tiến trình",
-      description:
-        "Nhận thông báo định kỳ và nhắc nhở để duy trì động lực cai thuốc",
-        navigateTo:"/premium-tracker",
-    },
-    {
-      icon: <FaMedal className="w-8 h-8 text-blue-500" />,
-      title: "Thành tích & Phần thưởng",
-      description:
-        "Mở khóa huy hiệu thành tích khi đạt được mốc không hút thuốc",
-      navigateTo: "/achievements",
     },
     {
       icon: <FaUsers className="w-8 h-8 text-blue-500" />,
@@ -183,18 +168,14 @@ function HomePage() {
 
                       {/* Nút CTA có glow effect khi hover */}
                       <div className="flex flex-col md:flex-row gap-4 justify-center">
-                        <button
-                          onClick={() => {
-                            if (user) {
-                              navigate("/service");
-                            } else {
-                              navigate("/register");
-                            }
-                          }}
-                          className="px-8 py-3 bg-[#3498db] hover:bg-[#2980b9] text-white font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-[#3498db]/50 hover:-translate-y-0.5"
-                        >
-                          Đăng Ký Ngay
-                        </button>
+                        {!user && (
+                          <button
+                            onClick={() => navigate("/register")}
+                            className="px-8 py-3 bg-[#3498db] hover:bg-[#2980b9] text-white font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-[#3498db]/50 hover:-translate-y-0.5"
+                          >
+                            Đăng Ký Ngay
+                          </button>
+                        )}
                         <button
                           onClick={() => navigate("/about")}
                           className="px-8 py-3 bg-transparent border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-[#3498db] transition-all duration-300 shadow-lg hover:-translate-y-0.5"
@@ -245,17 +226,34 @@ function HomePage() {
             </p>
             <button
               className="mt-6 px-8 py-3 bg-[#3498db] text-white rounded-lg font-bold hover:bg-[#2980b9] transition-colors shadow-lg"
-              onClick={() => navigate('/service/quit-plan-free')}
+              onClick={() => navigate("/service/quit-plan-free")}
             >
               Lập kế hoạch ngay
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
+          {/* 2 card trên */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            {features.slice(0, 2).map((feature, index) => (
               <div
                 key={index}
-                className="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-100 cursor-pointer"
+                className="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-100 cursor-pointer flex flex-col items-center text-center"
+                onClick={() =>
+                  feature.navigateTo && navigate(feature.navigateTo)
+                }
+              >
+                <div className="mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+          {/* 2 card dưới */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {features.slice(2, 4).map((feature, index) => (
+              <div
+                key={index}
+                className="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-100 cursor-pointer flex flex-col items-center text-center"
                 onClick={() =>
                   feature.navigateTo && navigate(feature.navigateTo)
                 }
@@ -271,7 +269,7 @@ function HomePage() {
 
       <section className="py-8 bg-white">
         <div className="container mx-auto px-6">
-          <PackagePage/>
+          <PackagePage />
         </div>
       </section>
       <hr />
@@ -321,15 +319,6 @@ function HomePage() {
                 </details>
               </div>
             ))}
-          </div>
-
-          <div className="text-center mt-10">
-            <button
-              className="px-8 py-3 bg-[#3498db] text-white rounded-lg hover:bg-[#2980b9] transition-colors"
-              onClick={() => navigate("/faqs")}
-            >
-              Xem Thêm FAQ
-            </button>
           </div>
         </div>
       </section>
