@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import api from "../../configs/axios";
 
-// --- START: NEW IMPORTS FROM ANT DESIGN ---
 import {
   Table,
   Button,
@@ -16,18 +15,21 @@ import {
   Menu,
   message,
   Typography,
+  Form,
 } from "antd";
 import {
   EyeOutlined,
   SearchOutlined,
   DownOutlined,
   SyncOutlined,
+  SendOutlined,
 } from "@ant-design/icons";
-// --- END: NEW IMPORTS FROM ANT DESIGN ---
+import { HiOutlineChatAlt2 } from "react-icons/hi";
 
-import { HiOutlineChatAlt2, HiChevronDown } from "react-icons/hi";
+const { Title, Text, Paragraph } = Typography;
+const { TextArea } = Input;
+const { Option } = Select;
 
-// Component Card cho mỗi chỉ số (Không thay đổi)
 const StatCard = ({ title, value, colorClass }) => (
   <div className={`rounded-lg p-4 ${colorClass}`}>
     <p className="text-sm text-gray-700">{title}</p>
@@ -35,8 +37,7 @@ const StatCard = ({ title, value, colorClass }) => (
   </div>
 );
 
-// Component Card cho mỗi Client (Không thay đổi)
-const ClientCard = ({ client }) => {
+const ClientCard = ({ client, onSendMessage }) => {
   const { progress } = client;
   const cravingColor =
     progress.cravingIntensity > 75
@@ -46,7 +47,7 @@ const ClientCard = ({ client }) => {
       : "bg-green-500";
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-5 border border-gray-200">
+    <div className="bg-white rounded-xl shadow-md p-5 border border-gray-200 flex flex-col">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-4">
           <img
@@ -100,17 +101,16 @@ const ClientCard = ({ client }) => {
             style={{ width: `${progress.cravingIntensity}%` }}
           ></div>
         </div>
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
-          <span>Low</span>
-          <span>Moderate</span>
-          <span>High</span>
-        </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 mt-auto">
         <button className="flex-1 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
           View Details
         </button>
-        <button className="p-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+        <button
+          onClick={() => onSendMessage(client)}
+          className="p-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+          title={`Send message to ${client.fullName}`}
+        >
           <HiOutlineChatAlt2 size={20} />
         </button>
       </div>
@@ -118,29 +118,21 @@ const ClientCard = ({ client }) => {
   );
 };
 
-// --- START: NEW CONSTANTS FOR BOOKING MANAGEMENT ---
-const { Title, Text, Paragraph } = Typography;
-const { Option } = Select;
-
 const STATUS_COLORS = {
   PENDING: "orange",
   CONFIRMED: "green",
   CANCELED: "red",
   COMPLETED: "blue",
 };
-
 const AVAILABLE_STATUSES = ["PENDING", "CONFIRMED", "CANCELED", "COMPLETED"];
-// --- END: NEW CONSTANTS ---
 
 function CoachDashboard() {
   const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const currentUser = useSelector((state) => state.user);
-
-  // --- START: NEW STATE FOR BOOKING MANAGEMENT ---
   const [bookings, setBookings] = useState([]);
-  const [allBookings, setAllBookings] = useState([]); // Store all fetched bookings
+  const [allBookings, setAllBookings] = useState([]);
   const [viewingBooking, setViewingBooking] = useState(null);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -148,7 +140,12 @@ function CoachDashboard() {
     total: 0,
   });
   const [filters, setFilters] = useState({ keyword: "", status: null });
-  // --- END: NEW STATE ---
+
+  const [isNotificationModalVisible, setIsNotificationModalVisible] =
+    useState(false);
+  const [currentTargetClient, setCurrentTargetClient] = useState(null);
+  const [notificationForm] = Form.useForm();
+  const [isSending, setIsSending] = useState(false);
 
   const fetchCoachData = useCallback(async () => {
     if (!currentUser?.id) {
@@ -159,46 +156,47 @@ function CoachDashboard() {
 
     setIsLoading(true);
     try {
-      const apiConfig = {
-        headers: { Authorization: `Bearer ${currentUser.token}` },
-      };
-      const response = await api.get(
-        `/bookings/coach/${currentUser.id}`,
-        apiConfig
-      );
+      const response = await api.get(`/bookings/coach/${currentUser.id}`);
       const coachBookings = response.data;
 
-      // 1. Process unique clients (same as before)
       const clientMap = new Map();
       coachBookings.forEach((booking) => {
         const userInfo = booking.user;
-        if (userInfo && !clientMap.has(userInfo.customerId)) {
+        // ✅ SỬA LỖI: Thay "id" bằng "customerId" để khớp với API
+        if (
+          userInfo &&
+          userInfo.customerId != null &&
+          !clientMap.has(userInfo.customerId)
+        ) {
           clientMap.set(userInfo.customerId, {
-            id: userInfo.customerId,
+            id: userInfo.customerId, // Dùng customerId
             fullName: userInfo.fullName,
             email: userInfo.email,
-            avatarUrl: userInfo.avatarUrl,
-            joinedDate: userInfo.joinedDate || null,
+            avatarUrl:
+              userInfo.avatarUrl ||
+              "https://placehold.co/100x100/EFEFEF/AAAAAA&text=No+Image",
+            joinedDate: userInfo.joinedDate
+              ? new Date(userInfo.joinedDate).toLocaleDateString()
+              : "N/A",
             plan: userInfo.plan || "Basic",
             progress: {
-              smokeFreeDays: 15,
-              cigarettesAvoided: 300,
-              moneySaved: 200,
-              cravingIntensity: 76,
-            }, // Dummy data
+              smokeFreeDays: Math.floor(Math.random() * 30),
+              cigarettesAvoided: Math.floor(Math.random() * 500),
+              moneySaved: Math.floor(Math.random() * 200),
+              cravingIntensity: Math.floor(Math.random() * 100),
+            },
           });
         }
       });
       setClients(Array.from(clientMap.values()));
 
-      // 2. Format and store all bookings for filtering
       const formattedBookings = coachBookings.map((booking) => ({
         ...booking,
-        key: booking.bookingId, // Ant Design table needs a unique 'key' prop
+        key: booking.bookingId,
         customerName: booking.user.fullName,
-        status: booking.status.toUpperCase(), // Standardize status to uppercase
+        status: booking.status.toUpperCase(),
       }));
-      setAllBookings(formattedBookings); // Store the original list
+      setAllBookings(formattedBookings);
     } catch (err) {
       setError("Failed to load dashboard data. Please try again.");
       console.error("Error fetching dashboard data:", err);
@@ -207,17 +205,12 @@ function CoachDashboard() {
     }
   }, [currentUser]);
 
-  // Initial data fetch
   useEffect(() => {
     fetchCoachData();
   }, [fetchCoachData]);
 
-  // --- START: NEW EFFECT FOR FILTERING ---
-  // This effect runs whenever filters or the source of bookings change
   useEffect(() => {
     let filteredData = [...allBookings];
-
-    // Apply keyword filter
     if (filters.keyword) {
       const keywordLower = filters.keyword.toLowerCase();
       filteredData = filteredData.filter(
@@ -226,18 +219,55 @@ function CoachDashboard() {
           b.bookingId.toString().includes(keywordLower)
       );
     }
-
-    // Apply status filter
     if (filters.status) {
       filteredData = filteredData.filter((b) => b.status === filters.status);
     }
-
     setBookings(filteredData);
     setPagination((p) => ({ ...p, total: filteredData.length, current: 1 }));
   }, [filters, allBookings]);
-  // --- END: NEW EFFECT FOR FILTERING ---
 
-  // --- START: NEW HANDLER FUNCTIONS ---
+  const showNotificationModal = (client) => {
+    setCurrentTargetClient(client);
+    setIsNotificationModalVisible(true);
+    notificationForm.resetFields();
+  };
+
+  const closeNotificationModal = () => {
+    setIsNotificationModalVisible(false);
+    setCurrentTargetClient(null);
+  };
+
+  const handleSendNotification = async (values) => {
+    if (!currentTargetClient || !currentUser?.id) {
+      message.error("Không tìm thấy thông tin người gửi hoặc người nhận.");
+      return;
+    }
+    setIsSending(true);
+    try {
+      const payload = {
+        recipientIds: [currentTargetClient.id],
+        senderId: currentUser.id,
+        title: values.title,
+        message: values.description,
+        type: values.type,
+      };
+
+      await api.post("/notifications", payload);
+      message.success(
+        `Đã gửi thông báo thành công đến ${currentTargetClient.fullName}`
+      );
+      closeNotificationModal();
+    } catch (err) {
+      console.error(
+        "Lỗi khi gửi thông báo:",
+        err.response?.data || err.message
+      );
+      message.error("Không thể gửi thông báo. Vui lòng thử lại.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const handleTableChange = (pagination) => setPagination(pagination);
   const handleSearch = (value) => setFilters({ ...filters, keyword: value });
   const handleStatusFilterChange = (value) =>
@@ -247,23 +277,17 @@ function CoachDashboard() {
 
   const handleUpdateStatus = async (bookingId, newStatus) => {
     try {
-      await api.put(
-        `/bookings/${bookingId}`,
-        { status: newStatus.toLowerCase() },
-        {
-          headers: { Authorization: `Bearer ${currentUser.token}` },
-        }
-      );
+      await api.put(`/bookings/${bookingId}`, {
+        status: newStatus.toLowerCase(),
+      });
       message.success(`Đã cập nhật trạng thái thành ${newStatus}`);
-      fetchCoachData(); // Refresh all data to get the latest status
+      fetchCoachData();
     } catch (error) {
       console.error("Error updating booking status:", error);
       message.error("Không thể cập nhật trạng thái. Vui lòng thử lại.");
     }
   };
-  // --- END: NEW HANDLER FUNCTIONS ---
 
-  // --- START: NEW TABLE COLUMNS DEFINITION ---
   const columns = [
     { title: "ID", dataIndex: "bookingId", key: "bookingId", width: 80 },
     { title: "Customer", dataIndex: "customerName", key: "customerName" },
@@ -293,16 +317,14 @@ function CoachDashboard() {
       key: "action",
       width: 220,
       render: (_, record) => {
-        const menu = (
-          <Menu
-            onClick={({ key }) => handleUpdateStatus(record.bookingId, key)}
-            items={AVAILABLE_STATUSES.map((status) => ({
-              key: status,
-              label: `Chuyển thành ${status}`,
-              disabled: record.status === status,
-            }))}
-          />
-        );
+        const menuProps = {
+          items: AVAILABLE_STATUSES.map((status) => ({
+            key: status,
+            label: `Chuyển thành ${status}`,
+            disabled: record.status === status,
+          })),
+          onClick: ({ key }) => handleUpdateStatus(record.bookingId, key),
+        };
         return (
           <Space size="small">
             <Button
@@ -312,7 +334,7 @@ function CoachDashboard() {
             >
               View
             </Button>
-            <Dropdown overlay={menu}>
+            <Dropdown menu={menuProps}>
               <Button type="primary">
                 Approve <DownOutlined />
               </Button>
@@ -322,13 +344,10 @@ function CoachDashboard() {
       },
     },
   ];
-  // --- END: NEW TABLE COLUMNS DEFINITION ---
 
-  if (isLoading && !clients.length) {
-    // Adjusted loading condition
+  if (isLoading && !clients.length && !bookings.length) {
     return <div className="p-8 text-center">Loading dashboard...</div>;
   }
-
   if (error) {
     return <div className="p-8 text-center text-red-500">{error}</div>;
   }
@@ -360,11 +379,14 @@ function CoachDashboard() {
           </Link>
         </div>
 
-        {/* Client Cards List */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
           {clients.length > 0 ? (
             clients.map((client) => (
-              <ClientCard key={client.id} client={client} />
+              <ClientCard
+                key={client.id}
+                client={client}
+                onSendMessage={showNotificationModal}
+              />
             ))
           ) : (
             <p className="lg:col-span-2 text-center text-gray-500">
@@ -373,7 +395,6 @@ function CoachDashboard() {
           )}
         </div>
 
-        {/* --- START: UPDATED APPOINTMENTS SECTION --- */}
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
             My Appointments
@@ -422,10 +443,68 @@ function CoachDashboard() {
             />
           </div>
         </div>
-        {/* --- END: UPDATED APPOINTMENTS SECTION --- */}
       </div>
 
-      {/* --- START: NEW MODAL FOR VIEWING DETAILS --- */}
+      {currentTargetClient && (
+        <Modal
+          title={`Gửi thông báo đến ${currentTargetClient.fullName}`}
+          open={isNotificationModalVisible}
+          onCancel={closeNotificationModal}
+          footer={[
+            <Button key="back" onClick={closeNotificationModal}>
+              Hủy
+            </Button>,
+            <Button
+              key="submit"
+              type="primary"
+              loading={isSending}
+              onClick={() => notificationForm.submit()}
+              icon={<SendOutlined />}
+            >
+              Gửi
+            </Button>,
+          ]}
+          width={600}
+        >
+          <Form
+            form={notificationForm}
+            layout="vertical"
+            onFinish={handleSendNotification}
+            initialValues={{ title: "", description: "", type: "message" }}
+          >
+            <Form.Item
+              name="title"
+              label="Tiêu đề"
+              rules={[{ required: true, message: "Vui lòng nhập tiêu đề!" }]}
+            >
+              <Input placeholder="Ví dụ: Lời nhắc buổi hẹn ngày mai" />
+            </Form.Item>
+
+            <Form.Item
+              name="type"
+              label="Loại thông báo"
+              rules={[
+                { required: true, message: "Vui lòng chọn loại thông báo!" },
+              ]}
+            >
+              <Select placeholder="Chọn loại thông báo">
+                <Option value="message">Tin nhắn chung</Option>
+                <Option value="reminder">Lời nhắc</Option>
+                <Option value="update">Cập nhật tiến trình</Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="description"
+              label="Nội dung"
+              rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
+            >
+              <TextArea rows={4} placeholder="Nhập nội dung chi tiết..." />
+            </Form.Item>
+          </Form>
+        </Modal>
+      )}
+
       <Modal
         title={
           <Title level={4}>Booking Details #{viewingBooking?.bookingId}</Title>
@@ -464,7 +543,6 @@ function CoachDashboard() {
           </div>
         )}
       </Modal>
-      {/* --- END: NEW MODAL --- */}
     </div>
   );
 }
