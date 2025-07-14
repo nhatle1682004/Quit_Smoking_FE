@@ -37,7 +37,7 @@ const Header = () => {
     { id: 7, label: "Tấm gương", href: "/success" },
     { id: 8, label: "Kế hoạch của bạn", href: "/my-plan", hasDropdown: true },
     { id: 9, label: "Blog", href: "/blog" },
-    { id: 10, label: "Liên hệ", href: "/contact" },
+
   ];
 
   const serviceDropdownItems = [
@@ -161,13 +161,6 @@ const Header = () => {
               {user ? (
                 <>
                   {/* Đã bỏ nút Dashboard ở header */}
-                  <button
-                    onClick={() => navigate("/achievements")}
-                    className="relative p-2 rounded-full hover:bg-yellow-100"
-                    aria-label="Thành tích"
-                  >
-                    <FaMedal className="w-6 h-6 text-yellow-400" />
-                  </button>
                   <button
                     onClick={() => navigate("/notifications")}
                     className="relative p-2 rounded-full hover:bg-blue-100"

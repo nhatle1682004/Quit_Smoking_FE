@@ -15,13 +15,11 @@ function UserPackage() {
   const [activatingPlanId, setActivatingPlanId] = useState(null); // Plan đang kích hoạt
   const navigate = useNavigate();
 
-  // Tách hàm fetch để dùng lại khi reload
   const fetchUserPackage = useCallback(async () => {
     setLoading(true);
     try {
       const response = await api.get("/purchased-plan/my");
       setPackages(response.data);
-      // Không cần toast ở đây, chỉ toast lỗi
     } catch {
       toast.error("Không lấy được gói của bạn");
     } finally {
