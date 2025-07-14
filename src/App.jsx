@@ -45,7 +45,6 @@ import PlanHistoryPreview from "./components/plan-history-preview";
 import PaymentResultPage from "./pages/payment-result";
 import CoachDashboard from "./pages/dashboard-coach";
 import NotificationsPage from "./pages/notifications";
-import PremiumTracker from "./pages/service/premium-tracker"; // Thêm import còn thiếu
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -144,10 +143,6 @@ function App() {
         {
           path: "plan-history-preview",
           element: <PlanHistoryPreview />,
-        },
-        {
-          path: "premium-tracker",
-          element: <PremiumTracker />,
         },
         {
           path: "notifications",
