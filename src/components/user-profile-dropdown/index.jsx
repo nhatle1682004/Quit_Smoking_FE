@@ -94,11 +94,6 @@ const UserProfileDropdown = ({ onMenuClick }) => {
         ]
       : []),
     {
-      key: "schedule",
-      icon: <CalendarOutlined style={{ fontSize: "20px", color: "#222" }} />,
-      label: "Lịch huấn luyện viên",
-    },
-    {
       key: "my-package",
       icon: <CreditCardOutlined style={{ fontSize: "20px", color: "#222" }} />,
       label: "Gói của tôi",
@@ -109,23 +104,13 @@ const UserProfileDropdown = ({ onMenuClick }) => {
       label: "Lịch sử kế hoạch",
     },
     {
-      key: "settings",
-      icon: <SettingOutlined style={{ fontSize: "20px", color: "#222" }} />,
-      label: "Cài đặt & Bảo mật",
-    },
-    {
-      key: "terms",
-      icon: <FileTextOutlined style={{ fontSize: "20px", color: "#222" }} />,
-      label: "Chính sách & Điều khoản",
-    },
-    {
       type: "divider",
     },
     {
       key: "logout",
       icon: <LogoutOutlined style={{ fontSize: "20px" }} />,
       label: <span className="text-red-500">Đăng xuất</span>,
-      danger: true, 
+      danger: true,
     },
   ];
 
