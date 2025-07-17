@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../configs/axios';
 import { ClockCircleOutlined } from '@ant-design/icons';
+import { Modal, Button, Spin, Descriptions, message } from 'antd';
 
 function PlanHistoryPreview() {
   const [planHistory, setPlanHistory] = useState([]);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [planDetail, setPlanDetail] = useState(null);
 
   const fetchPlanHistory = async () => {
     try {
@@ -12,6 +16,25 @@ function PlanHistoryPreview() {
     } catch (error) {
       console.error("Error fetching plan history:", error);
     }
+  };
+
+  const handleViewDetail = async (planId) => {
+    setDetailLoading(true);
+    setDetailModalOpen(true);
+    try {
+      const response = await api.get(`/quit-plan/detail/${planId}`);
+      setPlanDetail(response.data);
+    } catch (error) {
+      message.error('Không thể lấy chi tiết kế hoạch.');
+      setPlanDetail(null);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setDetailModalOpen(false);
+    setPlanDetail(null);
   };
 
   useEffect(() => {
@@ -89,10 +112,120 @@ function PlanHistoryPreview() {
                   )}
                 </div>
               </div>
+              <div className="flex justify-end mt-4">
+                <Button type="primary" onClick={() => handleViewDetail(plan.id)}>
+                  Xem chi tiết
+                </Button>
+              </div>
             </li>
           ))}
         </ul>
       )}
+      <Modal
+        title={null}
+        open={detailModalOpen}
+        onCancel={handleCloseModal}
+        footer={null}
+        width={650}
+        bodyStyle={{ padding: 0 }}
+      >
+        {detailLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <Spin size="large" />
+          </div>
+        ) : planDetail ? (
+          <div className="p-8">
+            {/* Header: Tên gói, trạng thái, giá */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+              <div className="flex items-center gap-3">
+                <ClockCircleOutlined className="text-3xl text-blue-500" />
+                <span className="text-2xl font-bold text-blue-700">{planDetail.packageInfo?.name || 'Không rõ'}</span>
+                <span className={`ml-3 px-3 py-1 rounded-full text-xs font-bold text-white ${
+                  planDetail.status === 'ACTIVE' ? 'bg-green-500' :
+                  planDetail.status === 'COMPLETED' ? 'bg-blue-500' :
+                  planDetail.status === 'CANCELLED' ? 'bg-red-500' :
+                  planDetail.status === 'INACTIVE' ? 'bg-gray-400' : 'bg-gray-300'
+                }`}>
+                  {planDetail.status === 'ACTIVE' && 'Đang diễn ra'}
+                  {planDetail.status === 'COMPLETED' && 'Hoàn thành'}
+                  {planDetail.status === 'CANCELLED' && 'Đã hủy'}
+                  {planDetail.status === 'INACTIVE' && 'Không hoạt động'}
+                  {!['ACTIVE', 'COMPLETED', 'CANCELLED', 'INACTIVE'].includes(planDetail.status) && planDetail.status}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-gray-500">Giá gói:</span>
+                <span className="text-lg font-bold text-green-600">{planDetail.packageInfo?.price ? planDetail.packageInfo.price + ' VNĐ' : 'Không rõ'}</span>
+              </div>
+            </div>
+            {/* Thông tin chung */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mb-6">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Mã gói:</span>
+                <span>{planDetail.packageInfo?.code || 'Không rõ'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Thời hạn:</span>
+                <span>{planDetail.packageInfo?.duration ? planDetail.packageInfo.duration + ' ngày' : 'Không rõ'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Bắt đầu:</span>
+                <span>{planDetail.startDate ? new Date(planDetail.startDate).toLocaleDateString() : ''}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Dự kiến bỏ thuốc:</span>
+                <span>{planDetail.targetQuitDate ? new Date(planDetail.targetQuitDate).toLocaleDateString() : ''}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Hỗ trợ chuyên gia:</span>
+                <span className={planDetail.packageInfo?.coachSupport ? 'text-green-600 font-semibold' : 'text-gray-400'}>{planDetail.packageInfo?.coachSupport ? 'Có' : 'Không'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Phương pháp:</span>
+                <span>{planDetail.method || 'Không rõ'}</span>
+              </div>
+            </div>
+            {/* Block mô tả, lý do, chi tiết kế hoạch */}
+            <div className="mb-4">
+              <div className="font-semibold text-gray-600 mb-1">Mô tả gói:</div>
+              <div className="bg-gray-50 rounded-lg p-3 text-gray-700 whitespace-pre-line min-h-[40px]">{planDetail.packageInfo?.description || 'Không rõ'}</div>
+            </div>
+            <div className="mb-4">
+              <div className="font-semibold text-gray-600 mb-1">Lý do bỏ thuốc:</div>
+              <div className="bg-gray-50 rounded-lg p-3 text-gray-700 whitespace-pre-line min-h-[40px]">{planDetail.motivationReason || 'Không rõ'}</div>
+            </div>
+            <div className="mb-2">
+              <div className="font-semibold text-gray-600 mb-1">Chi tiết kế hoạch:</div>
+              {(() => {
+                let planDetailArr = [];
+                try {
+                  planDetailArr = JSON.parse(planDetail.planDetail);
+                } catch {
+                  planDetailArr = null;
+                }
+                if (Array.isArray(planDetailArr)) {
+                  return (
+                    <ul className="space-y-2">
+                      {planDetailArr.map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-2 bg-blue-50 rounded-lg p-2">
+                          <span className="font-bold text-blue-500">Ngày {item.day}:</span>
+                          <span className="flex-1">{item.note}</span>
+                          <span className="text-gray-500">({item.cigarettes} điếu)</span>
+                        </li>
+                      ))}
+                    </ul>
+                  );
+                }
+                return (
+                  <div className="bg-gray-50 rounded-lg p-3 text-gray-700 whitespace-pre-line min-h-[40px]">{planDetail.planDetail || 'Không rõ'}</div>
+                );
+              })()}
+            </div>
+          </div>
+        ) : (
+          <div className="text-center text-gray-400 py-8">Không có dữ liệu chi tiết.</div>
+        )}
+      </Modal>
     </div>
   );
 }
