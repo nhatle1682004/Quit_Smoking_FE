@@ -45,6 +45,7 @@ import PlanHistoryPreview from "./components/plan-history-preview";
 import PaymentResultPage from "./pages/payment-result";
 import CoachDashboard from "./pages/dashboard-coach";
 import NotificationsPage from "./pages/notifications";
+import ReportDashboard from "./pages/dashboard-admin/report";
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -168,6 +169,7 @@ function App() {
         { path: "userManagement", element: <UserManagement /> },
         { path: "coachManagement", element: <CoachManagement /> },
         { path: "managePackage", element: <ManagePackage /> },
+        { path: "report", element: <ReportDashboard /> },
       ],
     },
     {

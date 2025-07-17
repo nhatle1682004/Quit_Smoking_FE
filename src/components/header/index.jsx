@@ -19,7 +19,7 @@ const Header = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-  }
+  };
 
   const handleHomeClick = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -32,41 +32,20 @@ const Header = () => {
     { id: 2, label: "Giới thiệu", href: "/about" },
     { id: 3, label: "Đặt lịch tư vấn chuyên gia", href: "/booking" },
     { id: 4, label: "Công cụ hỗ trợ", href: "/service", hasDropdown: true },
-    { id: 5, label: "Gói dịch vụ", href: "/package" }, 
+    { id: 5, label: "Gói dịch vụ", href: "/package" },
     { id: 6, label: "Nhật ký", href: "/journal" },
     { id: 7, label: "Tấm gương", href: "/success" },
-    { id: 8, label: "Kế hoạch của bạn", href: "/my-plan", hasDropdown: true },
+    { id: 8, label: "Kế hoạch của bạn", href: "/my-plan" },
     { id: 9, label: "Blog", href: "/blog" },
-
   ];
 
   const serviceDropdownItems = [
     { id: 1, label: "Lập kế hoạch cai thuốc", href: "/service/quit-plan-free" },
     { id: 2, label: "Theo dõi thủ công", href: "/service/process" },
-
   ];
- 
 
   const serviceDropdownMenu = {
     items: serviceDropdownItems.map((item) => ({
-      key: item.id,
-      label: (
-        <button
-          onClick={() => navigate(item.href)}
-          className="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 duration-200"
-        >
-          {item.label}
-        </button>
-      ),
-    })),
-  };
-
-  const myPlanDropdownItems = [
-    { id: 1, label: "Kế hoạch cá nhân", href: "/my-plan" },
-    { id: 2, label: "Theo dõi tiến trình", href: "/premium-tracker" },
-  ];
-  const myPlanDropdownMenu = {
-    items: myPlanDropdownItems.map((item) => ({
       key: item.id,
       label: (
         <button
@@ -118,22 +97,10 @@ const Header = () => {
             <nav className="hidden md:flex space-x-4 lg:space-x-6">
               {menuItems.map((item) =>
                 item.hasDropdown && item.id === 4 ? (
-                  /* chỉ còn dropdown cho id = 4 */
+                  // Dropdown chỉ cho "Công cụ hỗ trợ"
                   <Dropdown
                     key={item.id}
                     menu={serviceDropdownMenu}
-                    placement="bottomLeft"
-                    trigger={["hover"]}
-                  >
-                    <button className="text-white flex items-center space-x-1 hover:text-gray-200 duration-300">
-                      <span>{item.label}</span>
-                      <FiChevronDown className="w-4 h-4" />
-                    </button>
-                  </Dropdown>
-                ) : item.hasDropdown && item.id === 8 ? (
-                  <Dropdown
-                    key={item.id}
-                    menu={myPlanDropdownMenu}
                     placement="bottomLeft"
                     trigger={["hover"]}
                   >

@@ -162,17 +162,7 @@ function UserManagement() {
         </Tag>
       ),
     },
-    // {
-    //   title: "Premium",
-    //   dataIndex: "premium",
-    //   key: "premium",
-    //   render: (premium) =>
-    //     premium ? (
-    //       <CheckCircleOutlined style={{ color: "green", fontSize: 18 }} />
-    //     ) : (
-    //       <CloseCircleOutlined style={{ color: "red", fontSize: 18 }} />
-    //     ),
-    // },
+
     {
       title: "Thao tác",
       key: "actions",
@@ -273,6 +263,11 @@ function UserManagement() {
             rules={[
               { required: true, message: "Vui lòng nhập họ tên!" },
               { min: 5, message: "Tối thiểu 5 ký tự." },
+              {
+                pattern: /^(?!\s)[A-Za-zÀ-ỹ\s]+$/,
+                message:
+                  "Họ và tên không được bắt đầu bằng khoảng trắng, chứa số hoặc ký tự đặc biệt!",
+              },
             ]}
           >
             <Input placeholder="Nguyễn Văn A" />
@@ -282,7 +277,7 @@ function UserManagement() {
             label="Tên đăng nhập"
             name="username"
             rules={[
-              { required: true, message: "Bắt buộc!" },
+              { required: true, message: "Vui lòng nhập tên đăng nhập!" },
               {
                 pattern: /^[a-zA-Z0-9_]+$/,
                 message: "Không khoảng trắng hoặc ký tự đặc biệt!",
@@ -296,17 +291,18 @@ function UserManagement() {
             label="Email"
             name="email"
             rules={[
-              { required: true, message: "Bắt buộc!" },
+              { required: true, message: "Vui lòng nhập email!" },
               { type: "email", message: "Email không hợp lệ!" },
             ]}
           >
-            <Input placeholder="email@example.com" />
+            <Input placeholder="email@gmail.com" />
           </Form.Item>
 
           <Form.Item
             label="Số điện thoại"
             name="phoneNumber"
             rules={[
+              { required: true, message: "Vui lòng nhập số điện thoại!" },
               {
                 pattern: /^(0[3|5|7|8|9])+([0-9]{8})\b$/,
                 message: "Số điện thoại không hợp lệ!",
@@ -344,7 +340,7 @@ function UserManagement() {
           <Form.Item
             label="Giới tính"
             name="gender"
-            rules={[{ required: true, message: "Chọn giới tính!" }]}
+            rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
           >
             <Radio.Group>
               <Radio value="MALE">Nam</Radio>
@@ -359,6 +355,10 @@ function UserManagement() {
               rules={[
                 { required: true, message: "Vui lòng nhập mật khẩu!" },
                 { min: 6, message: "Tối thiểu 6 ký tự!" },
+                {
+                  pattern: /^\S+$/,
+                  message: "Không được chứa khoảng trắng!",
+                },
               ]}
             >
               <Input.Password />

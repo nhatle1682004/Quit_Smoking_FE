@@ -7,6 +7,7 @@ import {
   LogoutOutlined,
   HomeOutlined,
   AppstoreOutlined,
+  BarChartOutlined
 } from "@ant-design/icons";
 import {
   Breadcrumb,
@@ -40,6 +41,7 @@ const items = [
   getItem("User Management", "userManagement", <UserOutlined />),
   getItem("Coach Management", "coachManagement", <UserOutlined />),
   getItem("Manage Package ", "managePackage", <AppstoreOutlined />),
+  getItem("Reprort ", "report", <BarChartOutlined />),
 ];
 
 const Dashboard = () => {
@@ -140,9 +142,6 @@ const Dashboard = () => {
             {/* khi nguời dùng ấn item bên tay trái lập tức render children vô outlet */}
           </div>
         </Content>
-        <Footer style={{ textAlign: "center" }}>
-          Ant Design ©{new Date().getFullYear()} Created by Ant UED
-        </Footer>
       </Layout>
     </Layout>
   );
