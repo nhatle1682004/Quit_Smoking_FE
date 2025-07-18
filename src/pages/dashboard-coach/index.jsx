@@ -290,7 +290,7 @@ function CoachDashboard() {
       setIsSending(false);
     }
   };
-
+  
   // Handlers for table and filters
   const handleTableChange = (pagination) => setPagination(pagination);
   const handleSearch = (value) => setFilters({ ...filters, keyword: value });

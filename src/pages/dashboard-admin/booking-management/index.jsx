@@ -20,7 +20,7 @@ import {
   DownOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
-import api from "../../../configs/axios"; // FIXED: Reverted to use your original API configuration.
+import api from "../../../configs/axios";
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -47,7 +47,7 @@ function BookingManagement() {
   });
   const [filters, setFilters] = useState({
     keyword: "",
-    status: null, // New filter for booking status
+    status: null,
   });
   const [viewingBooking, setViewingBooking] = useState(null);
 
@@ -61,13 +61,15 @@ function BookingManagement() {
       // Filter data based on current status and keyword filters
       const filteredData = data.filter((booking) => {
         const keywordLower = filters.keyword.toLowerCase();
+        
+        // FIXED: Search logic updated to use correct field names
         const matchKeyword =
           !filters.keyword ||
-          booking.id.toString().toLowerCase().includes(keywordLower) ||
-          booking.userName?.toLowerCase().includes(keywordLower) ||
+          booking.bookingId.toString().toLowerCase().includes(keywordLower) ||
+          booking.user?.fullName?.toLowerCase().includes(keywordLower) ||
           booking.coachName?.toLowerCase().includes(keywordLower);
 
-        // UPDATED: Consistently check status in uppercase
+        // Consistently check status in uppercase
         const matchStatus =
           !filters.status ||
           (booking.status && booking.status.toUpperCase() === filters.status);
@@ -139,13 +141,13 @@ function BookingManagement() {
   const columns = [
     {
       title: "ID Lịch hẹn",
-      dataIndex: "id",
-      key: "id",
+      dataIndex: "bookingId", // FIXED: Changed from "id"
+      key: "bookingId",
       width: 120,
     },
     {
       title: "Tên Khách hàng",
-      dataIndex: "userName",
+      dataIndex: ["user", "fullName"], // FIXED: Changed from "userName" to access nested property
       key: "userName",
       responsive: ["md"],
     },
@@ -188,7 +190,7 @@ function BookingManagement() {
       render: (_, record) => {
         const menu = (
           <Menu
-            onClick={({ key }) => handleUpdateStatus(record.id, key)}
+            onClick={({ key }) => handleUpdateStatus(record.bookingId, key)} // FIXED: Changed from record.id
             items={AVAILABLE_STATUSES.map((status) => ({
               key: status,
               label: `Chuyển thành ${status}`,
@@ -267,7 +269,7 @@ function BookingManagement() {
         <Table
           columns={columns}
           dataSource={bookings}
-          rowKey="id"
+          rowKey="bookingId" // FIXED: Changed from "id"
           pagination={pagination}
           loading={loading}
           onChange={handleTableChange}
@@ -280,7 +282,7 @@ function BookingManagement() {
       <Modal
         title={
           <Title level={4} className="mb-0 text-gray-800">
-            Chi tiết Lịch hẹn #{viewingBooking?.id}
+            Chi tiết Lịch hẹn #{viewingBooking?.bookingId} {/* FIXED: Changed from .id */}
           </Title>
         }
         open={viewingBooking !== null}
@@ -295,7 +297,7 @@ function BookingManagement() {
         {viewingBooking && (
           <div className="p-4 bg-gray-50 rounded-lg shadow-inner">
             <Paragraph>
-              <Text strong>Tên Khách hàng:</Text> {viewingBooking.userName}
+              <Text strong>Tên Khách hàng:</Text> {viewingBooking.user?.fullName} {/* FIXED: Changed from .userName */}
             </Paragraph>
             <Paragraph>
               <Text strong>Tên Coach:</Text> {viewingBooking.coachName}
