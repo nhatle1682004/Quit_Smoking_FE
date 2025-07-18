@@ -62,21 +62,6 @@ const Header = () => {
       ),
     })),
   };
-
-  const myPlanDropdownItems = [];
-  const myPlanDropdownMenu = {
-    items: myPlanDropdownItems.map((item) => ({
-      key: item.id,
-      label: (
-        <button
-          onClick={() => navigate(item.href)}
-          className="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 duration-200"
-        >
-          {item.label}
-        </button>
-      ),
-    })),
-  };
   /* ---------- END MENU DATA ----------- */
 
   // THAY ĐỔI: Thay thế useEffect cũ bằng useEffect gọi Redux thunk
@@ -124,21 +109,10 @@ const Header = () => {
             <nav className="hidden md:flex space-x-4 lg:space-x-6">
               {menuItems.map((item) =>
                 item.hasDropdown && item.id === 4 ? (
+                  // Dropdown chỉ cho "Công cụ hỗ trợ"
                   <Dropdown
                     key={item.id}
                     menu={serviceDropdownMenu}
-                    placement="bottomLeft"
-                    trigger={["hover"]}
-                  >
-                    <button className="text-white flex items-center space-x-1 hover:text-gray-200 duration-300">
-                      <span>{item.label}</span>
-                      <FiChevronDown className="w-4 h-4" />
-                    </button>
-                  </Dropdown>
-                ) : item.hasDropdown && item.id === 8 ? (
-                  <Dropdown
-                    key={item.id}
-                    menu={myPlanDropdownMenu}
                     placement="bottomLeft"
                     trigger={["hover"]}
                   >

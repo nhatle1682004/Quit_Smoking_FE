@@ -100,13 +100,7 @@ function UserPackage() {
       case "PENDING":
         return <Badge color="orange" text="Chờ thanh toán" />;
       case "FAILED":
-        return (
-          <Badge
-            color="red"
-            text="Thanh toán
-         thất bại"
-          />
-        );
+        return <Badge color="red" text="Thanh toán thất bại" />;
       case "CANCELED":
         return <Badge color="red" text="Thanh toán đã hủy" />;
       default:

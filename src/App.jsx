@@ -40,12 +40,12 @@ import PlanHistoryPreview from "./components/plan-history-preview";
 import PaymentResultPage from "./pages/payment-result";
 import CoachDashboard from "./pages/dashboard-coach";
 import NotificationsPage from "./pages/notifications";
-// Import the new ClientDetailsPage component
+import ReportDashboard from "./pages/dashboard-admin/report";
+import ClientDetailsPage from "./pages/dashboard-coach/ClientDetailsPage";
 
 import { Provider } from "react-redux";
 import { persistor, store } from "./redux/store";
 import { PersistGate } from "redux-persist/integration/react";
-import ClientDetailsPage from "./pages/dashboard-coach/ClientDetailsPage";
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -168,6 +168,7 @@ function App() {
         { path: "userManagement", element: <UserManagement /> },
         { path: "coachManagement", element: <CoachManagement /> },
         { path: "managePackage", element: <ManagePackage /> },
+        { path: "report", element: <ReportDashboard /> },
       ],
     },
     {

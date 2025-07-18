@@ -156,6 +156,13 @@ function Plan() {
                 <span className="text-red-600 font-bold">hủy kế hoạch</span>?
               </span>
             }
+            description="Sau khi hủy, bạn sẽ không thể tạo lại kế hoạch mới với gói hiện tại."
+            okText="Đồng ý"
+            cancelText="Không"
+            okButtonProps={{
+              danger: true,
+              className: "bg-red-600 hover:bg-red-700",
+            }}
             onConfirm={() => handleDeletePlan(plan.id)}
           >
             <Button

@@ -18,15 +18,22 @@ function RegisterForm() {
   const onFinish = async (values) => {
     console.log("Success:", values);
     try {
-      // Đổi tên trường phone thành phoneNumber cho đúng backend
-      const payload = { ...values, phoneNumber: values.phone };
-      delete payload.phone;
-      await api.post("register", payload);
+      await api.post("register", values);
       toast.success("Tạo tài khoản thành công!");
       navigate("/login");
     } catch (e) {
       console.log(e);
-      toast.error(e.response?.data || "Đăng ký thất bại");
+      const msg =
+        e.response?.data?.message || e.response?.data || "Đăng ký thất bại";
+      const lowerMsg = msg.toLowerCase();
+
+      if (lowerMsg.includes("username")) {
+        toast.error("Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác!");
+      } else if (lowerMsg.includes("email")) {
+        toast.error("Email đã được sử dụng. Vui lòng dùng email khác!");
+      } else {
+        toast.error(msg);
+      }
     }
   };
   const onFinishFailed = (errorInfo) => {
@@ -39,21 +46,19 @@ function RegisterForm() {
       <Form
         name="basic"
         layout="vertical"
-        // labelCol={{ span: 24 }}
         initialValues={{ remember: true }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
-        // autoComplete="off"
       >
         <Form.Item
-          // label="Họ và tên"
           name="fullName"
           rules={[
             { required: true, message: "Vui lòng nhập họ và tên!" },
             { min: 5, message: "Họ và tên phải có ít nhất 5 ký tự!" },
             {
-              pattern: /^(?!\s).+$/,
-              message: "Họ và tên không được bắt đầu bằng khoảng trắng!",
+              pattern: /^(?!\s)[A-Za-zÀ-ỹ\s]+$/,
+              message:
+                "Họ và tên không được bắt đầu bằng khoảng trắng, chứa số hoặc ký tự đặc biệt!",
             },
           ]}
         >
@@ -87,7 +92,7 @@ function RegisterForm() {
 
             {
               pattern: /^[a-zA-Z0-9_]+$/,
-              message: "Không được chứa khoảng trắng hoặc ký tự đặc biệt!",
+              message: "Không khoảng trắng hoặc ký tự đặc biệt!",
             },
           ]}
         >
@@ -98,7 +103,7 @@ function RegisterForm() {
         </Form.Item>
         <Form.Item
           label="Số điện thoại"
-          name="phone"
+          name="phoneNumber"
           rules={[
             { required: true, message: "Vui lòng nhập số điện thoại!" },
             {

@@ -90,6 +90,12 @@ const UserProfile = () => {
                       label="Họ và tên"
                       rules={[
                         { required: true, message: "Vui lòng nhập họ tên" },
+                        { min: 5, message: "Họ và tên phải có ít nhất 5 ký tự!" },
+                        {
+                          pattern: /^(?!\s)[A-Za-zÀ-ỹ\s]+$/,
+                          message:
+                            "Họ và tên không được bắt đầu bằng khoảng trắng, chứa số hoặc ký tự đặc biệt!",
+                        },
                       ]}
                     >
                       <Input placeholder="Nhập họ tên" disabled={!editing} />
@@ -125,8 +131,8 @@ const UserProfile = () => {
                           message: "Vui lòng nhập số điện thoại",
                         },
                         {
-                          pattern: /^[0-9]{9,11}$/,
-                          message: "Số điện thoại không hợp lệ",
+                          pattern: /^(0[3|5|7|8|9])+([0-9]{8})\b$/,
+                          message: "Số điện thoại không hợp lệ!",
                         },
                       ]}
                     >
@@ -142,13 +148,12 @@ const UserProfile = () => {
                       <Divider />
                       <Text strong>Trạng thái tài khoản: </Text>
                       <span
-                        className={`px-2 py-1 rounded text-sm font-medium ${
-                          profile.premium
+                        className={`px-2 py-1 rounded text-sm font-medium ${profile.premium
                             ? "bg-green-100 text-green-800"
                             : "bg-gray-100 text-gray-800"
-                        }`}
+                          }`}
                       >
-                        {profile.premium ? "Premium" : "Miễn phí"}
+                        
                       </span>
                     </>
                   )}
