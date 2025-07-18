@@ -2,21 +2,16 @@ import React from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 
 import Header from "./components/header";
+import Footer from "./components/footer";
 
 import LoginPage from "./pages/login";
 import RegisterPage from "./pages/register";
 import HomePage from "./pages/home";
 import Dashboard from "./components/dashboard";
-import { Provider } from "react-redux";
-import { persistor, store } from "./redux/store";
-import { PersistGate } from "redux-persist/integration/react";
 import Notifications from "./pages/dashboard-admin/notifications/index";
 import BlogModeration from "./pages/dashboard-admin/blog-moderation";
-
 import UserManagement from "./pages/dashboard-admin/user-management";
-import Footer from "./components/footer";
 import InformationPage from "./pages/navbar-page/about";
-
 import BlogPage from "./pages/navbar-page/blog";
 import SuccessStories from "./pages/navbar-page/success/index";
 import SuccessStoryHoChiMinh from "./components/success-story-details/successStoryHoChiMinh";
@@ -46,6 +41,11 @@ import PaymentResultPage from "./pages/payment-result";
 import CoachDashboard from "./pages/dashboard-coach";
 import NotificationsPage from "./pages/notifications";
 import ReportDashboard from "./pages/dashboard-admin/report";
+import ClientDetailsPage from "./pages/dashboard-coach/ClientDetailsPage";
+
+import { Provider } from "react-redux";
+import { persistor, store } from "./redux/store";
+import { PersistGate } from "redux-persist/integration/react";
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -124,7 +124,6 @@ function App() {
           path: "journal",
           element: <LogSmoking />,
         },
-
         {
           path: "my-plan",
           element: <Plan />,
@@ -188,9 +187,14 @@ function App() {
       path: "/initial-condition",
       element: <InitialCondition />,
     },
+    // Coach-related routes are now grouped together
     {
       path: "/dashboard-coach",
       element: <CoachDashboard />,
+    },
+    {
+      path: "/dashboard-coach/client-details/:clientId",
+      element: <ClientDetailsPage />,
     },
   ]);
   return (

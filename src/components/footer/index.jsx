@@ -9,15 +9,12 @@ import {
 import { SiZalo } from "react-icons/si";
 
 const Footer = () => {
-
-
   const menuItems = [
     { id: 1, label: "Trang chủ", href: "/" },
     { id: 2, label: "Giới thiệu", href: "/about" },
     { id: 3, label: "Kiến thức chung", href: "/knowledge" },
     { id: 4, label: "Dịch vụ & Sản phẩm", href: "/service" },
     { id: 5, label: "Gương cai thuốc thành công", href: "/news" },
-    { id: 6, label: "Liên hệ", href: "/contact" },
   ];
 
   return (
