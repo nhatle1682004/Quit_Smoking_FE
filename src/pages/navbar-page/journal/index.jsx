@@ -59,8 +59,42 @@ function LogSmoking() {
   const [selectedDate, setSelectedDate] = useState(
     dayjs().format("YYYY-MM-DD")
   );
-  const user = useSelector((state) => state.user.user); // hoặc state.user, tuỳ cấu trúc
+  const user = useSelector((state) => state.user);
   const navigate = useNavigate();
+  useEffect(() => {
+    if (!user) {
+      toast.error("Bạn chưa đăng nhập!");
+    }
+  }, [user]);
+
+  if (!user) {
+    return (
+      <div
+        style={{
+          minHeight: "60vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <h2>Bạn chưa đăng nhập</h2>
+        <Button
+          type="primary"
+          size="large"
+          style={{
+            marginTop: 24,
+            padding: "10px 32px",
+            fontSize: 18,
+            borderRadius: 8,
+          }}
+          onClick={() => navigate("/login")}
+        >
+          Đăng nhập để sử dụng chức năng này
+        </Button>
+      </div>
+    );
+  }
 
   const fetchStats = async () => {
     try {
@@ -101,7 +135,7 @@ function LogSmoking() {
       toast.success("Cập nhật nhật ký hút thuốc thành công!");
       form.resetFields();
       setLogData(res.data);
-      fetchStats(); 
+      fetchStats();
     } catch (error) {
       console.error("API error:", error.response?.data || error.message);
       toast.error("Không thể cập nhật nhật ký hút thuốc! Vui lòng thử lại.");
@@ -144,7 +178,7 @@ function LogSmoking() {
           </div>
           <Title
             level={1}
-            className="text-gray-800 mb-4 bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent"
+            className="text-gray-800 mb-4 bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text"
           >
             Nhật Ký Hút Thuốc
           </Title>
@@ -293,6 +327,11 @@ function LogSmoking() {
                       type: "number",
                       min: 0,
                       message: "Số điếu phải không được là số âm!.",
+                    },
+                    {
+                      pattern: /^\d+$/,
+                      message:
+                        "Chỉ được nhập số, không được chứa chữ cái hoặc ký tự đặc biệt!",
                     },
                   ]}
                 >

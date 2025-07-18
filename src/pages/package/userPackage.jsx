@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../configs/axios";
 import { useNavigate } from "react-router-dom";
@@ -15,26 +15,29 @@ function UserPackage() {
   const [activatingPlanId, setActivatingPlanId] = useState(null); // Plan đang kích hoạt
   const navigate = useNavigate();
 
-  const fetchUserPackage = useCallback(async () => {
-    setLoading(true);
+  const fetchUserPackage = async () => {
     try {
       const response = await api.get("/purchased-plan/my");
       setPackages(response.data);
+      console.log(response.data);
     } catch {
       toast.error("Không lấy được gói của bạn");
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchUserPackage();
-  }, [fetchUserPackage]);
+  }, []);
 
   // Nhóm các gói
   const activePackages = packages.filter((pkg) => pkg.status === "ACTIVE");
   const paidPackages = packages.filter(
-    (pkg) => pkg.paymentStatus === "SUCCESS" && pkg.status !== "ACTIVE"
+    (pkg) =>
+      pkg.paymentStatus === "SUCCESS" &&
+      pkg.status !== "ACTIVE" &&
+      pkg.status !== "CANCELED"
   );
   const unpaidPackages = packages.filter(
     (pkg) => pkg.paymentStatus !== "SUCCESS"
@@ -45,6 +48,7 @@ function UserPackage() {
   const pendingPackages = unpaidPackages.filter(
     (pkg) => pkg.paymentStatus !== "FAILED"
   );
+  const canceledPackages = packages.filter((pkg) => pkg.status === "CANCELED");
 
   const handleRetryPayment = (paymentUrl) => {
     if (paymentUrl) window.location.href = paymentUrl;
@@ -231,6 +235,18 @@ function UserPackage() {
               {failedPackages.map((pkg) =>
                 renderPackageCard(pkg, { retry: true })
               )}
+            </div>
+          </>
+        )}
+
+        {/* Nhóm: GÓI ĐÃ HỦY */}
+        {canceledPackages.length > 0 && (
+          <>
+            <h3 className="text-xl font-semibold mb-2 text-gray-500">
+              Gói đã hủy
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+              {canceledPackages.map((pkg) => renderPackageCard(pkg))}
             </div>
           </>
         )}

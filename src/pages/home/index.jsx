@@ -99,7 +99,7 @@ function HomePage() {
       title: "Đặt lịch tư vấn chuyên gia",
       description:
         "Đặt lịch hẹn và nhận tư vấn trực tiếp từ các huấn luyện viên, chuyên gia y tế.",
-      navigateTo: "/knowledge",
+      navigateTo: "/booking",
     },
   ];
 
