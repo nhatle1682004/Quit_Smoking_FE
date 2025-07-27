@@ -36,7 +36,8 @@ function UserPackage() {
   // Nhóm các gói
   const activePackages = packages.filter((pkg) => pkg.status === "ACTIVE");
   const paidPackages = packages.filter(
-    (pkg) => pkg.paymentStatus === "SUCCESS" && pkg.status !== "ACTIVE"
+    (pkg) => pkg.paymentStatus === "SUCCESS" && pkg.status !== "ACTIVE" &&
+    pkg.status !== "CANCELED" 
   );
   const unpaidPackages = packages.filter(
     (pkg) => pkg.paymentStatus !== "SUCCESS"

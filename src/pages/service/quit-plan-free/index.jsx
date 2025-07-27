@@ -1,10 +1,9 @@
 import { Button, DatePicker, Form, Input } from "antd";
-import React, { useEffect } from "react";
+import React from "react";
 import { toast } from "react-toastify";
 import api from "../../../configs/axios";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-
 dayjs.extend(isSameOrAfter);
 
 import { CalendarOutlined, DownloadOutlined } from "@ant-design/icons";
@@ -14,36 +13,18 @@ import { useSelector } from "react-redux";
 function QuitPlanFree() {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-
-const user = useSelector((state) => state.user?.currentUser);
-
-useEffect(() => {
-    if (!user) {
-      toast.error("Bạn chưa đăng nhập!");
-    }
-  }, [user]);
-
-  if (!user) {
-    return (
-      <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-        <h2>Bạn chưa đăng nhập</h2>
-        <Button
-          type="primary"
-          size="large"
-          style={{ marginTop: 24, padding: '10px 32px', fontSize: 18, borderRadius: 8 }}
-          onClick={() => navigate('/login')}
-        >
-          Đăng nhập để sử dụng chức năng này
-        </Button>
-      </div>
-    );
-  }
+  const user = useSelector((state) => state.user?.currentUser);
 
   const handleDownloadTemplate = () => {
     window.open("/QuitSmoking_KeHoachCaiThuoc.pdf", "_blank");
   };
 
   const handleSubmit = async (values) => {
+    if (!user) {
+      toast.error("Vui lòng đăng nhập để tạo kế hoạch cai thuốc.");
+      return;
+    }
+
     try {
       const response = await api.post("/free-plan/create", values);
       console.log(response.data);
@@ -89,11 +70,7 @@ useEffect(() => {
           className="space-y-6"
         >
           <Form.Item
-            label={
-              <span className="font-medium text-gray-700">
-                Ngày bắt đầu kế hoạch *
-              </span>
-            }
+            label={<span className="font-medium text-gray-700">Ngày bắt đầu kế hoạch *</span>}
             name="startDate"
             rules={[
               { required: true, message: "Vui lòng chọn ngày bắt đầu" },
@@ -116,11 +93,7 @@ useEffect(() => {
           </Form.Item>
 
           <Form.Item
-            label={
-              <span className="font-medium text-gray-700">
-                Ngày kết thúc kế hoạch *
-              </span>
-            }
+            label={<span className="font-medium text-gray-700">Ngày kết thúc kế hoạch *</span>}
             name="endDate"
             rules={[
               { required: true, message: "Vui lòng chọn ngày kết thúc" },
@@ -131,7 +104,6 @@ useEffect(() => {
 
                   if (!value) return Promise.resolve();
 
-                  // Ép kiểu để đảm bảo value là dayjs
                   const selectedDate = dayjs(value);
                   const start = startDate ? dayjs(startDate) : null;
 
@@ -140,9 +112,7 @@ useEffect(() => {
                   }
 
                   if (start && selectedDate.isBefore(start, "day")) {
-                    return Promise.reject(
-                      "Ngày kết thúc không được trước ngày bắt đầu"
-                    );
+                    return Promise.reject("Ngày kết thúc không được trước ngày bắt đầu");
                   }
 
                   return Promise.resolve();
@@ -156,14 +126,11 @@ useEffect(() => {
               suffixIcon={<CalendarOutlined />}
             />
           </Form.Item>
+
           <Form.Item
-            label={
-              <span className="font-medium text-gray-700">Lý do thúc đẩy</span>
-            }
+            label={<span className="font-medium text-gray-700">Lý do thúc đẩy</span>}
             name="motivationReason"
-            rules={[
-              { required: true, message: "Vui lòng nhập lý do thúc đẩy" },
-            ]}
+            rules={[{ required: true, message: "Vui lòng nhập lý do thúc đẩy" }]}
           >
             <Input.TextArea
               rows={3}
@@ -171,12 +138,11 @@ useEffect(() => {
               className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           </Form.Item>
+
           <Form.Item
-            label={
-              <span className="font-medium text-gray-700">Ghi chú thêm</span>
-            }
+            label={<span className="font-medium text-gray-700">Ghi chú thêm</span>}
             name="note"
-            rules={[{ required: true, message: "Vui lòng nhập ghi chú thêm" }]} 
+            rules={[{ required: true, message: "Vui lòng nhập ghi chú thêm" }]}
           >
             <Input.TextArea
               rows={3}

@@ -31,7 +31,7 @@ const COACH_MEET_LINKS = {
 };
 
 function BookingPage() {
-  const [selectedCoachAccountId, setSelectedCoachAccountId] = useState(null);
+  const [selectedCoachId, setSelectedCoachId] = useState(null);
   const [form, setForm] = useState({ date: "", startTime: "", endTime: "" });
   const [coaches, setCoaches] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,9 +45,7 @@ function BookingPage() {
   const [isCheckingSlots, setIsCheckingSlots] = useState(false);
 
   const currentUser = useSelector((state) => state.user);
-  const selectedCoach = coaches.find(
-    (c) => c.accountId === selectedCoachAccountId
-  );
+  const selectedCoach = coaches.find((c) => c.id === selectedCoachId);
 
   const fetchInitialData = useCallback(async () => {
     if (!currentUser?.id) {
@@ -121,7 +119,7 @@ function BookingPage() {
   }, [fetchInitialData]);
 
   useEffect(() => {
-    if (selectedCoachAccountId && form.date) {
+    if (selectedCoachId && form.date) {
       const fetchBookedSlots = async () => {
         setIsCheckingSlots(true);
         try {
@@ -130,7 +128,7 @@ function BookingPage() {
           };
           const res = await api.get("/bookings/appointments", {
             params: {
-              coachId: selectedCoachAccountId,
+              coachId: selectedCoachId,
               date: form.date,
             },
             headers: apiConfig.headers,
@@ -151,16 +149,16 @@ function BookingPage() {
     } else {
       setBookedSlots([]);
     }
-  }, [selectedCoachAccountId, form.date, currentUser?.token]);
+  }, [selectedCoachId, form.date, currentUser?.token]);
 
-  const handleSelectCoach = (accountId) => {
-    setSelectedCoachAccountId(accountId);
+  const handleSelectCoach = (coachId) => {
+    setSelectedCoachId(coachId);
     setForm({ date: "", startTime: "", endTime: "" });
     setError(null);
   };
 
   const handleGoBack = () => {
-    setSelectedCoachAccountId(null);
+    setSelectedCoachId(null);
     setError(null);
   };
 
@@ -174,7 +172,7 @@ function BookingPage() {
       };
       const body = {
         userId: currentUser.id,
-        coachId: selectedCoach.accountId,
+        coachId: selectedCoach.id,
         date: form.date,
         startTime: form.startTime,
         endTime: form.endTime,
@@ -184,6 +182,7 @@ function BookingPage() {
       setSuccess(true);
       setLatestBooking(res.data);
     } catch (err) {
+      
       setError("Đặt lịch thất bại. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
@@ -461,7 +460,7 @@ function BookingPage() {
             </h3>
             <p className="text-sm text-gray-500 mb-4">{coach.specialization}</p>
             <button
-              onClick={() => handleSelectCoach(coach.accountId)}
+              onClick={() => handleSelectCoach(coach.id)}
               className="mt-4 px-5 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
             >
               Chọn Coach

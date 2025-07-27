@@ -56,7 +56,7 @@ function InitialCondition() {
           >
             <Form.Item
               name="cigarettesPerDay"
-              label="Số lượng thuốc lá hút mỗi ngày"
+              label="Số lượng điếu thuốc lá hút mỗi ngày"
               rules={[
                 { required: true, message: "Vui lòng nhập số điếu mỗi ngày" },
                 {
@@ -139,23 +139,6 @@ function InitialCondition() {
                 maxLength={300}
               />
             </Form.Item>
-
-            <Form.Item
-              name="readinessScale"
-              label="Mức độ sẵn sàng bỏ thuốc (1-10)"
-              rules={[
-                { required: true, message: "Vui lòng nhập mức độ từ 1 đến 10" },
-                {
-                  type: "number",
-                  min: 1,
-                  max: 10,
-                  message: "Mức độ phải từ 1 đến 10",
-                },
-              ]}
-            >
-              <InputNumber className="w-full" placeholder="Ví dụ: 7" />
-            </Form.Item>
-
             <Form.Item
               name="emotion"
               label="Cảm xúc khi hút thuốc"

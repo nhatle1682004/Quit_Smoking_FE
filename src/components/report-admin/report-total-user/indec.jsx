@@ -18,7 +18,7 @@ function ReportTotalUsers() {
   const fetchReport = async () => {
     setLoading(true);
     try {
-      const response = await api.get('admin/dashboard/user-stats');
+      const response = await api.get('/admin/dashboard/user-stats');
       setReport(response.data);
       // Gọi thêm API tổng doanh thu
       const totalRes = await api.get('/admin/dashboard/total-success-amount/all');

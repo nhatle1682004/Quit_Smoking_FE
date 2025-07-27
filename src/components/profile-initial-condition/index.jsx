@@ -86,7 +86,7 @@ function ProfileInitialCondition() {
           <Form form={form} layout="vertical" onFinish={handleSubmit}>
             <Form.Item
               name="cigarettesPerDay"
-              label="Số lượng thuốc lá hút mỗi ngày"
+              label="Số lượng điếu thuốc lá hút mỗi ngày"
               rules={[
                 { required: true, message: "Vui lòng nhập số điếu mỗi ngày" },
                 {
@@ -175,32 +175,7 @@ function ProfileInitialCondition() {
                 disabled={!editing || hasActivePackage}
               />
             </Form.Item>
-            <Form.Item
-              name="readinessScale"
-              label="Mức độ sẵn sàng bỏ thuốc (1-10)"
-              rules={[
-                { required: true, message: "Vui lòng nhập mức độ từ 1 đến 10" },
-                {
-                  type: "number",
-                  min: 1,
-                  max: 10,
-                  message: "Mức độ phải từ 1 đến 10",
-                },
-                {
-                  pattern: /^\d+$/,
-                  message:
-                    "Chỉ được nhập số, không được chứa chữ cái hoặc ký tự đặc biệt!",
-                },
-              ]}
-            >
-              <InputNumber
-                className="w-full"
-                min={1}
-                max={10}
-                placeholder="Ví dụ: 7"
-                disabled={!editing}
-              />
-            </Form.Item>
+           
             <Form.Item
               name="emotion"
               label="Cảm xúc khi hút thuốc"

@@ -148,62 +148,76 @@ function CoachDashboard() {
   const [isSending, setIsSending] = useState(false);
 
   const fetchCoachData = useCallback(async () => {
-    if (!currentUser?.id) {
+  if (!currentUser?.id) {
+    setIsLoading(false);
+    setError("Please log in to view the dashboard.");
+    return;
+  }
+
+  setIsLoading(true);
+  try {
+    // 1. Lấy danh sách coach profile để map sang coachId
+    const coachListRes = await api.get("/coach/coaches");
+    const coachProfile = coachListRes.data.find(
+      (c) => c.accountId === currentUser.id
+    );
+    if (!coachProfile) {
+      setError("Không tìm được coach profile cho tài khoản này!");
       setIsLoading(false);
-      setError("Please log in to view the dashboard.");
       return;
     }
+    const coachId = coachProfile.id;
 
-    setIsLoading(true);
-    try {
-      const response = await api.get(`/bookings/coach/${currentUser.id}`);
-      const coachBookings = response.data;
+    // 2. Lấy booking của coach theo đúng coachId
+    const response = await api.get(`/bookings/coach/${coachId}`);
+    const coachBookings = response.data;
 
-      const clientMap = new Map();
-      coachBookings.forEach((booking) => {
-        const userInfo = booking.user;
-        // ✅ SỬA LỖI: Thay "id" bằng "customerId" để khớp với API
-        if (
-          userInfo &&
-          userInfo.customerId != null &&
-          !clientMap.has(userInfo.customerId)
-        ) {
-          clientMap.set(userInfo.customerId, {
-            id: userInfo.customerId, // Dùng customerId
-            fullName: userInfo.fullName,
-            email: userInfo.email,
-            avatarUrl:
-              userInfo.avatarUrl ||
-              "https://placehold.co/100x100/EFEFEF/AAAAAA&text=No+Image",
-            joinedDate: userInfo.joinedDate
-              ? new Date(userInfo.joinedDate).toLocaleDateString()
-              : "N/A",
-            plan: userInfo.plan || "Basic",
-            progress: {
-              smokeFreeDays: Math.floor(Math.random() * 30),
-              cigarettesAvoided: Math.floor(Math.random() * 500),
-              moneySaved: Math.floor(Math.random() * 200),
-              cravingIntensity: Math.floor(Math.random() * 100),
-            },
-          });
-        }
-      });
-      setClients(Array.from(clientMap.values()));
+    // 3. Duyệt lấy danh sách client
+    const clientMap = new Map();
+    coachBookings.forEach((booking) => {
+      const userInfo = booking.user;
+      if (
+        userInfo &&
+        userInfo.customerId != null &&
+        !clientMap.has(userInfo.customerId)
+      ) {
+        clientMap.set(userInfo.customerId, {
+          id: userInfo.customerId,
+          fullName: userInfo.fullName,
+          email: userInfo.email,
+          avatarUrl:
+            userInfo.avatarUrl ||
+            "https://placehold.co/100x100/EFEFEF/AAAAAA&text=No+Image",
+          joinedDate: userInfo.joinedDate
+            ? new Date(userInfo.joinedDate).toLocaleDateString()
+            : "N/A",
+          plan: userInfo.plan || "Basic",
+          progress: {
+            smokeFreeDays: Math.floor(Math.random() * 30),
+            cigarettesAvoided: Math.floor(Math.random() * 500),
+            moneySaved: Math.floor(Math.random() * 200),
+            cravingIntensity: Math.floor(Math.random() * 100),
+          },
+        });
+      }
+    });
+    setClients(Array.from(clientMap.values()));
 
-      const formattedBookings = coachBookings.map((booking) => ({
-        ...booking,
-        key: booking.bookingId,
-        customerName: booking.user.fullName,
-        status: booking.status.toUpperCase(),
-      }));
-      setAllBookings(formattedBookings);
-    } catch (err) {
-      setError("Failed to load dashboard data. Please try again.");
-      console.error("Error fetching dashboard data:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentUser]);
+    const formattedBookings = coachBookings.map((booking) => ({
+      ...booking,
+      key: booking.bookingId,
+      customerName: booking.user.fullName,
+      status: booking.status.toUpperCase(),
+    }));
+    setAllBookings(formattedBookings);
+  } catch (err) {
+    setError("Failed to load dashboard data. Please try again.");
+    console.error("Error fetching dashboard data:", err);
+  } finally {
+    setIsLoading(false);
+  }
+}, [currentUser]);
+
 
   useEffect(() => {
     fetchCoachData();
