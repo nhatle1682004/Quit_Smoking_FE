@@ -1,4 +1,4 @@
-import React, { useEffect, useState,  } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../configs/axios";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +15,6 @@ function UserPackage() {
   const [activatingPlanId, setActivatingPlanId] = useState(null); // Plan đang kích hoạt
   const navigate = useNavigate();
 
-
   const fetchUserPackage = async () => {
     try {
       const response = await api.get("/purchased-plan/my");
@@ -25,19 +24,20 @@ function UserPackage() {
       toast.error("Không lấy được gói của bạn");
     } finally {
       setLoading(false);
-    };
+    }
   };
 
-    useEffect(() => {
-      fetchUserPackage();
-    }, []);
-
+  useEffect(() => {
+    fetchUserPackage();
+  }, []);
 
   // Nhóm các gói
   const activePackages = packages.filter((pkg) => pkg.status === "ACTIVE");
   const paidPackages = packages.filter(
-    (pkg) => pkg.paymentStatus === "SUCCESS" && pkg.status !== "ACTIVE" &&
-    pkg.status !== "CANCELED" 
+    (pkg) =>
+      pkg.paymentStatus === "SUCCESS" &&
+      pkg.status !== "ACTIVE" &&
+      pkg.status !== "CANCELED"
   );
   const unpaidPackages = packages.filter(
     (pkg) => pkg.paymentStatus !== "SUCCESS"
@@ -100,13 +100,7 @@ function UserPackage() {
       case "PENDING":
         return <Badge color="orange" text="Chờ thanh toán" />;
       case "FAILED":
-        return (
-          <Badge
-            color="red"
-            text="Thanh toán
-         thất bại"
-          />
-        );
+        return <Badge color="red" text="Thanh toán thất bại" />;
       case "CANCELED":
         return <Badge color="red" text="Thanh toán đã hủy" />;
       default:

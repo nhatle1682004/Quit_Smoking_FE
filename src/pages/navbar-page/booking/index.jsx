@@ -16,7 +16,7 @@ const TIME_SLOTS = [
   { label: "15:00 - 17:00", startTime: "15:00", endTime: "17:00" },
 ];
 
-// Ánh xạ ID của Coach với link Google Meet tương ứng.
+// Ánh xạ ID của Coach (từ bảng coaches) với link Google Meet
 const COACH_MEET_LINKS = {
   22: "https://meet.google.com/pfw-oxjm-vpy",
   23: "https://meet.google.com/uiu-hhqt-hwk",
@@ -40,11 +40,10 @@ function BookingPage() {
   const [userBlockMessage, setUserBlockMessage] = useState(null);
   const [latestBooking, setLatestBooking] = useState(null);
   const [confirmedAppointment, setConfirmedAppointment] = useState(null);
-
   const [bookedSlots, setBookedSlots] = useState([]);
   const [isCheckingSlots, setIsCheckingSlots] = useState(false);
-
   const currentUser = useSelector((state) => state.user);
+
   const selectedCoach = coaches.find((c) => c.id === selectedCoachId);
 
   const fetchInitialData = useCallback(async () => {
@@ -57,6 +56,7 @@ function BookingPage() {
     const apiConfig = {
       headers: { Authorization: `Bearer ${currentUser.token}` },
     };
+
     try {
       const planRes = await api.get("/purchased-plan/my", apiConfig);
       const activePlan = planRes.data.find((plan) => plan.status === "ACTIVE");
@@ -69,36 +69,60 @@ function BookingPage() {
         return;
       }
 
-      const coachesRes = await api.get("/coach/coaches", apiConfig);
-      const userBookingsRes = await api.get(
-        `/bookings/user/${currentUser.id}`,
-        apiConfig
-      );
+      const [coachesRes, userBookingsRes] = await Promise.all([
+        api.get("/coach/coaches", apiConfig),
+        api.get(`/bookings/user/${currentUser.id}`, apiConfig),
+      ]);
+
       const allCoaches = coachesRes.data;
       const userBookings = userBookingsRes.data;
-      const userActiveBooking = userBookings.find((b) =>
-        ["pending", "confirmed"].includes(b.status)
-      );
-      if (userActiveBooking) {
-        const matchedCoach = allCoaches.find(
-          (c) => c.accountId === userActiveBooking.coachId
-        );
-        const coachName = matchedCoach?.fullName || "chưa rõ";
-        const detailedBooking = { ...userActiveBooking, coachName };
-        if (userActiveBooking.status === "confirmed") {
-          setConfirmedAppointment(detailedBooking);
-        } else {
-          setUserBlockMessage(
-            `Bạn đã có lịch hẹn đang chờ duyệt với Coach ${coachName}.`
-          );
-        }
-      } else {
+
+      if (!userBookings || userBookings.length === 0) {
         const coachList = allCoaches.map((coach) => ({
           ...coach,
           specialization: "Life & Relationship Coach",
           aboutMe: `Chuyên gia với hơn 10 năm kinh nghiệm.`,
         }));
         setCoaches(coachList);
+        setIsLoading(false);
+        return;
+      }
+
+      const assignedBookingCoachId = userBookings[0].coachId;
+      const assignedCoach = allCoaches.find(
+        (c) => c.id === assignedBookingCoachId
+      );
+
+      if (!assignedCoach) {
+        setError("Không tìm thấy thông tin Coach đã đặt trước của bạn.");
+        setIsLoading(false);
+        return;
+      }
+
+      const activeBooking = userBookings.find((b) =>
+        ["pending", "confirmed"].includes(b.status)
+      );
+
+      if (activeBooking) {
+        const detailedBooking = {
+          ...activeBooking,
+          coachName: assignedCoach.fullName,
+        };
+        if (activeBooking.status === "confirmed") {
+          setConfirmedAppointment(detailedBooking);
+        } else {
+          setUserBlockMessage(
+            `Bạn đã có lịch hẹn đang chờ duyệt với Coach ${assignedCoach.fullName}.`
+          );
+        }
+      } else {
+        setCoaches([
+          {
+            ...assignedCoach,
+            specialization: "Life & Relationship Coach",
+            aboutMe: `Chuyên gia với hơn 10 năm kinh nghiệm.`,
+          },
+        ]);
       }
     } catch (err) {
       if (err.response && err.response.status === 404) {
@@ -182,7 +206,7 @@ function BookingPage() {
       setSuccess(true);
       setLatestBooking(res.data);
     } catch (err) {
-      
+      console.log(err);
       setError("Đặt lịch thất bại. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
@@ -225,17 +249,6 @@ function BookingPage() {
   }
 
   if (confirmedAppointment) {
-    // --- DÒNG KIỂM TRA MỚI ---
-    console.log(
-      "CHECKING - Lịch hẹn đã xác nhận (tải lại trang):",
-      confirmedAppointment
-    );
-    console.log(
-      "CHECKING - ID của Coach đang được dùng:",
-      confirmedAppointment.coachId
-    );
-    // -------------------------
-
     return (
       <div className="flex justify-center items-center min-h-screen p-4 bg-gray-50">
         <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full text-center">
@@ -329,16 +342,6 @@ function BookingPage() {
           </div>
           {latestBooking?.status === "confirmed" && (
             <div className="mt-6">
-              {/* --- DÒNG KIỂM TRA MỚI --- */}
-              {console.log(
-                "CHECKING - Lịch hẹn đã xác nhận (sau khi đặt):",
-                latestBooking
-              )}
-              {console.log(
-                "CHECKING - ID của Coach đang được dùng:",
-                latestBooking.coachId
-              )}
-              {/* ------------------------- */}
               <a
                 href={
                   COACH_MEET_LINKS[latestBooking.coachId] ||
@@ -444,30 +447,40 @@ function BookingPage() {
       <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
         Chọn Coach để đặt lịch
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {coaches.map((coach) => (
-          <div
-            key={coach.accountId}
-            className="bg-white rounded-xl p-6 shadow-md text-center transform hover:scale-105 transition-transform"
-          >
-            <img
-              src={coach.avatarUrl}
-              alt={coach.fullName}
-              className="w-24 h-24 rounded-full mx-auto object-cover mb-4 border-4 border-indigo-200"
-            />
-            <h3 className="font-bold text-lg text-gray-900">
-              {coach.fullName}
-            </h3>
-            <p className="text-sm text-gray-500 mb-4">{coach.specialization}</p>
-            <button
-              onClick={() => handleSelectCoach(coach.id)}
-              className="mt-4 px-5 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+      {coaches.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {coaches.map((coach) => (
+            <div
+              key={coach.id}
+              className="bg-white rounded-xl p-6 shadow-md text-center transform hover:scale-105 transition-transform"
             >
-              Chọn Coach
-            </button>
-          </div>
-        ))}
-      </div>
+              <img
+                src={coach.avatarUrl}
+                alt={coach.fullName}
+                className="w-24 h-24 rounded-full mx-auto object-cover mb-4 border-4 border-indigo-200"
+              />
+              <h3 className="font-bold text-lg text-gray-900">
+                {coach.fullName}
+              </h3>
+              <p className="text-sm text-gray-500 mb-4">
+                {coach.specialization}
+              </p>
+              <button
+                onClick={() => handleSelectCoach(coach.id)}
+                className="mt-4 px-5 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                Chọn Coach
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        !isLoading && (
+          <p className="text-center text-gray-500">
+            Không có coach nào để hiển thị.
+          </p>
+        )
+      )}
     </div>
   );
 }

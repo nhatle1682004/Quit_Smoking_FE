@@ -25,7 +25,7 @@ function ReportTotalUsers() {
       setGrandTotal(totalRes.data.totalSuccessAmount || 0);
       toast.success("Lấy báo cáo thành công");
     } catch {
-      toast.error("Lấy báo cáo không thành công, vui lòng thử lại sau");
+      (err)
     } finally {
       setLoading(false);
     }

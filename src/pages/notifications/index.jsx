@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useDispatch } from "react-redux";
 import api from "../../configs/axios";
 import {
   Box,
@@ -28,7 +29,8 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 
-// Bảng màu và các hàm helper giữ nguyên
+import { fetchUnreadCount } from "../../redux/features/notificationSlice";
+
 const PALETTE = {
   primary: "#007BFF",
   primaryLighter: alpha("#007BFF", 0.1),
@@ -69,28 +71,25 @@ const formatTimeAgo = (isoDate) => {
   return `${days} ngày trước`;
 };
 
-// --- COMPONENT CHÍNH ---
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedNotification, setSelectedNotification] = useState(null);
+  const dispatch = useDispatch();
 
-  // Giữ nguyên toàn bộ logic fetch và xử lý state
   const fetchNotifications = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await api.get("/notifications");
-      if (Array.isArray(response.data)) {
-        setNotifications(
-          response.data.sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-          )
-        );
-      } else {
-        setNotifications([]);
-      }
+      setNotifications(
+        Array.isArray(response.data)
+          ? response.data.sort(
+              (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            )
+          : []
+      );
     } catch (err) {
       setError("Không thể tải thông báo. Vui lòng thử lại sau.");
       setNotifications([]);
@@ -104,59 +103,51 @@ const NotificationsPage = () => {
   }, [fetchNotifications]);
 
   const handleMarkAsRead = async (notificationId) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n))
-    );
     try {
       await api.patch(`/notifications/${notificationId}/read`);
+      fetchNotifications();
+      dispatch(fetchUnreadCount()); // Cập nhật lại số lượng trên Redux
     } catch (err) {
       setError("Không thể đánh dấu đã đọc. Vui lòng thử lại sau.");
-      fetchNotifications();
     }
   };
 
   const handleMarkAllAsRead = async () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     try {
       await api.post("/notifications/read-all");
+      fetchNotifications();
+      dispatch(fetchUnreadCount()); // Cập nhật lại số lượng trên Redux
     } catch (err) {
       setError("Không thể thực hiện. Vui lòng thử lại.");
-      fetchNotifications();
     }
   };
 
   const handleNotificationClick = (notification) => {
     setSelectedNotification(notification);
+    if (!notification.isRead) {
+      handleMarkAsRead(notification.id);
+    }
   };
 
   const handleCloseModal = () => {
     setSelectedNotification(null);
   };
 
-  const handleConfirmRead = () => {
-    if (selectedNotification && !selectedNotification.isRead) {
-      handleMarkAsRead(selectedNotification.id);
-    }
-    handleCloseModal();
-  };
-
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const renderContent = () => {
-    if (loading) {
+    if (loading)
       return (
         <Box sx={{ display: "flex", justifyContent: "center", p: 10 }}>
           <CircularProgress />
         </Box>
       );
-    }
-    if (error) {
+    if (error)
       return (
         <Alert severity="error" sx={{ m: 2 }}>
           {error}
         </Alert>
       );
-    }
     if (notifications.length === 0) {
       return (
         <Box sx={{ textAlign: "center", p: 8 }}>
@@ -169,9 +160,9 @@ const NotificationsPage = () => {
         </Box>
       );
     }
-
     return (
       <Stack spacing={0} sx={{ position: "relative", paddingLeft: "30px" }}>
+        {/* Timeline Line */}
         <Box
           sx={{
             position: "absolute",
@@ -232,7 +223,6 @@ const NotificationsPage = () => {
                 }}
               />
             </Box>
-
             {/* Content */}
             <Stack
               direction="row"
@@ -243,11 +233,7 @@ const NotificationsPage = () => {
               <Box sx={{ color: PALETTE.textSecondary }}>
                 {getNotificationIcon(notification.type)}
               </Box>
-
               <Box sx={{ flexGrow: 1, overflow: "hidden" }}>
-                {" "}
-                {/* Thêm overflow hidden cho cha */}
-                {/* 1. Title */}
                 <Typography
                   variant="body1"
                   sx={{
@@ -260,13 +246,11 @@ const NotificationsPage = () => {
                 >
                   {notification.title}
                 </Typography>
-                {/* 2. Message/Content - ĐÂY LÀ THAY ĐỔI CHÍNH */}
                 <Typography
                   variant="body2"
                   sx={{
                     color: PALETTE.textSecondary,
                     mt: 0.25,
-                    // Giới hạn hiển thị trong 2 dòng
                     display: "-webkit-box",
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: "vertical",
@@ -276,7 +260,6 @@ const NotificationsPage = () => {
                 >
                   {notification.message}
                 </Typography>
-                {/* 3. Timestamp */}
                 <Typography
                   variant="caption"
                   display="block"
@@ -324,12 +307,10 @@ const NotificationsPage = () => {
             </Button>
           )}
         </Stack>
-
         {/* Content */}
         {renderContent()}
       </Container>
-
-      {/* Modal hiển thị chi tiết (giữ nguyên) */}
+      {/* Modal */}
       <Dialog
         open={!!selectedNotification}
         onClose={handleCloseModal}
@@ -355,7 +336,6 @@ const NotificationsPage = () => {
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          {/* Ở đây message sẽ hiển thị đầy đủ và tự xuống dòng */}
           <DialogContentText
             sx={{ color: PALETTE.textSecondary, whiteSpace: "pre-wrap" }}
           >
@@ -369,26 +349,6 @@ const NotificationsPage = () => {
             {formatTimeAgo(selectedNotification?.createdAt)}
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          {!selectedNotification?.isRead && (
-            <Button
-              onClick={handleConfirmRead}
-              variant="contained"
-              startIcon={<CheckCircleOutlineIcon />}
-              sx={{
-                flexGrow: 1,
-                backgroundColor: PALETTE.primary,
-                textTransform: "none",
-                fontWeight: "bold",
-                borderRadius: 2,
-                py: 1,
-                "&:hover": { backgroundColor: alpha(PALETTE.primary, 0.8) },
-              }}
-            >
-              Xác nhận đã đọc
-            </Button>
-          )}
-        </DialogActions>
       </Dialog>
     </Box>
   );

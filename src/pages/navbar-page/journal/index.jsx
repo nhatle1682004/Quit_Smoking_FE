@@ -69,13 +69,26 @@ function LogSmoking() {
 
   if (!user) {
     return (
-      <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+      <div
+        style={{
+          minHeight: "60vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <h2>Bạn chưa đăng nhập</h2>
         <Button
           type="primary"
           size="large"
-          style={{ marginTop: 24, padding: '10px 32px', fontSize: 18, borderRadius: 8 }}
-          onClick={() => navigate('/login')}
+          style={{
+            marginTop: 24,
+            padding: "10px 32px",
+            fontSize: 18,
+            borderRadius: 8,
+          }}
+          onClick={() => navigate("/login")}
         >
           Đăng nhập để sử dụng chức năng này
         </Button>

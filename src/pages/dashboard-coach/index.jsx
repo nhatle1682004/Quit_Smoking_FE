@@ -30,6 +30,7 @@ const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
+// Component to display a single statistic card
 const StatCard = ({ title, value, colorClass }) => (
   <div className={`rounded-lg p-4 ${colorClass}`}>
     <p className="text-sm text-gray-700">{title}</p>
@@ -37,6 +38,7 @@ const StatCard = ({ title, value, colorClass }) => (
   </div>
 );
 
+// Component to display a client's information card
 const ClientCard = ({ client, onSendMessage }) => {
   const { progress } = client;
   const cravingColor =
@@ -103,9 +105,14 @@ const ClientCard = ({ client, onSendMessage }) => {
         </div>
       </div>
       <div className="flex items-center gap-3 mt-auto">
-        <button className="flex-1 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
+        {/* UPDATED LINK: Points to the nested route */}
+        <Link
+          to={`/dashboard-coach/client-details/${client.id}`}
+          state={{ clientName: client.fullName }}
+          className="flex-1 text-center px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+        >
           View Details
-        </button>
+        </Link>
         <button
           onClick={() => onSendMessage(client)}
           className="p-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
@@ -154,54 +161,55 @@ function CoachDashboard() {
     return;
   }
 
-  setIsLoading(true);
-  try {
-    // 1. Lấy danh sách coach profile để map sang coachId
-    const coachListRes = await api.get("/coach/coaches");
-    const coachProfile = coachListRes.data.find(
-      (c) => c.accountId === currentUser.id
-    );
-    if (!coachProfile) {
-      setError("Không tìm được coach profile cho tài khoản này!");
-      setIsLoading(false);
-      return;
-    }
-    const coachId = coachProfile.id;
-
-    // 2. Lấy booking của coach theo đúng coachId
-    const response = await api.get(`/bookings/coach/${coachId}`);
-    const coachBookings = response.data;
-
-    // 3. Duyệt lấy danh sách client
-    const clientMap = new Map();
-    coachBookings.forEach((booking) => {
-      const userInfo = booking.user;
-      if (
-        userInfo &&
-        userInfo.customerId != null &&
-        !clientMap.has(userInfo.customerId)
-      ) {
-        clientMap.set(userInfo.customerId, {
-          id: userInfo.customerId,
-          fullName: userInfo.fullName,
-          email: userInfo.email,
-          avatarUrl:
-            userInfo.avatarUrl ||
-            "https://placehold.co/100x100/EFEFEF/AAAAAA&text=No+Image",
-          joinedDate: userInfo.joinedDate
-            ? new Date(userInfo.joinedDate).toLocaleDateString()
-            : "N/A",
-          plan: userInfo.plan || "Basic",
-          progress: {
-            smokeFreeDays: Math.floor(Math.random() * 30),
-            cigarettesAvoided: Math.floor(Math.random() * 500),
-            moneySaved: Math.floor(Math.random() * 200),
-            cravingIntensity: Math.floor(Math.random() * 100),
-          },
-        });
+    setIsLoading(true);
+    try {
+      // 1. Get the coach profile list to map to the coachId
+      const coachListRes = await api.get("/coach/coaches");
+      const coachProfile = coachListRes.data.find(
+        (c) => c.accountId === currentUser.id
+      );
+      if (!coachProfile) {
+        setError("Không tìm được coach profile cho tài khoản này!");
+        setIsLoading(false);
+        return;
       }
-    });
-    setClients(Array.from(clientMap.values()));
+      const coachId = coachProfile.id;
+
+      // 2. Get the coach's bookings using the correct coachId
+      const response = await api.get(`/bookings/coach/${coachId}`);
+      const coachBookings = response.data;
+
+      // 3. Iterate to get the client list
+      const clientMap = new Map();
+      coachBookings.forEach((booking) => {
+        const userInfo = booking.user;
+        if (
+          userInfo &&
+          userInfo.customerId != null &&
+          !clientMap.has(userInfo.customerId)
+        ) {
+          clientMap.set(userInfo.customerId, {
+            id: userInfo.customerId,
+            fullName: userInfo.fullName,
+            email: userInfo.email,
+            avatarUrl:
+              userInfo.avatarUrl ||
+              "https://placehold.co/100x100/EFEFEF/AAAAAA&text=No+Image",
+            joinedDate: userInfo.joinedDate
+              ? new Date(userInfo.joinedDate).toLocaleDateString()
+              : "N/A",
+            plan: userInfo.plan || "Basic",
+            // Mock progress data
+            progress: {
+              smokeFreeDays: Math.floor(Math.random() * 30),
+              cigarettesAvoided: Math.floor(Math.random() * 500),
+              moneySaved: Math.floor(Math.random() * 200),
+              cravingIntensity: Math.floor(Math.random() * 100),
+            },
+          });
+        }
+      });
+      setClients(Array.from(clientMap.values()));
 
     const formattedBookings = coachBookings.map((booking) => ({
       ...booking,
@@ -223,6 +231,7 @@ function CoachDashboard() {
     fetchCoachData();
   }, [fetchCoachData]);
 
+  // Effect to apply filters to the booking list
   useEffect(() => {
     let filteredData = [...allBookings];
     if (filters.keyword) {
@@ -240,6 +249,7 @@ function CoachDashboard() {
     setPagination((p) => ({ ...p, total: filteredData.length, current: 1 }));
   }, [filters, allBookings]);
 
+  // Handlers for the notification modal
   const showNotificationModal = (client) => {
     setCurrentTargetClient(client);
     setIsNotificationModalVisible(true);
@@ -282,6 +292,7 @@ function CoachDashboard() {
     }
   };
 
+  // Handlers for table and filters
   const handleTableChange = (pagination) => setPagination(pagination);
   const handleSearch = (value) => setFilters({ ...filters, keyword: value });
   const handleStatusFilterChange = (value) =>
@@ -289,19 +300,21 @@ function CoachDashboard() {
   const viewBookingDetails = (booking) => setViewingBooking(booking);
   const closeBookingDetails = () => setViewingBooking(null);
 
+  // Handler to update booking status
   const handleUpdateStatus = async (bookingId, newStatus) => {
     try {
       await api.put(`/bookings/${bookingId}`, {
         status: newStatus.toLowerCase(),
       });
       message.success(`Đã cập nhật trạng thái thành ${newStatus}`);
-      fetchCoachData();
+      fetchCoachData(); // Refresh data after update
     } catch (error) {
       console.error("Error updating booking status:", error);
       message.error("Không thể cập nhật trạng thái. Vui lòng thử lại.");
     }
   };
 
+  // Columns definition for the bookings table
   const columns = [
     { title: "ID", dataIndex: "bookingId", key: "bookingId", width: 80 },
     { title: "Customer", dataIndex: "customerName", key: "customerName" },
@@ -359,6 +372,7 @@ function CoachDashboard() {
     },
   ];
 
+  // Conditional rendering for loading and error states
   if (isLoading && !clients.length && !bookings.length) {
     return <div className="p-8 text-center">Loading dashboard...</div>;
   }
@@ -459,6 +473,7 @@ function CoachDashboard() {
         </div>
       </div>
 
+      {/* Modal for sending notifications */}
       {currentTargetClient && (
         <Modal
           title={`Gửi thông báo đến ${currentTargetClient.fullName}`}
@@ -519,6 +534,7 @@ function CoachDashboard() {
         </Modal>
       )}
 
+      {/* Modal for viewing booking details */}
       <Modal
         title={
           <Title level={4}>Booking Details #{viewingBooking?.bookingId}</Title>
