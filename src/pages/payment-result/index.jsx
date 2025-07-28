@@ -32,14 +32,20 @@ const PaymentResultPage = () => {
         planId,
         paymentStatus: statusForApi,
       });
+      console.log("🔥 Phản hồi từ BE:", res.data);
 
-      if (res.data?.status === "success") {
+      if (res.data === "OK") {
+        console.log("📦 Phản hồi xác nhận:", status);
         toast.success("Thanh toán thành công!");
         setPaymentStatus("success");
+      } else if (res.data.paymentStatus === "PENDING") {
+        toast.info("Thanh toán đang chờ xử lý từ VNPAY.");
+        setPaymentStatus("pending");
       } else {
-        toast.error("Xác nhận thất bại: ");
+        toast.error("Thanh toán thất bại!");
         setPaymentStatus("fail");
       }
+      
     } catch (error) {
       console.error("Lỗi xác nhận thanh toán:", error);
       toast.error("Không xác nhận được đơn hàng!");

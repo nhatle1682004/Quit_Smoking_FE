@@ -7,13 +7,13 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 dayjs.extend(isSameOrAfter);
 
 import { CalendarOutlined, DownloadOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 function QuitPlanFree() {
   const [form] = Form.useForm();
+  const user = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const user = useSelector((state) => state.user?.currentUser);
 
   const handleDownloadTemplate = () => {
     window.open("/QuitSmoking_KeHoachCaiThuoc.pdf", "_blank");
@@ -30,7 +30,7 @@ function QuitPlanFree() {
       console.log(response.data);
       toast.success("Tạo kế hoạch thành công");
       form.resetFields();
-      navigate("/service/process");
+      navigate("/my-plan");
     } catch (error) {
       toast.error("Lỗi khi tạo kế hoạch");
       console.log(error);
@@ -40,8 +40,8 @@ function QuitPlanFree() {
   return (
     <div className="min-h-screen bg-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 p-10 bg-white rounded-lg shadow-xl">
-        <h3 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Hướng dẫn tạo kế hoạch cai thuốc
+        <h3 className="mt-4 text-center text-lg font-semibold text-blue-700 tracking-wide mb-2">
+          Hướng dẫn tạo kế hoạch cai thuốc miễn phí
         </h3>
 
         <div className="text-center">
@@ -135,18 +135,6 @@ function QuitPlanFree() {
             <Input.TextArea
               rows={3}
               placeholder="Tại sao bạn muốn cai thuốc? (Ví dụ: Vì sức khỏe, gia đình...)"
-              className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </Form.Item>
-
-          <Form.Item
-            label={<span className="font-medium text-gray-700">Ghi chú thêm</span>}
-            name="note"
-            rules={[{ required: true, message: "Vui lòng nhập ghi chú thêm" }]}
-          >
-            <Input.TextArea
-              rows={3}
-              placeholder="Các ghi chú hoặc nhắc nhở đặc biệt cho bản thân..."
               className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           </Form.Item>

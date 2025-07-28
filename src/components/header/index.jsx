@@ -36,7 +36,7 @@ const Header = () => {
     { id: 1, label: "Trang chủ", href: "/" },
     { id: 2, label: "Giới thiệu", href: "/about" },
     { id: 3, label: "Đặt lịch tư vấn chuyên gia", href: "/booking" },
-    { id: 4, label: "Công cụ hỗ trợ", href: "/service", hasDropdown: true },
+    { id: 4, label: "Công cụ hỗ trợ", href: "/service/quit-plan-free" },
     { id: 5, label: "Gói dịch vụ", href: "/package" },
     { id: 6, label: "Nhật ký", href: "/journal" },
     { id: 7, label: "Tấm gương", href: "/success" },
@@ -44,24 +44,7 @@ const Header = () => {
     { id: 9, label: "Blog", href: "/blog" },
   ];
 
-  const serviceDropdownItems = [
-    { id: 1, label: "Lập kế hoạch cai thuốc", href: "/service/quit-plan-free" },
-    { id: 2, label: "Theo dõi thủ công", href: "/service/process" },
-  ];
-
-  const serviceDropdownMenu = {
-    items: serviceDropdownItems.map((item) => ({
-      key: item.id,
-      label: (
-        <button
-          onClick={() => navigate(item.href)}
-          className="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 duration-200"
-        >
-          {item.label}
-        </button>
-      ),
-    })),
-  };
+  // Xoá dropdown cho Công cụ hỗ trợ
   /* ---------- END MENU DATA ----------- */
 
   // THAY ĐỔI: Thay thế useEffect cũ bằng useEffect gọi Redux thunk
@@ -108,20 +91,7 @@ const Header = () => {
             {/* Desktop Nav */}
             <nav className="hidden md:flex space-x-4 lg:space-x-6">
               {menuItems.map((item) =>
-                item.hasDropdown && item.id === 4 ? (
-                  // Dropdown chỉ cho "Công cụ hỗ trợ"
-                  <Dropdown
-                    key={item.id}
-                    menu={serviceDropdownMenu}
-                    placement="bottomLeft"
-                    trigger={["hover"]}
-                  >
-                    <button className="text-white flex items-center space-x-1 hover:text-gray-200 duration-300">
-                      <span>{item.label}</span>
-                      <FiChevronDown className="w-4 h-4" />
-                    </button>
-                  </Dropdown>
-                ) : (
+                (
                   <button
                     key={item.id}
                     onClick={() =>
@@ -191,28 +161,7 @@ const Header = () => {
             <div className="md:hidden bg-[#2980b9] shadow-lg rounded-lg mt-2 p-4">
               <nav className="flex flex-col space-y-4">
                 {menuItems.map((item) =>
-                  item.hasDropdown ? (
-                    <div key={item.id}>
-                      <div className="text-white flex items-center justify-between">
-                        <span>{item.label}</span>
-                        <FiChevronDown className="w-4 h-4" />
-                      </div>
-                      <div className="ml-4 mt-2 space-y-2">
-                        {serviceDropdownItems.map((sub) => (
-                          <button
-                            key={sub.id}
-                            onClick={() => {
-                              navigate(sub.href);
-                              toggleMenu();
-                            }}
-                            className="text-gray-200 hover:text-white text-left w-full"
-                          >
-                            {sub.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
+                  (
                     <button
                       key={item.id}
                       onClick={() => {
@@ -229,7 +178,7 @@ const Header = () => {
                 {user && user.username ? (
                   <>
                     <div className="flex items-center pt-4 border-t border-[#2573a7]">
-                      <UserAvatar fullName={user.username} size={32} />
+                      <UserAvatar fullName={user.username} avatarUrl={user.avatarUrl} size={32} />
                     </div>
                     <button
                       onClick={() => {
