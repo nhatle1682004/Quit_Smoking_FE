@@ -148,7 +148,7 @@ function UserPackage() {
           )}
         </span>
       </div>
-      {/* ✅ [UPDATED] Gọi retryPaymentByPlanId thay vì dùng paymentUrl cũ */}
+      {/*  [UPDATED] Gọi retryPaymentByPlanId thay vì dùng paymentUrl cũ */}
       {options.retry && (
         <Button
           type="primary"

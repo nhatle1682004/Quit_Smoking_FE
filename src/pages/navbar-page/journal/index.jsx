@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import api from "../../../configs/axios";
 import { toast } from "react-toastify";
+import api from "../../../configs/axios";
 import {
   Form,
   Input,
@@ -14,7 +14,6 @@ import {
   Progress,
   Tag,
   Spin,
-  Divider,
 } from "antd";
 import {
   FireOutlined,
@@ -32,96 +31,147 @@ import DatePickerSmokingLog from "./DatePickerSmokingLog";
 import dayjs from "dayjs";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import axios from "../../../configs/axios";
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
 
 function LogSmoking() {
   const [form] = Form.useForm();
-
   const [logData, setLogData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [stats, setStatsData] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(
-    dayjs().format("YYYY-MM-DD")
-  );
+  const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const [hasActivePlan, setHasActivePlan] = useState(false);
-  const [pendingDate, setPendingDate] = useState(null);
 
-  useEffect(() => {
-    if (!user) {
-      toast.error("Bạn chưa đăng nhập!");
+  const [hasActivePaidPlan, setHasActivePaidPlan] = useState(false);
+  const [hasActiveQuitPlan, setHasActiveQuitPlan] = useState(false);
+  const [hasFreeActivePlan, setHasFreeActivePlan] = useState(false);
+  // Removed setPendingDate as it was unused and pendingDate seems to be handled by selectedDate
+  // const [pendingDate, setPendingDate] = useState(null);
+
+  const hasAccessToFullFeatures = hasActivePaidPlan || hasActiveQuitPlan;
+  // Removed hasLimitedAccess as it was unused
+  // const hasLimitedAccess = hasFreeActivePlan && !hasAccessToFullFeatures;
+
+  // canPostSmokingLog vẫn được giữ lại vì nó được dùng cho nút Gửi nhật ký
+  const canPostSmokingLog = hasFreeActivePlan || hasAccessToFullFeatures;
+
+  const renderStatusTag = (status) => {
+    let color = "";
+    let text = "";
+    switch (status) {
+      case "Tốt":
+        color = "green";
+        text = "Tốt";
+        break;
+      case "Trung bình":
+        color = "orange";
+        text = "Trung bình";
+        break;
+      case "Kém":
+        color = "red";
+        text = "Kém";
+        break;
+      default:
+        color = "default";
+        text = "Không xác định";
     }
-  }, [user]);
+    return <Tag color={color}>{text}</Tag>;
+  };
 
   useEffect(() => {
-    // Kiểm tra gói active
-    const checkActivePlan = async () => {
-      try {
-        const res = await axios.get("/quit-plan/active");
-        if (res.data && res.data.createdAt) {
-          setHasActivePlan(true);
-        } else {
-          setHasActivePlan(false);
-        }
-      } catch {
-        setHasActivePlan(false);
-      }
-    };
-    checkActivePlan();
-  }, []);
-
+    if (!user) toast.error("Bạn chưa đăng nhập!");
+  }, [user]);
   if (!user) {
     return (
-      <div
-        style={{
-          minHeight: "60vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+      <div className="center-content">
         <h2>Bạn chưa đăng nhập</h2>
-        <Button
-          type="primary"
-          size="large"
-          style={{
-            marginTop: 24,
-            padding: "10px 32px",
-            fontSize: 18,
-            borderRadius: 8,
-          }}
-          onClick={() => navigate("/login")}
-        >
-          Đăng nhập để sử dụng chức năng này
-        </Button>
+        <Button type="primary" size="large" onClick={() => navigate("/login")}>Đăng nhập để sử dụng chức năng này</Button>
       </div>
     );
   }
+
+  useEffect(() => {
+    const checkPaidPlan = async () => {
+      try {
+        const res = await api.get("/purchased-plan/active");
+        if (res.data?.status === "ACTIVE" && res.data?.paymentStatus === "SUCCESS") {
+          setHasActivePaidPlan(true);
+        } else {
+          setHasActivePaidPlan(false);
+        }
+      } catch (error) {
+        console.log(error);
+        setHasActivePaidPlan(false);
+        console.error("Không thể ghi nhận log: Coach chưa giao nhiệm vụ hôm nay");
+      }
+    };
+  
+    checkPaidPlan();
+  }, []);
+
+  useEffect(() => {
+    const checkQuitPlan = async () => {
+      try {
+        const res = await api.get("/quit-plan/active");
+        setHasActiveQuitPlan(!!res.data?.createdAt);
+      } catch (error) {
+        console.log(error);
+        setHasActiveQuitPlan(false);
+       // console.error("Lỗi khi kiểm tra kế hoạch cai thuốc:", error);
+      }
+    };
+  
+    checkQuitPlan();
+  }, []);
+  
+  useEffect(() => {
+    const checkFreePlan = async () => {
+      try {
+        const res = await api.get("/free-plan/active");
+        if (res.data?.isActive === true) {
+          setHasFreeActivePlan(true);
+        } else {
+          setHasFreeActivePlan(false);
+         // toast.error("Bạn chưa có kế hoạch miễn phí nào đang hoạt động. Vui lòng tạo kế hoạch để sử dụng tính năng này.");
+        }
+      } catch (error) {
+        console.log(error);
+        setHasFreeActivePlan(false);
+       // toast.error("Không thể kiểm tra kế hoạch miễn phí. Vui lòng thử lại sau.");
+      }
+    };
+  
+    checkFreePlan();
+  }, []);
+   
+
 
   const fetchStats = async () => {
     try {
       const res = await api.get("/smoking-log/stats");
       setStatsData(res.data);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   const fetchSmokingLogByDay = async (date) => {
     try {
       const res = await api.get("/smoking-log/day", { params: { date } });
-      if (!res.data || Object.keys(res.data).length === 0) {
-        toast.success("Lấy nhật ký thành công.");
-      } else {
-        setLogData(res.data);
-      }
+      setLogData(res.data);
+      toast.success("Đã tải nhật ký thành công.");
+      return res.data;
     } catch (error) {
-      console.error("API error:", error.response?.data || error.message);
+      const msg = error.response?.data?.message;
+      if (msg === "Chưa có ghi nhận ngày này") {
+        toast.error("Chưa có ghi nhận ngày này.");
+        setLogData(null);
+      } else {
+        toast.error("Lỗi khi tải nhật ký.");
+      }
+      return null;
     }
   };
 
@@ -129,84 +179,44 @@ function LogSmoking() {
     fetchStats();
   }, []);
 
-const onFinish = async (values) => {
-  setLoading(true);
-  try {
-    const res = await api.post("/smoking-log", values);
-
-    if (res && res.data) {
-      // Cập nhật trạng thái từ dữ liệu backend trả về
-      setLogData({
-        cigarettesToday: res.data.cigarettesToday,
-        targetCigarettes: res.data.targetCigarettes,
-        nicotineEstimate: res.data.nicotineEstimate,
-        coStatus: res.data.coStatus,
-        moneySavedToday: res.data.moneySavedToday,
-        lungStatus: res.data.lungStatus,
-        tasteStatus: res.data.tasteStatus,
-        bloodPressureStatus: res.data.bloodPressureStatus,
-        circulationStatus: res.data.circulationStatus,
-        skinStatus: res.data.skinStatus,
-        heartRate: res.data.heartRate,
-        heartRateStatus: res.data.heartRateStatus,
-        dailyHealthPercent: res.data.dailyHealthPercent,
-        targetAchieved: res.data.isTargetAchieved,
-        note: res.data.note,
-        daysCompleted: res.data.daysCompleted,
-        totalPlanDays: res.data.totalPlanDays,
-      });
-
-      toast.success("Cập nhật nhật ký hút thuốc thành công!");
-      fetchStats();
-    } else {
-      toast.error("Dữ liệu trả về không hợp lệ.");
+  const onFinish = async (values) => {
+    try {
+      const res = await api.post("/smoking-log", values);
+      if (res?.data) {
+        setLogData(res.data);
+        toast.success("Cập nhật nhật ký thành công!");
+        fetchStats();
+      } else {
+        toast.error("Dữ liệu trả về không hợp lệ.");
+      }
+    } catch (err) {
+      const rawMsg = err.response?.data?.message;
+  
+      // Trường hợp coach chưa giao nhiệm vụ
+      if (rawMsg?.includes("Coach chưa giao nhiệm vụ")) {
+        toast.error("Không thể ghi nhật ký: Huấn luyện viên chưa giao nhiệm vụ hôm nay.");
+      }
+      //  Trường hợp không có kế hoạch nào đang hoạt động (mặc định)
+      else if (rawMsg?.includes("không có kế hoạch") || err.response?.status === 400) {
+        toast.error("Bạn chưa có kế hoạch nào đang hoạt động.");
+      }
+      //  Các lỗi khác không rõ
+      else {
+        toast.error("Đã xảy ra lỗi khi gửi nhật ký. Vui lòng thử lại sau.");
+      }
+  
+      console.error("Lỗi ghi nhật ký:", err);
     }
-  } catch (error) {
-    console.error("API error:", error.response?.data || error.message);
-    toast.error(
-      error.response?.data.message || "Không thể cập nhật nhật ký hút thuốc! Vui lòng thử lại."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const renderStatusTag = (status) => {
-    const colorMap = {
-      "Ổn định": "green",
-      "Bình thường": "blue",
-      "Chưa ổn định": "orange",
-      "Ít thay đổi": "yellow",
-      Tốt: "green",
-      "Cần cải thiện": "red",
-      "Cải thiện": "green",
-      "Cải thiện rõ": "green",
-      "Giảm mạnh": "green",
-      "Cải thiện mạnh": "green",
-    };
-
-    return (
-      <Tag
-        color={colorMap[status] || "default"}
-        style={{ fontSize: "14px", padding: "4px 8px" }}
-      >
-        {status}
-      </Tag>
-    );
-  };
-
-  const isFreePlan = !hasActivePlan;
-
-  const handleUpgradeClick = () => {
-    navigate("/package");
   };
 
   const isValidDate = (dateStr) => {
-    if (!dateStr) return false;
-    const today = dayjs().endOf("day");
-    const selected = dayjs(dateStr);
-    return selected.isSameOrBefore(today, "day");
+    const today = dayjs().format("YYYY-MM-DD");
+    const selected = dayjs(dateStr).format("YYYY-MM-DD");
+    return selected <= today;
   };
+
+  const handleUpgradeClick = () => navigate("/package");
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-8 my-10 px-4">
@@ -251,36 +261,35 @@ const onFinish = async (values) => {
               {/* Nút chọn ngày và DatePicker */}
               <div className="flex flex-col gap-4 items-center">
                 <DatePickerSmokingLog
+                  // Now using only selectedDate as pendingDate is removed if not needed
+                  key={selectedDate}
                   onDateChange={(date) => {
-                    if (date) {
-                      setPendingDate(date.format("YYYY-MM-DD"));
-                    }
+                    if (date) setSelectedDate(date.format("YYYY-MM-DD"));
                   }}
-                  defaultValue={
-                    pendingDate ? dayjs(pendingDate) : dayjs(selectedDate)
-                  }
+                  // Now using only selectedDate as pendingDate is removed if not needed
+                  defaultValue={dayjs(selectedDate)}
                 />
+
                 <Button
                   type="primary"
                   className="bg-gradient-to-r from-blue-500 to-green-500 border-none rounded-lg font-semibold text-lg px-8 py-2 h-auto shadow-md hover:shadow-lg transition-all duration-300"
-                  disabled={!pendingDate}
+                  disabled={!selectedDate || !hasAccessToFullFeatures}
                   onClick={() => {
-                    if (!pendingDate || !isValidDate(pendingDate)) {
+                    if (!selectedDate || !isValidDate(selectedDate)) {
                       toast.error(
                         "Vui lòng chọn ngày hợp lệ (không phải ngày trong tương lai)!"
                       );
                       return;
                     }
 
-                    if (isFreePlan) {
+                    if (!hasAccessToFullFeatures) {
                       toast.error(
-                        "Bạn cần nâng cấp gói để xem lại nhật ký các ngày trước!"
+                        "Tính năng xem nhật ký chỉ dành cho tài khoản trả phí."
                       );
                       return;
                     }
 
-                    setSelectedDate(pendingDate);
-                    fetchSmokingLogByDay(pendingDate);
+                    fetchSmokingLogByDay(selectedDate);
                   }}
                 >
                   Xem nhật ký
@@ -313,20 +322,41 @@ const onFinish = async (values) => {
                     />
                   </Col>
                   <Col xs={24} sm={12}>
+                    {/* Money Saved - accessible for quit plan users or full features */}
                     <Statistic
                       title="Tổng tiền tiết kiệm (VNĐ)"
-                      value={stats.totalMoneySaved}
+                      value={
+                        hasActiveQuitPlan || hasAccessToFullFeatures
+                          ? stats.totalMoneySaved
+                          : "******"
+                      }
                       valueStyle={{ color: "#059669", fontWeight: "bold" }}
                     />
                   </Col>
                   <Col xs={24} sm={12}>
                     <Statistic
                       title="Số ngày đạt mục tiêu"
-                      value={stats.daysAchievedTarget}
+                      value={
+                        hasAccessToFullFeatures
+                          ? stats.daysAchievedTarget
+                          : "N/A"
+                      }
                       valueStyle={{ color: "#10b981", fontWeight: "bold" }}
                     />
                   </Col>
                 </Row>
+                {!hasAccessToFullFeatures && (
+                  <div className="text-center mt-6">
+                    <Button
+                      type="default"
+                      size="small"
+                      onClick={handleUpgradeClick}
+                      className="text-blue-500 border-blue-500 hover:text-blue-700 hover:border-blue-700"
+                    >
+                      Nâng cấp để xem chi tiết
+                    </Button>
+                  </div>
+                )}
               </Card>
             )}
           </Col>
@@ -336,7 +366,7 @@ const onFinish = async (values) => {
         {logData &&
           logData.daysCompleted !== undefined &&
           logData.totalPlanDays !== undefined &&
-          !isFreePlan && (
+          hasAccessToFullFeatures && (
             <Row justify="center" style={{ marginBottom: 24, marginTop: 24 }}>
               <Col xs={24} sm={12}>
                 <Card
@@ -362,13 +392,14 @@ const onFinish = async (values) => {
           )}
 
         {/* Nút "Nâng cấp gói" */}
-        {isFreePlan && (
+        {!hasAccessToFullFeatures && (
           <div className="text-center mb-6">
             <Button
               type="primary"
               size="large"
               onClick={handleUpgradeClick}
               className="bg-gradient-to-r from-blue-500 to-green-500 border-none rounded-lg font-semibold text-lg px-8 py-4 h-auto shadow-md hover:shadow-lg transition-all duration-300"
+              style={{ fontSize: "16px", fontWeight: "600" }}
             >
               Nâng cấp gói để xem đầy đủ thông tin
             </Button>
@@ -439,6 +470,8 @@ const onFinish = async (values) => {
                     }}
                     size="large"
                     className="rounded-lg"
+                    // ĐÃ BỎ DISABLED Ở ĐÂY
+                    // disabled={!canPostSmokingLog}
                   />
                 </Form.Item>
               </Col>
@@ -479,7 +512,7 @@ const onFinish = async (values) => {
                 { required: true, message: "Vui lòng nhập ghi chú." },
                 { min: 5, message: "Tối thiểu 5 ký tự" },
                 { max: 255, message: "Ghi chú không quá 255 ký tự." },
-                 {
+                {
                   pattern: /^(?!\s).+/,
                   message: "Không được bắt đầu bằng khoảng trắng!",
                 },
@@ -496,6 +529,8 @@ const onFinish = async (values) => {
                   borderRadius: 12,
                   padding: "12px 16px",
                 }}
+                // ĐÃ BỎ DISABLED Ở ĐÂY
+                // disabled={!canPostSmokingLog}
               />
             </Form.Item>
 
@@ -507,6 +542,8 @@ const onFinish = async (values) => {
                 size="large"
                 className="px-12 py-3 my-3 h-auto rounded-full bg-gradient-to-r from-blue-500 to-green-500 border-0 shadow-lg hover:shadow-xl transition-all duration-300"
                 style={{ fontSize: "16px", fontWeight: "600" }}
+                // Vẫn giữ disabled cho nút gửi nếu người dùng không có quyền
+               
               >
                 {loading ? (
                   <>
@@ -602,7 +639,7 @@ const onFinish = async (values) => {
               <Col xs={24} sm={12} lg={6}>
                 {/* Conditionally apply blur to Nicotine Estimate with Tailwind */}
                 <div className="relative">
-                  {!isFreePlan ? null : (
+                  {!hasAccessToFullFeatures ? (
                     <div
                       className="absolute inset-0 flex items-center justify-center bg-emerald-500 bg-opacity-80 text-white p-4 rounded-2xl text-lg font-bold text-center z-10 select-none cursor-pointer"
                       onClick={handleUpgradeClick}
@@ -611,10 +648,10 @@ const onFinish = async (values) => {
                       <br />
                       thông tin này
                     </div>
-                  )}
+                  ) : null}
                   <Card
                     className={`text-center my-10 shadow-lg border-0 bg-gradient-to-br from-orange-50 to-orange-100 ${
-                      isFreePlan
+                      !hasAccessToFullFeatures
                         ? "filter blur-md pointer-events-none select-none"
                         : "hover:shadow-xl transition-all duration-300"
                     }`}
@@ -631,7 +668,11 @@ const onFinish = async (values) => {
                           Nicotine (mg)
                         </span>
                       }
-                      value={logData.nicotineEstimate}
+                      value={
+                        hasAccessToFullFeatures
+                          ? logData.nicotineEstimate
+                          : "******"
+                      }
                       valueStyle={{
                         color:
                           logData.nicotineEstimate > 0 ? "#ea580c" : "#059669",
@@ -659,7 +700,12 @@ const onFinish = async (values) => {
                         Tiết kiệm hôm nay
                       </span>
                     }
-                    value={logData.moneySavedToday}
+                    // FIX: Ensure money saved requires either quit plan OR full features (paid plan)
+                    value={
+                      hasActiveQuitPlan || hasAccessToFullFeatures
+                        ? logData.moneySavedToday
+                        : "******"
+                    }
                     valueStyle={{
                       color: "#059669",
                       fontSize: "28px",
@@ -674,7 +720,7 @@ const onFinish = async (values) => {
             {/* Health Progress */}
             {/* Conditionally apply blur to Health Progress with Tailwind */}
             <div className="relative">
-              {!isFreePlan ? null : (
+              {!hasAccessToFullFeatures ? (
                 <div
                   className="absolute inset-0 flex items-center justify-center bg-emerald-500 bg-opacity-80 text-white p-4 rounded-2xl text-lg font-bold text-center z-10 select-none cursor-pointer"
                   onClick={handleUpgradeClick}
@@ -683,10 +729,10 @@ const onFinish = async (values) => {
                   <br />
                   tiến độ sức khỏe
                 </div>
-              )}
+              ) : null}
               <Card
                 className={`my-10 shadow-xl border-0 bg-gradient-to-r from-blue-50 to-indigo-50 ${
-                  isFreePlan
+                  !hasAccessToFullFeatures
                     ? "filter blur-md pointer-events-none select-none"
                     : ""
                 }`}
@@ -744,7 +790,7 @@ const onFinish = async (values) => {
             <Row gutter={[24, 24]}>
               <Col xs={24} lg={12}>
                 <div className="relative">
-                  {!isFreePlan ? null : (
+                  {!hasAccessToFullFeatures ? (
                     <div
                       className="absolute inset-0 flex items-center justify-center bg-emerald-500 bg-opacity-80 text-white p-4 rounded-2xl text-lg font-bold text-center z-10 select-none cursor-pointer"
                       onClick={handleUpgradeClick}
@@ -753,7 +799,7 @@ const onFinish = async (values) => {
                       <br />
                       tình trạng sức khỏe
                     </div>
-                  )}
+                  ) : null}
                   <Card
                     title={
                       <span className="text-gray-800 font-semibold">
@@ -761,7 +807,7 @@ const onFinish = async (values) => {
                       </span>
                     }
                     className={`h-full my-10 shadow-lg border-0 bg-gradient-to-br from-red-50 to-pink-50 ${
-                      isFreePlan
+                      !hasAccessToFullFeatures
                         ? "filter blur-md pointer-events-none select-none"
                         : ""
                     }`}
@@ -800,7 +846,7 @@ const onFinish = async (values) => {
               </Col>
               <Col xs={24} lg={12}>
                 <div className="relative">
-                  {!isFreePlan ? null : (
+                  {!hasAccessToFullFeatures ? (
                     <div
                       className="absolute inset-0 flex items-center justify-center bg-emerald-500 bg-opacity-80 text-white p-4 rounded-2xl text-lg font-bold text-center z-10 select-none cursor-pointer"
                       onClick={handleUpgradeClick}
@@ -809,7 +855,7 @@ const onFinish = async (values) => {
                       <br />
                       tình trạng sức khỏe
                     </div>
-                  )}
+                  ) : null}
                   <Card
                     title={
                       <span className="text-gray-800 font-semibold">
@@ -817,7 +863,7 @@ const onFinish = async (values) => {
                       </span>
                     }
                     className={`h-full my-10 shadow-lg border-0 bg-gradient-to-br from-blue-50 to-cyan-50 ${
-                      isFreePlan
+                      !hasAccessToFullFeatures
                         ? "filter blur-md pointer-events-none select-none"
                         : ""
                     }`}
@@ -849,9 +895,9 @@ const onFinish = async (values) => {
             </Row>
 
             {/* Motivational Message */}
-            {/* Conditionally apply blur to Motivational Message if target not achieved and on free plan */}
+            {/* Conditionally apply blur to Motivational Message if target not achieved and no full access */}
             <div className="relative">
-              {!isFreePlan || logData.targetAchieved ? null : (
+              {!hasAccessToFullFeatures && !logData.targetAchieved ? (
                 <div
                   className="absolute inset-0 flex items-center justify-center bg-emerald-500 bg-opacity-80 text-white p-4 rounded-2xl text-lg font-bold text-center z-10 select-none cursor-pointer"
                   onClick={handleUpgradeClick}
@@ -860,10 +906,10 @@ const onFinish = async (values) => {
                   <br />
                   tin nhắn động viên
                 </div>
-              )}
+              ) : null}
               <Card
                 className={`my-10 shadow-xl border-0 text-center ${
-                  isFreePlan && !logData.targetAchieved
+                  !hasAccessToFullFeatures && !logData.targetAchieved
                     ? "filter blur-md pointer-events-none select-none"
                     : ""
                 }`}

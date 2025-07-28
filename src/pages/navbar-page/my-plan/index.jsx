@@ -233,9 +233,6 @@ function Plan() {
                   <span className="font-semibold text-red-600">
                     Bạn có chắc chắn muốn hủy kế hoạch miễn phí?
                   </span>
-                  <div className="mt-2 text-gray-700">
-                    Bạn có chắc muốn hủy kế hoạch không ?
-                  </div>
                 </div>
               }
               onConfirm={handleCancelFreePlan}

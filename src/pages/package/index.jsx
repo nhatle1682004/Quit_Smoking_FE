@@ -57,7 +57,7 @@ function PackagePage() {
       window.location.href = paymentUrl;
     } catch (error) {
       console.log(error);
-      toast.error("Mua gói thất bại");
+      toast.warning(" Bạn đang có 1 gói chưa thanh toán. Vui lòng hoàn tất thanh toán tại phần Gói của tôi.");
     }
   };
 
