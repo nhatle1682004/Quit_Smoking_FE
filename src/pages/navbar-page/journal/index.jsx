@@ -87,7 +87,11 @@ function LogSmoking() {
     return (
       <div className="center-content">
         <h2>Bạn chưa đăng nhập</h2>
-        <Button type="primary" size="large" onClick={() => navigate("/login")}>Đăng nhập để sử dụng chức năng này</Button>
+
+        <Button type="primary" size="large" onClick={() => navigate("/login")}>
+          Đăng nhập để sử dụng chức năng này
+        </Button>
+
       </div>
     );
   }
@@ -96,7 +100,12 @@ function LogSmoking() {
     const checkPaidPlan = async () => {
       try {
         const res = await api.get("/purchased-plan/active");
-        if (res.data?.status === "ACTIVE" && res.data?.paymentStatus === "SUCCESS") {
+
+        if (
+          res.data?.status === "ACTIVE" &&
+          res.data?.paymentStatus === "SUCCESS"
+        ) {
+
           setHasActivePaidPlan(true);
         } else {
           setHasActivePaidPlan(false);
@@ -104,10 +113,14 @@ function LogSmoking() {
       } catch (error) {
         console.log(error);
         setHasActivePaidPlan(false);
-        console.error("Không thể ghi nhận log: Coach chưa giao nhiệm vụ hôm nay");
+
+        console.error(
+          "Không thể ghi nhận log: Coach chưa giao nhiệm vụ hôm nay"
+        );
       }
     };
-  
+
+
     checkPaidPlan();
   }, []);
 
@@ -119,13 +132,15 @@ function LogSmoking() {
       } catch (error) {
         console.log(error);
         setHasActiveQuitPlan(false);
-       // console.error("Lỗi khi kiểm tra kế hoạch cai thuốc:", error);
+
+        // console.error("Lỗi khi kiểm tra kế hoạch cai thuốc:", error);
       }
     };
-  
+
     checkQuitPlan();
   }, []);
-  
+
+
   useEffect(() => {
     const checkFreePlan = async () => {
       try {
@@ -134,18 +149,20 @@ function LogSmoking() {
           setHasFreeActivePlan(true);
         } else {
           setHasFreeActivePlan(false);
-         // toast.error("Bạn chưa có kế hoạch miễn phí nào đang hoạt động. Vui lòng tạo kế hoạch để sử dụng tính năng này.");
+
+          // toast.error("Bạn chưa có kế hoạch miễn phí nào đang hoạt động. Vui lòng tạo kế hoạch để sử dụng tính năng này.");
+
         }
       } catch (error) {
         console.log(error);
         setHasFreeActivePlan(false);
-       // toast.error("Không thể kiểm tra kế hoạch miễn phí. Vui lòng thử lại sau.");
+
+        // toast.error("Không thể kiểm tra kế hoạch miễn phí. Vui lòng thử lại sau.");
       }
     };
-  
+
     checkFreePlan();
   }, []);
-   
 
 
   const fetchStats = async () => {
@@ -191,20 +208,29 @@ function LogSmoking() {
       }
     } catch (err) {
       const rawMsg = err.response?.data?.message;
-  
+
+
       // Trường hợp coach chưa giao nhiệm vụ
       if (rawMsg?.includes("Coach chưa giao nhiệm vụ")) {
-        toast.error("Không thể ghi nhật ký: Huấn luyện viên chưa giao nhiệm vụ hôm nay.");
+        toast.error(
+          "Không thể ghi nhật ký: Huấn luyện viên chưa giao nhiệm vụ hôm nay."
+        );
       }
       //  Trường hợp không có kế hoạch nào đang hoạt động (mặc định)
-      else if (rawMsg?.includes("không có kế hoạch") || err.response?.status === 400) {
+      else if (
+        rawMsg?.includes("không có kế hoạch") ||
+        err.response?.status === 400
+      ) {
+
         toast.error("Bạn chưa có kế hoạch nào đang hoạt động.");
       }
       //  Các lỗi khác không rõ
       else {
         toast.error("Đã xảy ra lỗi khi gửi nhật ký. Vui lòng thử lại sau.");
       }
-  
+
+
+
       console.error("Lỗi ghi nhật ký:", err);
     }
   };
@@ -216,7 +242,6 @@ function LogSmoking() {
   };
 
   const handleUpgradeClick = () => navigate("/package");
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-8 my-10 px-4">
@@ -543,7 +568,7 @@ function LogSmoking() {
                 className="px-12 py-3 my-3 h-auto rounded-full bg-gradient-to-r from-blue-500 to-green-500 border-0 shadow-lg hover:shadow-xl transition-all duration-300"
                 style={{ fontSize: "16px", fontWeight: "600" }}
                 // Vẫn giữ disabled cho nút gửi nếu người dùng không có quyền
-               
+
               >
                 {loading ? (
                   <>

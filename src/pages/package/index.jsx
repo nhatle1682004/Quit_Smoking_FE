@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { toast } from 'react-toastify';
-import api from '../../configs/axios';
-import { Button, Badge, Divider } from 'antd';
-import { GiftOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import React, { useEffect, useState, useMemo } from "react";
+import { toast } from "react-toastify";
+import api from "../../configs/axios";
+import { Button, Badge, Divider } from "antd";
+import { GiftOutlined, CheckCircleOutlined } from "@ant-design/icons";
 
 function PackagePage() {
   const [packages, setPackages] = useState([]);
@@ -15,7 +15,7 @@ function PackagePage() {
 
   const fetchPackages = async () => {
     try {
-      const response = await api.get('/package');
+      const response = await api.get("/package");
       setPackages(response.data);
     } catch {
       toast.error("Lấy dữ liệu gói thất bại");
@@ -24,7 +24,7 @@ function PackagePage() {
 
   const fetchUserPlans = async () => {
     try {
-      const res = await api.get('/purchased-plan/my');
+      const res = await api.get("/purchased-plan/my");
       setUserPlans(res.data);
     } catch {
       // Ignored silently
@@ -33,16 +33,17 @@ function PackagePage() {
 
   const purchasedPackageCodes = useMemo(() => {
     return userPlans
-      .filter(plan =>
-        plan.paymentStatus === "SUCCESS" &&
-        (plan.status === "PENDING" || plan.status === "ACTIVE")
+      .filter(
+        (plan) =>
+          plan.paymentStatus === "SUCCESS" &&
+          (plan.status === "PENDING" || plan.status === "ACTIVE")
       )
-      .map(plan => plan.packageInfo?.code || plan.packageInfo?.packageCode);
+      .map((plan) => plan.packageInfo?.code || plan.packageInfo?.packageCode);
   }, [userPlans]);
 
   const handleBuyPackage = async (packageCode) => {
     try {
-      const response = await api.post('/purchased-plan/buy', {
+      const response = await api.post("/purchased-plan/buy", {
         packageCode: String(packageCode),
       });
 
@@ -57,12 +58,19 @@ function PackagePage() {
       window.location.href = paymentUrl;
     } catch (error) {
       console.log(error);
-      toast.warning(" Bạn đang có 1 gói chưa thanh toán. Vui lòng hoàn tất thanh toán tại phần Gói của tôi.");
+
+      toast.warning(
+        " Bạn đang có 1 gói chưa thanh toán. Vui lòng hoàn tất thanh toán tại phần Gói của tôi."
+      );
+
     }
   };
 
   const formatPrice = (price) =>
-    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
 
   const formatDuration = (days) => `${days} ngày`;
 
@@ -73,7 +81,7 @@ function PackagePage() {
           🎁 Danh sách gói hỗ trợ
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {packages.map(pkg => {
+          {packages.map((pkg) => {
             const code = pkg.code || pkg.packageCode;
             const isPurchased = purchasedPackageCodes.includes(code);
 
@@ -83,34 +91,42 @@ function PackagePage() {
                 className="flex flex-col h-full rounded-2xl shadow-xl border-2 border-[#2563eb] bg-white p-4"
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <GiftOutlined style={{ fontSize: 28, color: '#2563eb' }} />
-                  <span className="text-lg sm:text-xl font-bold text-black">{pkg.name}</span>
+                  <GiftOutlined style={{ fontSize: 28, color: "#2563eb" }} />
+                  <span className="text-lg sm:text-xl font-bold text-black">
+                    {pkg.name}
+                  </span>
                 </div>
 
                 <div className="flex-1 mb-2">
-                  {pkg.description?.split('\n').map((line, idx) => (
+                  {pkg.description?.split("\n").map((line, idx) => (
                     <div
                       key={idx}
                       className="flex items-start gap-2 mb-2 text-black text-sm sm:text-base"
                     >
-                      <CheckCircleOutlined style={{ fontSize: 18, color: '#22c55e', marginTop: 3 }} />
+                      <CheckCircleOutlined
+                        style={{ fontSize: 18, color: "#22c55e", marginTop: 3 }}
+                      />
                       <span>{line}</span>
                     </div>
                   ))}
                 </div>
 
-                <Divider dashed style={{ margin: '8px 0' }} />
+                <Divider dashed style={{ margin: "8px 0" }} />
 
                 <div className="mb-2 flex items-center gap-2 text-sm sm:text-base text-black">
                   <Badge color="blue" />
                   <span className="font-semibold">Giá:</span>
-                  <span className="font-bold text-lg">{formatPrice(pkg.price)}</span>
+                  <span className="font-bold text-lg">
+                    {formatPrice(pkg.price)}
+                  </span>
                 </div>
 
                 <div className="mb-4 flex items-center gap-2 text-sm sm:text-base text-black">
                   <Badge color="purple" />
                   <span className="font-semibold">Thời hạn:</span>
-                  <span className="font-bold">{formatDuration(pkg.duration)}</span>
+                  <span className="font-bold">
+                    {formatDuration(pkg.duration)}
+                  </span>
                 </div>
 
                 <Button
@@ -121,13 +137,13 @@ function PackagePage() {
                   onClick={() => !isPurchased && handleBuyPackage(code)}
                   style={{
                     background: isPurchased
-                      ? '#ddd'
-                      : 'linear-gradient(90deg, #2563eb 0%, #3b82f6 100%)',
-                    color: isPurchased ? '#888' : '#fff',
-                    cursor: isPurchased ? 'not-allowed' : 'pointer',
+                      ? "#ddd"
+                      : "linear-gradient(90deg, #2563eb 0%, #3b82f6 100%)",
+                    color: isPurchased ? "#888" : "#fff",
+                    cursor: isPurchased ? "not-allowed" : "pointer",
                   }}
                 >
-                  {isPurchased ? 'Đã mua' : 'Mua ngay'}
+                  {isPurchased ? "Đã mua" : "Mua ngay"}
                 </Button>
               </div>
             );

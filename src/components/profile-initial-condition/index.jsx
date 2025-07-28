@@ -37,7 +37,7 @@ function ProfileInitialCondition() {
     // Kiểm tra gói active
     const checkActivePackage = async () => {
       try {
-        const res = await api.get('/purchased-plan/active');
+        const res = await api.get("/purchased-plan/active");
         if (res.data && res.data.status === "ACTIVE") {
           setHasActivePackage(true);
         } else {
@@ -90,16 +90,28 @@ function ProfileInitialCondition() {
               name="cigarettesPerDay"
               label="Số lượng điếu thuốc lá hút mỗi ngày"
               rules={[
-                { required: true, message: "Vui lòng nhập số lượng điếu thuốc lá hút mỗi ngày" },
+
+                {
+                  required: true,
+                  message: "Vui lòng nhập số lượng điếu thuốc lá hút mỗi ngày",
+                },
+
                 {
                   type: "number",
                   min: 0,
                   max: 50,
-                  message: "Số điếu mỗi ngày phải từ 0 đến 50, không được phép là số âm",
+
+                  message:
+                    "Số điếu mỗi ngày phải từ 0 đến 50, không được phép là số âm",
                 },
               ]}
             >
-              <InputNumber style={{ width: "100%" }} placeholder="Ví dụ: 10" disabled={!editing || hasActivePackage} />
+              <InputNumber
+                style={{ width: "100%" }}
+                placeholder="Ví dụ: 10"
+                disabled={!editing || hasActivePackage}
+              />
+
             </Form.Item>
 
             <Form.Item
@@ -123,18 +135,25 @@ function ProfileInitialCondition() {
               </Select>
             </Form.Item>
 
+
             <Form.Item
               name="quitReason"
               label="Lý do muốn bỏ thuốc lá"
+
               rules={[
-                { required: true, message: "Vui lòng nhập lý do" },
+                { required: true, message: "Vui lòng nhập cảm xúc" },
                 { min: 5, message: "Tối thiểu 5 ký tự" },
+
                 { max: 300, message: "Vui lòng giới hạn dưới 300 ký tự." },
-                {
-                  pattern: /^(?!\s).+/, message: "Không được bắt đầu bằng khoảng trắng!",
-                },
+
                 {
                   pattern: /.*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*/,
+                  message: "Lý do phải chứa ít nhất 5 chữ cái",
+                },
+
+                {
+                  pattern:
+                    /.*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*/,
                   message: "Lý do phải chứa ít nhất 5 chữ cái",
                 },
               ]}
@@ -155,12 +174,15 @@ function ProfileInitialCondition() {
                 { required: true, message: "Vui lòng nhập cảm xúc" },
                 { min: 5, message: "Tối thiểu 5 ký tự" },
                 {
-                  pattern: /^(?!\s).+/, message: "Không được bắt đầu bằng khoảng trắng!",
+                  pattern: /^(?!\s).+/,
+                  message: "Không được bắt đầu bằng khoảng trắng!",
                 },
                 {
-                  pattern: /.*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*/,
+                  pattern:
+                    /.*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*/,
                   message: "Lý do phải chứa ít nhất 5 chữ cái",
                 },
+
               ]}
             >
               <Input
@@ -235,7 +257,13 @@ function ProfileInitialCondition() {
                   <Button type="primary" onClick={() => form.submit()}>
                     Lưu
                   </Button>
-                  <Button htmlType="button" onClick={handleCancel} className="ml-2">
+
+                  <Button
+                    htmlType="button"
+                    onClick={handleCancel}
+                    className="ml-2"
+                  >
+
                     Hủy
                   </Button>
                 </>

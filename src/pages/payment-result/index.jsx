@@ -2,7 +2,12 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../configs/axios";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FaCheckCircle, FaTimesCircle, FaHome, FaHistory } from "react-icons/fa";
+import {
+  FaCheckCircle,
+  FaTimesCircle,
+  FaHome,
+  FaHistory,
+} from "react-icons/fa";
 
 const PaymentResultPage = () => {
   const location = useLocation();
@@ -45,7 +50,7 @@ const PaymentResultPage = () => {
         toast.error("Thanh toán thất bại!");
         setPaymentStatus("fail");
       }
-      
+
     } catch (error) {
       console.error("Lỗi xác nhận thanh toán:", error);
       toast.error("Không xác nhận được đơn hàng!");
@@ -74,24 +79,35 @@ const PaymentResultPage = () => {
         >
           {paymentStatus === "loading" && (
             <div className="text-center">
-              <h2 className="text-2xl font-semibold text-gray-700">Đang xác nhận giao dịch...</h2>
+
+              <h2 className="text-2xl font-semibold text-gray-700">
+                Đang xác nhận giao dịch...
+              </h2>
+
               <p className="mt-4 text-gray-600">Vui lòng chờ trong giây lát.</p>
             </div>
           )}
           {paymentStatus === "success" && (
             <div className="text-center">
               <FaCheckCircle className="mx-auto h-16 w-16 text-green-500 animate-bounce" />
-              <h2 className="mt-4 text-3xl font-bold text-green-800">Thanh toán thành công!</h2>
+              <h2 className="mt-4 text-3xl font-bold text-green-800">
+                Thanh toán thành công!
+              </h2>
               <p className="mt-4 text-lg text-gray-800">
-                Cảm ơn bạn đã thanh toán. Bạn có thể về trang chủ hoặc xem các gói của mình.
+                Cảm ơn bạn đã thanh toán. Bạn có thể về trang chủ hoặc xem các
+                gói của mình.
               </p>
             </div>
           )}
           {paymentStatus === "fail" && (
             <div className="text-center">
               <FaTimesCircle className="mx-auto h-16 w-16 text-red-500 animate-bounce" />
-              <h2 className="mt-4 text-3xl font-bold text-red-800">Thanh toán thất bại!</h2>
-              <div className="mt-6 text-gray-600">Vui lòng thử lại hoặc liên hệ hỗ trợ.</div>
+              <h2 className="mt-4 text-3xl font-bold text-red-800">
+                Thanh toán thất bại!
+              </h2>
+              <div className="mt-6 text-gray-600">
+                Vui lòng thử lại hoặc liên hệ hỗ trợ.
+              </div>
             </div>
           )}
         </div>

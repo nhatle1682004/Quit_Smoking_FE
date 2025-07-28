@@ -58,12 +58,20 @@ function InitialCondition() {
               name="cigarettesPerDay"
               label="Số lượng điếu thuốc lá hút mỗi ngày"
               rules={[
-                { required: true, message: "Vui lòng nhập số lượng điếu thuốc lá hút mỗi ngày" },
+
+                {
+                  required: true,
+                  message: "Vui lòng nhập số lượng điếu thuốc lá hút mỗi ngày",
+                },
+
                 {
                   type: "number",
                   min: 0,
                   max: 50,
-                  message: "Số điếu mỗi ngày phải từ 0 đến 50, không được phép là số âm",
+
+                  message:
+                    "Số điếu mỗi ngày phải từ 0 đến 50, không được phép là số âm",
+
                 },
               ]}
             >
@@ -104,10 +112,12 @@ function InitialCondition() {
                   message: "Không được bắt đầu bằng khoảng trắng!",
                 },
                 {
-                  pattern: /.*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*/,
+
+                  pattern:
+                    /.*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*/,
                   message: "Lý do phải chứa ít nhất 5 chữ cái",
                 },
-                
+
               ]}
             >
               <Input.TextArea
@@ -123,15 +133,17 @@ function InitialCondition() {
               rules={[
                 { required: true, message: "Vui lòng nhập cảm xúc" },
                 { min: 5, message: "Tối thiểu 5 ký tự" },
-                                {
+                {
                   pattern: /^(?!\s).+/,
                   message: "Không được bắt đầu bằng khoảng trắng!",
                 },
                 {
-                  pattern: /.*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*/,
+
+                  pattern:
+                    /.*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*/,
                   message: "Lý do phải chứa ít nhất 5 chữ cái",
                 },
-                
+
               ]}
             >
               <Input
@@ -153,7 +165,7 @@ function InitialCondition() {
                   max: 50000,
                   message: "Giá mỗi điếu thuốc lá phải từ 2000 đến 50.000 VNĐ",
                 },
-                                {
+                {
                   pattern: /^\d+$/,
                   message:
                     "Chỉ được nhập số, không được chứa chữ cái hoặc ký tự đặc biệt!",
@@ -167,6 +179,7 @@ function InitialCondition() {
                 parser={(v) => v.replace(/\D/g, "")}
               />
             </Form.Item>
+
 
 
             <Form.Item

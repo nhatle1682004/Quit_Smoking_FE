@@ -7,15 +7,18 @@ import {
   Button,
   Table,
   Typography,
-  message,
   Card,
   Spin,
   Empty,
   Breadcrumb,
-  InputNumber, // Import InputNumber
-  Tag, // Import Tag
+  InputNumber,
+  Tag,
+  DatePicker,
 } from "antd";
 import { SendOutlined, HomeOutlined, UserOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
+import { ToastContainer, toast } from "react-toastify"; // Import ToastContainer và toast
+import "react-toastify/dist/ReactToastify.css"; // Import CSS của react-toastify
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -26,20 +29,15 @@ function ClientDetailsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [form] = Form.useForm();
-  const { clientId } = useParams(); // Lấy ID khách hàng từ URL
-  const location = useLocation(); // Lấy state được truyền từ Link
+  const { clientId } = useParams();
+  const location = useLocation();
   const clientName = location.state?.clientName || "Client";
 
-  // Hàm để lấy danh sách các nhiệm vụ đã giao
   const fetchTasks = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Giả định {purchasedPlanId} có thể được thay thế bằng ID của khách hàng
-      const response = await api.get(
-        `/api/coach/client/${clientId}/daily-tasks`
-      );
-      // Giả định response trả về một mảng các nhiệm vụ
+      const response = await api.get(`/coach/client/${clientId}/daily-tasks`);
       setTasks(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error("Failed to fetch tasks:", err);
@@ -58,47 +56,41 @@ function ClientDetailsPage() {
     }
   }, [clientId, fetchTasks]);
 
-  // Hàm để xử lý việc giao nhiệm vụ mới
   const handleAssignTask = async (values) => {
     setIsSubmitting(true);
     try {
-      // Tính toán ngày mai theo định dạng YYYY-MM-DD
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const year = tomorrow.getFullYear();
-      const month = String(tomorrow.getMonth() + 1).padStart(2, "0"); // Tháng bắt đầu từ 0
-      const day = String(tomorrow.getDate()).padStart(2, "0");
-      const formattedDate = `${year}-${month}-${day}`;
+      const formattedDate = values.date.format("YYYY-MM-DD");
 
-      // Xây dựng payload dựa trên định dạng request body mới
       const payload = {
-        purchasedPlanId: parseInt(clientId, 10), // Giả định clientId là purchasedPlanId
         date: formattedDate,
         targetSmokePerDay: values.targetSmokePerDay,
         note: values.note,
       };
 
-      // Sử dụng API POST để giao nhiệm vụ mới
-      // Giả định {clientUsername} trong endpoint có thể được thay thế bằng clientId
-      await api.post(`/api/coach/client/${clientId}/daily-task`, payload);
+      await api.post(`/coach/client/${clientId}/daily-task`, payload);
 
-      message.success(
-        `Đã giao nhiệm vụ cho ngày ${formattedDate} thành công đến ${clientName}!`
+      // THAY ĐỔI: Sử dụng toast.success để hiển thị thông báo
+      toast.success(
+        `Đã giao nhiệm vụ cho ${clientName} vào ngày ${formattedDate} thành công!`
       );
       form.resetFields();
-      fetchTasks(); // Tải lại danh sách nhiệm vụ để hiển thị nhiệm vụ mới
+      fetchTasks();
     } catch (err) {
       console.error("Failed to assign task:", err);
       const errorMessage =
         err.response?.data?.message ||
         "Giao nhiệm vụ thất bại. Vui lòng thử lại.";
-      message.error(errorMessage);
+      // THAY ĐỔI: Sử dụng toast.error để hiển thị thông báo lỗi
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Cập nhật các cột để khớp với cấu trúc dữ liệu nhiệm vụ mới
+  const disabledDate = (current) => {
+    return current && current < dayjs().startOf("day");
+  };
+
   const columns = [
     {
       title: "Ngày thực hiện",
@@ -117,15 +109,6 @@ function ClientDetailsPage() {
       title: "Ghi chú từ Coach",
       dataIndex: "note",
       key: "note",
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => {
-        const color = status === "COMPLETED" ? "green" : "blue";
-        return <Tag color={color}>{status || "PENDING"}</Tag>;
-      },
     },
   ];
 
@@ -150,17 +133,32 @@ function ClientDetailsPage() {
           Nhiệm vụ hàng ngày cho {clientName}
         </Title>
 
-        {/* Form đã được cập nhật để giao nhiệm vụ */}
-        <Card title="Giao nhiệm vụ mới cho ngày mai" className="mb-8 shadow-md">
+        <Card title="Giao nhiệm vụ mới" className="mb-8 shadow-md">
           <Form
             form={form}
             layout="vertical"
             onFinish={handleAssignTask}
-            initialValues={{ targetSmokePerDay: 5, note: "uống nhiều nước !" }}
+            initialValues={{
+              date: dayjs(),
+              targetSmokePerDay: 5,
+              note: "uống nhiều nước !",
+            }}
           >
             <Form.Item
+              name="date"
+              label="Ngày giao nhiệm vụ"
+              rules={[{ required: true, message: "Vui lòng chọn ngày!" }]}
+            >
+              <DatePicker
+                style={{ width: "100%" }}
+                format="YYYY-MM-DD"
+                disabledDate={disabledDate}
+              />
+            </Form.Item>
+
+            <Form.Item
               name="targetSmokePerDay"
-              label="Số điếu thuốc mục tiêu cho ngày mai"
+              label="Số điếu thuốc mục tiêu"
               rules={[
                 {
                   required: true,
@@ -174,6 +172,7 @@ function ClientDetailsPage() {
                 placeholder="Ví dụ: 5"
               />
             </Form.Item>
+
             <Form.Item
               name="note"
               label="Ghi chú cho khách hàng"
@@ -181,6 +180,7 @@ function ClientDetailsPage() {
             >
               <TextArea rows={4} placeholder="Ví dụ: 'Nhớ uống nhiều nước!'" />
             </Form.Item>
+
             <Form.Item>
               <Button
                 type="primary"
@@ -205,12 +205,15 @@ function ClientDetailsPage() {
             <Table
               columns={columns}
               dataSource={tasks}
-              rowKey={(record) => record.id || record.date} // Sử dụng key duy nhất, fallback về date
+              rowKey={(record) => record.id || record.date}
               pagination={{ pageSize: 5 }}
+              scroll={{ x: "max-content" }}
             />
           )}
         </Card>
       </div>
+      <ToastContainer />{" "}
+      {/* THÊM: Component ToastContainer để hiển thị thông báo */}
     </div>
   );
 }

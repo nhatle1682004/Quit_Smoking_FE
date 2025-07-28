@@ -42,6 +42,7 @@ const Header = () => {
     { id: 7, label: "Tấm gương", href: "/success" },
     { id: 8, label: "Kế hoạch của bạn", href: "/my-plan" },
     { id: 9, label: "Blog", href: "/blog" },
+    { id: 10, label: "Nhiệm vụ hằng ngày", href: "/daily-tasks" },
   ];
 
   // Xoá dropdown cho Công cụ hỗ trợ
@@ -90,19 +91,19 @@ const Header = () => {
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex space-x-4 lg:space-x-6">
-              {menuItems.map((item) =>
-                (
-                  <button
-                    key={item.id}
-                    onClick={() =>
-                      item.id === 1 ? handleHomeClick() : navigate(item.href)
-                    }
-                    className="text-white hover:text-gray-200 duration-300"
-                  >
-                    {item.label}
-                  </button>
-                )
-              )}
+
+              {menuItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() =>
+                    item.id === 1 ? handleHomeClick() : navigate(item.href)
+                  }
+                  className="text-white hover:text-gray-200 duration-300"
+                >
+                  {item.label}
+                </button>
+              ))}
+
             </nav>
 
             {/* Actions Area */}
@@ -160,25 +161,31 @@ const Header = () => {
           {isOpen && (
             <div className="md:hidden bg-[#2980b9] shadow-lg rounded-lg mt-2 p-4">
               <nav className="flex flex-col space-y-4">
-                {menuItems.map((item) =>
-                  (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        item.id === 1 ? handleHomeClick() : navigate(item.href);
-                        toggleMenu();
-                      }}
-                      className="text-white hover:text-gray-200 text-left"
-                    >
-                      {item.label}
-                    </button>
-                  )
-                )}
+
+                {menuItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      item.id === 1 ? handleHomeClick() : navigate(item.href);
+                      toggleMenu();
+                    }}
+                    className="text-white hover:text-gray-200 text-left"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+
 
                 {user && user.username ? (
                   <>
                     <div className="flex items-center pt-4 border-t border-[#2573a7]">
-                      <UserAvatar fullName={user.username} avatarUrl={user.avatarUrl} size={32} />
+
+                      <UserAvatar
+                        fullName={user.username}
+                        avatarUrl={user.avatarUrl}
+                        size={32}
+                      />
+
                     </div>
                     <button
                       onClick={() => {
