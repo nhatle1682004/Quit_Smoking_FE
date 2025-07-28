@@ -4,6 +4,7 @@ import { DatePicker, Alert } from "antd";
 const DatePickerSmokingLog = ({ onDateChange, defaultValue, noLogMessage }) => {
   return (
     <div className="text-center">
+
       <DatePicker
         value={defaultValue}
         onChange={onDateChange}
@@ -12,6 +13,7 @@ const DatePickerSmokingLog = ({ onDateChange, defaultValue, noLogMessage }) => {
         size="large"
         allowClear={false}
       />
+
 
       {noLogMessage && (
         <Alert

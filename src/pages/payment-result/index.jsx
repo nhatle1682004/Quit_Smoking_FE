@@ -50,6 +50,7 @@ const PaymentResultPage = () => {
         toast.error("Thanh toán thất bại!");
         setPaymentStatus("fail");
       }
+
     } catch (error) {
       console.error("Lỗi xác nhận thanh toán:", error);
       toast.error("Không xác nhận được đơn hàng!");
@@ -78,9 +79,11 @@ const PaymentResultPage = () => {
         >
           {paymentStatus === "loading" && (
             <div className="text-center">
+
               <h2 className="text-2xl font-semibold text-gray-700">
                 Đang xác nhận giao dịch...
               </h2>
+
               <p className="mt-4 text-gray-600">Vui lòng chờ trong giây lát.</p>
             </div>
           )}
