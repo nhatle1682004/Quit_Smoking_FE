@@ -11,8 +11,8 @@ import {
 
 function UserPackage() {
   const [packages, setPackages] = useState([]);
-  const [loading, setLoading] = useState(false); // Đang fetch danh sách
-  const [activatingPlanId, setActivatingPlanId] = useState(null); // Plan đang kích hoạt
+  const [loading, setLoading] = useState(false);
+  const [activatingPlanId, setActivatingPlanId] = useState(null);
   const navigate = useNavigate();
 
   const fetchUserPackage = async () => {
@@ -31,7 +31,6 @@ function UserPackage() {
     fetchUserPackage();
   }, []);
 
-  // Nhóm các gói
   const activePackages = packages.filter((pkg) => pkg.status === "ACTIVE");
   const paidPackages = packages.filter(
     (pkg) =>
@@ -50,19 +49,29 @@ function UserPackage() {
   );
   const canceledPackages = packages.filter((pkg) => pkg.status === "CANCELED");
 
-  const handleRetryPayment = (paymentUrl) => {
-    if (paymentUrl) window.location.href = paymentUrl;
-    else toast.error("Không tìm thấy link thanh toán lại!");
+  // ✅ [NEW] Gọi lại API để lấy link thanh toán mới
+  const handleRetryPaymentByPlanId = async (planId) => {
+    try {
+      const res = await api.post(`/purchased-plan/${planId}/retry-payment`);
+      const newPaymentUrl = res.data?.paymentUrl;
+      if (newPaymentUrl) {
+        window.location.href = newPaymentUrl;
+      } else {
+        toast.error("Không lấy được link thanh toán mới.");
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("Lỗi khi thử lại thanh toán.");
+    }
   };
 
-  // Sửa lại hàm kích hoạt: disable nút khi đang xử lý, reload xong mới show UI mới
   const handleActivatePackage = async (planId) => {
-    if (activatingPlanId) return; // Đang có plan khác đang kích hoạt
+    if (activatingPlanId) return;
     setActivatingPlanId(planId);
     try {
       await api.post(`/purchased-plan/${planId}/activate`);
       toast.success("Kích hoạt gói thành công");
-      await fetchUserPackage(); // Đảm bảo fetch lại data mới trước khi cho user thao tác tiếp
+      await fetchUserPackage();
     } catch (err) {
       let message = "Không thể kích hoạt gói";
       if (err?.response?.data?.message) {
@@ -74,7 +83,6 @@ function UserPackage() {
     }
   };
 
-  // Badge trạng thái gói
   const renderStatusBadge = (status) => {
     switch (status) {
       case "ACTIVE":
@@ -92,7 +100,6 @@ function UserPackage() {
     }
   };
 
-  // Badge trạng thái thanh toán
   const renderPaymentBadge = (paymentStatus) => {
     switch (paymentStatus) {
       case "SUCCESS":
@@ -108,7 +115,6 @@ function UserPackage() {
     }
   };
 
-  // Render card của từng gói
   const renderPackageCard = (pkg, options = {}) => (
     <div
       key={pkg.id}
@@ -142,18 +148,18 @@ function UserPackage() {
           )}
         </span>
       </div>
-      {/* Nút tùy theo nhóm */}
+      {/*  [UPDATED] Gọi retryPaymentByPlanId thay vì dùng paymentUrl cũ */}
       {options.retry && (
         <Button
           type="primary"
-          danger={pkg.paymentStatus === "FAILED"} // nút thất bại màu đỏ
+          danger={pkg.paymentStatus === "FAILED"}
           icon={<ReloadOutlined />}
-          onClick={() => handleRetryPayment(pkg.paymentUrl)}
+          onClick={() => handleRetryPaymentByPlanId(pkg.id)}
           className="mt-auto mb-2"
           style={
             pkg.paymentStatus === "FAILED"
-              ? { background: "#ff4d4f", border: "none", fontWeight: 600 } // đỏ
-              : { background: "#1677ff", border: "none", fontWeight: 600 } // xanh
+              ? { background: "#ff4d4f", border: "none", fontWeight: 600 }
+              : { background: "#1677ff", border: "none", fontWeight: 600 }
           }
         >
           Thanh toán lại
@@ -165,7 +171,7 @@ function UserPackage() {
           icon={<CheckCircleOutlined />}
           onClick={() => handleActivatePackage(pkg.id)}
           className="mt-auto"
-          disabled={activatingPlanId === pkg.id} // disable khi đang gọi
+          disabled={activatingPlanId === pkg.id}
           loading={activatingPlanId === pkg.id}
         >
           Kích hoạt ngay
@@ -181,7 +187,6 @@ function UserPackage() {
           Gói của tôi
         </h2>
 
-        {/* Nhóm: GÓI ĐANG HOẠT ĐỘNG */}
         {activePackages.length > 0 && (
           <>
             <h3 className="text-xl font-semibold mb-2 text-green-700">
@@ -193,7 +198,6 @@ function UserPackage() {
           </>
         )}
 
-        {/* Nhóm: GÓI ĐÃ THANH TOÁN (chưa ACTIVE) */}
         {paidPackages.length > 0 && (
           <>
             <h3 className="text-xl font-semibold mb-2 text-blue-700">
@@ -207,7 +211,6 @@ function UserPackage() {
           </>
         )}
 
-        {/* Nhóm: GÓI CHƯA THANH TOÁN (pending/failed) */}
         {pendingPackages.length > 0 && (
           <>
             <h3 className="text-xl font-semibold mb-2 text-orange-600">
@@ -233,7 +236,6 @@ function UserPackage() {
           </>
         )}
 
-        {/* Nhóm: GÓI ĐÃ HỦY */}
         {canceledPackages.length > 0 && (
           <>
             <h3 className="text-xl font-semibold mb-2 text-gray-500">
@@ -245,7 +247,6 @@ function UserPackage() {
           </>
         )}
 
-        {/* Nếu không có gói nào */}
         {packages.length === 0 && !loading && (
           <div className="text-center">
             <GiftOutlined

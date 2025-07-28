@@ -18,16 +18,16 @@ const TIME_SLOTS = [
 
 // Ánh xạ ID của Coach (từ bảng coaches) với link Google Meet
 const COACH_MEET_LINKS = {
-  22: "https://meet.google.com/pfw-oxjm-vpy",
-  23: "https://meet.google.com/uiu-hhqt-hwk",
-  24: "https://meet.google.com/avq-ryky-kph",
-  25: "https://meet.google.com/yho-wmay-jbe",
-  26: "https://meet.google.com/yuo-cfmk-fej",
-  27: "https://meet.google.com/hjf-khzm-tsn",
-  28: "https://meet.google.com/ddu-cdyn-ihk",
-  29: "https://meet.google.com/trg-setn-myv",
-  30: "https://meet.google.com/nqs-hrcf-gfh",
-  31: "https://meet.google.com/pmv-fnoh-zuu",
+  1: "https://meet.google.com/pfw-oxjm-vpy",
+  2: "https://meet.google.com/uiu-hhqt-hwk",
+  3: "https://meet.google.com/avq-ryky-kph",
+  4: "https://meet.google.com/yho-wmay-jbe",
+  5: "https://meet.google.com/yuo-cfmk-fej",
+  6: "https://meet.google.com/hjf-khzm-tsn",
+  7: "https://meet.google.com/ddu-cdyn-ihk",
+  8: "https://meet.google.com/trg-setn-myv",
+  9: "https://meet.google.com/nqs-hrcf-gfh",
+  10: "https://meet.google.com/pmv-fnoh-zuu",
 };
 
 function BookingPage() {
@@ -80,7 +80,8 @@ function BookingPage() {
       if (!userBookings || userBookings.length === 0) {
         const coachList = allCoaches.map((coach) => ({
           ...coach,
-          specialization: "Life & Relationship Coach",
+          specialization:
+            "Huấn luyện viên hỗ trợ bỏ thuốc, đồng hành cải thiện sức khỏe.",
           aboutMe: `Chuyên gia với hơn 10 năm kinh nghiệm.`,
         }));
         setCoaches(coachList);
@@ -119,7 +120,8 @@ function BookingPage() {
         setCoaches([
           {
             ...assignedCoach,
-            specialization: "Life & Relationship Coach",
+            specialization:
+              "Huấn luyện viên hỗ trợ bỏ thuốc, đồng hành cải thiện sức khỏe.",
             aboutMe: `Chuyên gia với hơn 10 năm kinh nghiệm.`,
           },
         ]);

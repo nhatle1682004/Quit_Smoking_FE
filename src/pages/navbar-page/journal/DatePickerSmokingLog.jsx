@@ -1,17 +1,18 @@
-import React from 'react';
-import { DatePicker, Alert } from 'antd';
+import React from "react";
+import { DatePicker, Alert } from "antd";
 
 const DatePickerSmokingLog = ({ onDateChange, defaultValue, noLogMessage }) => {
   return (
     <div className="text-center">
       <DatePicker
+        value={defaultValue}
         onChange={onDateChange}
-        defaultValue={defaultValue}
         format="YYYY-MM-DD"
-        style={{ width: '100%', height: 48, fontSize: 18, borderRadius: 12 }}
+        style={{ width: "100%", height: 48, fontSize: 18, borderRadius: 12 }}
         size="large"
         allowClear={false}
       />
+
       {noLogMessage && (
         <Alert
           message={noLogMessage}

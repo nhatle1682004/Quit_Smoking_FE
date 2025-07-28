@@ -46,6 +46,7 @@ import ClientDetailsPage from "./pages/dashboard-coach/ClientDetailsPage";
 import { Provider } from "react-redux";
 import { persistor, store } from "./redux/store";
 import { PersistGate } from "redux-persist/integration/react";
+import DailyTaskPage from "./pages/navbar-page/dailytask";
 
 function App() {
   // react-router-dom: ho tro phan thanh n trang, moi trang khi ma load len no se cap nhat html ben trong cai index.html
@@ -147,6 +148,10 @@ function App() {
         {
           path: "notifications",
           element: <NotificationsPage />,
+        },
+        {
+          path: "daily-tasks",
+          element: <DailyTaskPage />,
         },
       ],
     },
