@@ -19,7 +19,7 @@ const Header = () => {
   const dispatch = useDispatch();
 
   // THAY ĐỔI: Lấy state user và notification từ Redux
-  const user = useSelector((state) => state.user); // Sửa lại như code gốc của bạn
+  const user = useSelector((state) => state.user);
   const { unreadCount } = useSelector((state) => state.notifications);
 
   const handleLogout = () => {
