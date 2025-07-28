@@ -9,12 +9,15 @@ import {
   Divider,
   Space,
   Tabs,
+  Popconfirm,
 } from "antd";
 import { EditOutlined, LockOutlined } from "@ant-design/icons";
 import api from "../../../configs/axios";
 import { toast } from "react-toastify";
 import { Navigate, useNavigate } from "react-router-dom";
 import ProfileInitialCondition from "../../../components/profile-initial-condition";
+import { useDispatch } from "react-redux";
+import { logout } from "../../../redux/features/userSlice";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -57,9 +60,16 @@ const UserProfile = () => {
     }
   };
 
+  const dispatch = useDispatch();
+
   const handleDeleteAccount = async () => {
     try {
       await api.delete("/user/me");
+
+      // Xóa localStorage nếu bạn lưu token ở đó
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      dispatch(logout());
       toast.success("Xóa tài khoản thành công!");
       navigate("/");
     } catch (err) {
@@ -90,7 +100,10 @@ const UserProfile = () => {
                       label="Họ và tên"
                       rules={[
                         { required: true, message: "Vui lòng nhập họ tên" },
-                        { min: 5, message: "Họ và tên phải có ít nhất 5 ký tự!" },
+                        {
+                          min: 5,
+                          message: "Họ và tên phải có ít nhất 5 ký tự!",
+                        },
                         {
                           pattern: /^(?!\s)[A-Za-zÀ-ỹ\s]+$/,
                           message:
@@ -148,13 +161,12 @@ const UserProfile = () => {
                       <Divider />
                       <Text strong>Trạng thái tài khoản: </Text>
                       <span
-                        className={`px-2 py-1 rounded text-sm font-medium ${profile.premium
+                        className={`px-2 py-1 rounded text-sm font-medium ${
+                          profile.premium
                             ? "bg-green-100 text-green-800"
                             : "bg-gray-100 text-gray-800"
-                          }`}
-                      >
-                        
-                      </span>
+                        }`}
+                      ></span>
                     </>
                   )}
 
@@ -177,9 +189,6 @@ const UserProfile = () => {
                         >
                           Hủy
                         </Button>
-                        <Button danger onClick={handleDeleteAccount}>
-                          Xóa tài khoản
-                        </Button>
                       </>
                     ) : (
                       <>
@@ -195,9 +204,17 @@ const UserProfile = () => {
                         >
                           Chỉnh sửa thông tin cá nhân
                         </Button>
-                        <Button danger onClick={handleDeleteAccount}>
-                          Xóa tài khoản
-                        </Button>
+
+                        <Popconfirm
+                          title="Bạn chắc chắn muốn xóa tài khoản?"
+                          description="Thao tác này không thể hoàn tác. Bạn có chắc chắn không?"
+                          okText="Xác nhận"
+                          cancelText="Hủy"
+                          onConfirm={handleDeleteAccount}
+                          okButtonProps={{ danger: true }}
+                        >
+                          <Button danger>Xóa tài khoản</Button>
+                        </Popconfirm>
                       </>
                     )}
                   </Space>

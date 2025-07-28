@@ -16,58 +16,12 @@ import { logout } from "../../redux/features/userSlice";
 
 const { Text, Title } = Typography;
 
-// Hàm tạo avatar từ tên người dùng
-const generateAvatarFromName = (name) => {
-  if (!name) return "U";
-
-  // Tách tên thành các từ
-  const words = name.trim().split(" ");
-
-  // Lấy chữ cái đầu của từ cuối cùng
-  if (words.length > 0) {
-    return words[words.length - 1][0].toUpperCase();
-  }
-
-  return "U";
-};
-
-// Hàm tạo màu nền cho avatar
-const generateAvatarColor = (name) => {
-  if (!name) return "#1890ff";
-
-  const colors = [
-    "#f56a00",
-    "#7265e6",
-    "#ffbf00",
-    "#00a2ae",
-    "#87d068",
-    "#1890ff",
-    "#722ed1",
-    "#eb2f96",
-    "#fa8c16",
-    "#52c41a",
-    "#13c2c2",
-    "#2f54eb",
-  ];
-
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  return colors[Math.abs(hash) % colors.length];
-};
-
 const UserProfileDropdown = ({ onMenuClick }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   // Lấy thông tin user từ Redux store
   const user = useSelector((state) => state.user);
-
-  // Tạo avatar từ tên người dùng
-  const avatarText = generateAvatarFromName(user?.username || "User");
-  const avatarColor = generateAvatarColor(user?.username || "User");
 
   const handleLogout = () => {
     dispatch(logout());
@@ -159,16 +113,7 @@ const UserProfileDropdown = ({ onMenuClick }) => {
       {/* Phần Header của Dropdown */}
       <div className="p-4 border-b border-gray-200">
         <Space>
-          <Avatar
-            size={40}
-            style={{
-              backgroundColor: avatarColor,
-              color: "#fff",
-              fontWeight: "bold",
-            }}
-          >
-            {avatarText}
-          </Avatar>
+          {/* Avatar removed */}
           <div>
             <Title level={5} className="!mb-0">
               {user?.username}
@@ -205,13 +150,18 @@ const UserProfileDropdown = ({ onMenuClick }) => {
       >
         <Avatar
           size={40}
-          style={{
-            backgroundColor: avatarColor,
-            color: "#fff",
-            fontWeight: "bold",
-          }}
+          src={user?.avatarUrl || undefined}
+          style={
+            user?.avatarUrl
+              ? undefined
+              : {
+                  backgroundColor: stringToColor(user?.username || "User"),
+                  fontWeight: "bold",
+                  verticalAlign: "middle",
+                }
+          }
         >
-          {avatarText}
+          {!user?.avatarUrl && getLastWord(user?.username || "?")}
         </Avatar>
         <span className="font-semibold hidden sm:inline text-white">
           {user?.username}
@@ -222,3 +172,17 @@ const UserProfileDropdown = ({ onMenuClick }) => {
 };
 
 export default UserProfileDropdown;
+
+// Thêm các hàm giống như ở UserAvatar
+const stringToColor = (str) => {
+  const colors = ["#f56a00", "#7265e6", "#ffbf00", "#00a2ae", "#87d068"];
+  let sum = 0;
+  for (let i = 0; i < str.length; i++) sum += str.charCodeAt(i);
+  return colors[sum % colors.length];
+};
+
+const getLastWord = (name) => {
+  if (!name || typeof name !== "string") return "?";
+  const words = name.trim().split(/\s+/);
+  return words.length > 0 ? words[words.length - 1] : "?";
+};

@@ -155,11 +155,11 @@ function CoachDashboard() {
   const [isSending, setIsSending] = useState(false);
 
   const fetchCoachData = useCallback(async () => {
-    if (!currentUser?.id) {
-      setIsLoading(false);
-      setError("Please log in to view the dashboard.");
-      return;
-    }
+  if (!currentUser?.id) {
+    setIsLoading(false);
+    setError("Please log in to view the dashboard.");
+    return;
+  }
 
     setIsLoading(true);
     try {
@@ -211,20 +211,21 @@ function CoachDashboard() {
       });
       setClients(Array.from(clientMap.values()));
 
-      const formattedBookings = coachBookings.map((booking) => ({
-        ...booking,
-        key: booking.bookingId,
-        customerName: booking.user.fullName,
-        status: booking.status.toUpperCase(),
-      }));
-      setAllBookings(formattedBookings);
-    } catch (err) {
-      setError("Failed to load dashboard data. Please try again.");
-      console.error("Error fetching dashboard data:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentUser]);
+    const formattedBookings = coachBookings.map((booking) => ({
+      ...booking,
+      key: booking.bookingId,
+      customerName: booking.user.fullName,
+      status: booking.status.toUpperCase(),
+    }));
+    setAllBookings(formattedBookings);
+  } catch (err) {
+    setError("Failed to load dashboard data. Please try again.");
+    console.error("Error fetching dashboard data:", err);
+  } finally {
+    setIsLoading(false);
+  }
+}, [currentUser]);
+
 
   useEffect(() => {
     fetchCoachData();

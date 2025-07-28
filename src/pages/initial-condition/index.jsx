@@ -56,19 +56,14 @@ function InitialCondition() {
           >
             <Form.Item
               name="cigarettesPerDay"
-              label="Số lượng thuốc lá hút mỗi ngày"
+              label="Số lượng điếu thuốc lá hút mỗi ngày"
               rules={[
-                { required: true, message: "Vui lòng nhập số điếu mỗi ngày" },
-                {
-                  pattern: /^\d+$/,
-                  message:
-                    "Chỉ được nhập số, không được chứa chữ cái hoặc ký tự đặc biệt!",
-                },
+                { required: true, message: "Vui lòng nhập số lượng điếu thuốc lá hút mỗi ngày" },
                 {
                   type: "number",
                   min: 0,
                   max: 50,
-                  message: "Số điếu mỗi ngày phải từ 0 đến 100, không được phép là số âm",
+                  message: "Số điếu mỗi ngày phải từ 0 đến 50, không được phép là số âm",
                 },
               ]}
             >
@@ -77,7 +72,7 @@ function InitialCondition() {
 
             <Form.Item
               name="firstSmokeTime"
-              label="Thời điểm hút điếu đầu tiên"
+              label="Thời điểm hút điếu thuốc lá đầu tiên trong ngày"
               rules={[{ required: true, message: "Vui lòng chọn thời điểm" }]}
             >
               <Select placeholder="-- Chọn thời gian --">
@@ -96,32 +91,10 @@ function InitialCondition() {
               </Select>
             </Form.Item>
 
-            <Form.Item
-              name="reasonForStarting"
-              label="Lý do bắt đầu hút thuốc"
-              rules={[
-                { required: true, message: "Vui lòng nhập lý do" },
-                { min: 5, message: "Tối thiểu 5 ký tự" },
-                {
-                  pattern: /^(?!\s)/,
-                  message: "Không được bắt đầu bằng khoảng trắng!",
-                },
-                {
-                  max: 300,
-                  message: "Lý do quá dài, vui lòng rút gọn dưới 300 ký tự!",
-                },
-               
-              ]}
-            >
-              <TextArea
-                autoSize={{ minRows: 3, maxRows: 6 }}
-                placeholder="Ví dụ: Do áp lực công việc, bạn bè rủ rê, tò mò..."
-              />
-            </Form.Item>
 
             <Form.Item
               name="quitReason"
-              label="Lý do muốn bỏ thuốc"
+              label="Lý do muốn bỏ thuốc lá"
               rules={[
                 { required: true, message: "Vui lòng nhập lý do" },
                 { min: 5, message: "Tối thiểu 5 ký tự" },
@@ -130,41 +103,33 @@ function InitialCondition() {
                   pattern: /^(?!\s).+/,
                   message: "Không được bắt đầu bằng khoảng trắng!",
                 },
+                {
+                  pattern: /.*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*/,
+                  message: "Lý do phải chứa ít nhất 5 chữ cái",
+                },
+                
               ]}
             >
               <Input.TextArea
-                placeholder="Bạn thường hút thuốc khi nào? "
-                autoSize={{ minRows: 3, maxRows: 6 }}
+                placeholder="Ví dụ: Giảm căng thẳng, bảo vệ sức khỏe, vì con cái..."
+                autoSize={{ minRows: 2, maxRows: 6 }}
                 showCount
                 maxLength={300}
               />
             </Form.Item>
-
-            <Form.Item
-              name="readinessScale"
-              label="Mức độ sẵn sàng bỏ thuốc (1-10)"
-              rules={[
-                { required: true, message: "Vui lòng nhập mức độ từ 1 đến 10" },
-                {
-                  type: "number",
-                  min: 1,
-                  max: 10,
-                  message: "Mức độ phải từ 1 đến 10",
-                },
-              ]}
-            >
-              <InputNumber className="w-full" placeholder="Ví dụ: 7" />
-            </Form.Item>
-
             <Form.Item
               name="emotion"
-              label="Cảm xúc khi hút thuốc"
+              label="Cảm xúc khi hút thuốc lá"
               rules={[
                 { required: true, message: "Vui lòng nhập cảm xúc" },
                 { min: 5, message: "Tối thiểu 5 ký tự" },
                                 {
                   pattern: /^(?!\s).+/,
                   message: "Không được bắt đầu bằng khoảng trắng!",
+                },
+                {
+                  pattern: /.*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*/,
+                  message: "Lý do phải chứa ít nhất 5 chữ cái",
                 },
                 
               ]}
@@ -179,14 +144,14 @@ function InitialCondition() {
 
             <Form.Item
               name="pricePerCigarette"
-              label="Giá mỗi điếu thuốc (VNĐ)"
+              label="Giá mỗi điếu thuốc lá (VNĐ)"
               rules={[
                 { required: true, message: "Vui lòng nhập giá" },
                 {
                   type: "number",
                   min: 2000,
-                  max: 200000,
-                  message: "Giá mỗi điếu phải từ 2000 đến 200.000 VNĐ",
+                  max: 50000,
+                  message: "Giá mỗi điếu thuốc lá phải từ 2000 đến 50.000 VNĐ",
                 },
                                 {
                   pattern: /^\d+$/,
@@ -203,63 +168,14 @@ function InitialCondition() {
               />
             </Form.Item>
 
-            <Form.Item
-              name="cigarettesPerPack"
-              label="Số điếu trong một bao"
-              rules={[
-                { required: true, message: "Vui lòng nhập số điếu" },
-                {
-                  type: "number",
-                  min: 1,
-                  max: 50,
-                  message: "Số điếu/bao phải từ 1 đến 100, không được phép là số âm",
-                },
-                                {
-                  pattern: /^\d+$/,
-                  message:
-                    "Chỉ được nhập số, không được chứa chữ cái hoặc ký tự đặc biệt!",
-                },
-              ]}
-            >
-              <InputNumber
-                style={{ width: "100%" }}
-                placeholder="Thường là 20"
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="weightKg"
-              label="Cân nặng hiện tại (kg)"
-              rules={[
-                { required: true, message: "Vui lòng nhập cân nặng" },
-                {
-                  type: "number",
-                  min: 1,
-                  max: 300,
-                  message: "Cân nặng phải từ 1 đến 300 kg, không được phép là số âm",
-                },
-                                {
-                  pattern: /^\d+$/,
-                  message:
-                    "Chỉ được nhập số, không được chứa chữ cái hoặc ký tự đặc biệt!",
-                },
-              ]}
-            >
-              <InputNumber
-                style={{ width: "100%" }}
-                step={0.1}
-                placeholder="Ví dụ: 65.5"
-              />
-            </Form.Item>
-
-            <Divider />
 
             <Form.Item
               name="hasTriedToQuit"
-              label="Bạn đã từng cố bỏ thuốc?"
+              label="Bạn đã từng cố bỏ thuốc lá chưa?"
               rules={[{ required: true, message: "Vui lòng chọn" }]}
             >
               <Radio.Group>
+                
                 <Radio value={true}>Có</Radio>
                 <Radio value={false}>Không</Radio>
               </Radio.Group>
