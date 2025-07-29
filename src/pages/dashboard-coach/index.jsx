@@ -13,7 +13,6 @@ import {
   Select,
   Dropdown,
   Menu,
-  // message, // <-- ĐÃ XÓA DÒNG NÀY (Không dùng Ant Design message nữa)
   Typography,
   Form,
   Spin,
@@ -25,18 +24,31 @@ import {
   DownOutlined,
   SyncOutlined,
   SendOutlined,
+  VideoCameraOutlined, // Nhập icon này cho nút Meet
 } from "@ant-design/icons";
 import { HiOutlineChatAlt2 } from "react-icons/hi";
 import dayjs from "dayjs";
-import { toast } from "react-toastify"; // <-- ĐÃ THÊM DÒNG NÀY: Import toast
+import { toast } from "react-toastify";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
-// Đã xóa message.config vì nó chỉ dành cho Ant Design message
+// Các liên kết Google Meet được mã hóa cứng cho các huấn luyện viên
+const COACH_MEET_LINKS = {
+  1: "https://meet.google.com/pfw-oxjm-vpy",
+  2: "https://meet.google.com/uiu-hhqt-hwk",
+  3: "https://meet.google.com/avq-ryky-kph",
+  4: "https://meet.google.com/yho-wmay-jbe",
+  5: "https://meet.google.com/yuo-cfmk-fej",
+  6: "https://meet.google.com/hjf-khzm-tsn",
+  7: "https://meet.google.com/ddu-cdyn-ihk",
+  8: "https://meet.google.com/trg-setn-myv",
+  9: "https://meet.google.com/nqs-hrcf-gfh",
+  10: "https://meet.google.com/pmv-fnoh-zuu",
+};
 
-// Component to display a single statistic card
+// Thành phần để hiển thị một thẻ thống kê đơn lẻ
 const StatCard = ({ title, value, colorClass }) => (
   <div className={`rounded-lg p-4 ${colorClass}`}>
     <p className="text-sm text-gray-700">{title}</p>
@@ -44,9 +56,9 @@ const StatCard = ({ title, value, colorClass }) => (
   </div>
 );
 
-// Component to display a client's information card
+// Thành phần để hiển thị thẻ thông tin khách hàng
 const ClientCard = ({ client, onSendMessage, isLoadingSmokingLog }) => {
-  // Use optional chaining for progress to avoid errors if it's undefined
+  // Sử dụng optional chaining cho progress để tránh lỗi nếu nó không xác định
   const progress = client.progress || {};
 
   return (
@@ -60,7 +72,7 @@ const ClientCard = ({ client, onSendMessage, isLoadingSmokingLog }) => {
             <p className="text-sm text-gray-500">{client.email}</p>
             {client.joinedDate && (
               <p className="text-xs text-gray-400">
-                {/* Joined: {client.joinedDate} */}
+                {/* Đã tham gia: {client.joinedDate} */}
               </p>
             )}
           </div>
@@ -73,7 +85,7 @@ const ClientCard = ({ client, onSendMessage, isLoadingSmokingLog }) => {
       </div>
       <div className="mb-4">
         <h4 className="font-semibold text-gray-700 mb-3">
-          Progress Overview (Today)
+          Tổng quan tiến trình (Hôm nay)
         </h4>
         {isLoadingSmokingLog ? (
           <div className="text-center py-4">
@@ -93,35 +105,35 @@ const ClientCard = ({ client, onSendMessage, isLoadingSmokingLog }) => {
             />
             {progress.coStatus && (
               <StatCard
-                title="CO Status"
+                title="Trạng thái CO"
                 value={progress.coStatus}
                 colorClass="bg-purple-100"
               />
             )}
             {progress.lungStatus && (
               <StatCard
-                title="Lung Status"
+                title="Trạng thái phổi"
                 value={progress.lungStatus}
                 colorClass="bg-teal-100"
               />
             )}
             {progress.dailyHealthPercent !== undefined && (
               <StatCard
-                title="Daily Health %"
+                title="Sức khỏe hàng ngày %"
                 value={`${progress.dailyHealthPercent}%`}
                 colorClass="bg-orange-100"
               />
             )}
             {progress.bloodPressure && (
               <StatCard
-                title="Blood Pressure"
+                title="Huyết áp"
                 value={progress.bloodPressure}
                 colorClass="bg-lime-100"
               />
             )}
             {progress.heartRate && (
               <StatCard
-                title="Heart Rate"
+                title="Nhịp tim"
                 value={progress.heartRate}
                 colorClass="bg-pink-100"
               />
@@ -135,12 +147,12 @@ const ClientCard = ({ client, onSendMessage, isLoadingSmokingLog }) => {
           state={{ clientName: client.fullName }}
           className="flex-1 text-center px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
         >
-          Gửi nhiệm vụ cho {client.fullName}
+          Giao nhiệm vụ cho {client.fullName}
         </Link>
         <button
           onClick={() => onSendMessage(client)}
           className="p-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-          title={`Send message to ${client.fullName}`}
+          title={`Gửi tin nhắn cho ${client.fullName}`}
         >
           <HiOutlineChatAlt2 size={20} />
         </button>
@@ -177,38 +189,59 @@ function CoachDashboard() {
   const [currentTargetClient, setCurrentTargetClient] = useState(null);
   const [notificationForm] = Form.useForm();
   const [isSending, setIsSending] = useState(false);
+  const [coachMeetLink, setCoachMeetLink] = useState(null); // Trạng thái cho liên kết Meet của huấn luyện viên
 
-  // State to manage loading of smoking logs individually
+  // Trạng thái để quản lý việc tải nhật ký hút thuốc riêng lẻ
   const [smokingLogLoadingMap, setSmokingLogLoadingMap] = useState({});
 
   const fetchCoachData = useCallback(async () => {
-  if (!currentUser?.id) {
-    setIsLoading(false);
-    setError("Please log in to view the dashboard.");
-    return;
-  }
+    if (!currentUser?.id) {
+      setIsLoading(false);
+      setError("Please log in to view the dashboard.");
+      return;
+    }
 
     setIsLoading(true);
     try {
-      // 1. Get the coach profile list to map to the coachId
+      // 1. Lấy danh sách hồ sơ huấn luyện viên để ánh xạ tới coachId
       const coachListRes = await api.get("/coach/coaches");
+      console.log("Phản hồi danh sách huấn luyện viên:", coachListRes.data); // Nhật ký gỡ lỗi
+
       const coachProfile = coachListRes.data.find(
         (c) => c.accountId === currentUser.id
       );
+      console.log("Tìm thấy hồ sơ huấn luyện viên:", coachProfile); // Nhật ký gỡ lỗi
+
       if (!coachProfile) {
-        setError("Không tìm được coach profile cho tài khoản này!");
+        setError("Không tìm thấy hồ sơ huấn luyện viên cho tài khoản này!");
         setIsLoading(false);
+        console.log(
+          "Lỗi: Không tìm thấy hồ sơ huấn luyện viên cho tài khoản này."
+        ); // Nhật ký gỡ lỗi
         return;
       }
       const coachId = coachProfile.id;
+      console.log("ID huấn luyện viên (từ hồ sơ):", coachId); // Nhật ký gỡ lỗi
 
-      // 2. Get the coach's bookings using the correct coachId
+      // Đặt liên kết Google Meet của huấn luyện viên
+      if (COACH_MEET_LINKS[coachId]) {
+        setCoachMeetLink(COACH_MEET_LINKS[coachId]);
+        console.log(
+          "Đã đặt liên kết Google Meet của huấn luyện viên:",
+          COACH_MEET_LINKS[coachId]
+        ); // Nhật ký gỡ lỗi
+      } else {
+        setCoachMeetLink(null); // Xóa nếu không tìm thấy liên kết
+        console.log("Không tìm thấy liên kết Google Meet cho ID:", coachId); // Nhật ký gỡ lỗi
+      }
+
+      // 2. Lấy các cuộc hẹn của huấn luyện viên bằng cách sử dụng coachId chính xác
       const response = await api.get(`/bookings/coach/${coachId}`);
       const coachBookings = response.data;
 
-      // 3. Iterate to get the client list and fetch smoking logs
+      // 3. Lặp lại để lấy danh sách khách hàng và tìm nạp nhật ký hút thuốc
       const clientMap = new Map();
-      const today = dayjs().format("YYYY-MM-DD"); // Get today's date for smoking log API
+      const today = dayjs().format("YYYY-MM-DD"); // Lấy ngày hôm nay cho API nhật ký hút thuốc
 
       const clientPromises = coachBookings.map(async (booking) => {
         const userInfo = booking.user;
@@ -228,11 +261,11 @@ function CoachDashboard() {
               ? new Date(userInfo.joinedDate).toLocaleDateString()
               : "N/A",
             plan: userInfo.plan || "Basic",
-            progress: {}, // Initialize progress as empty
+            progress: {}, // Khởi tạo tiến trình là rỗng
           };
           clientMap.set(userInfo.customerId, clientData);
 
-          // Fetch smoking log for each client for today
+          // Tìm nạp nhật ký hút thuốc cho mỗi khách hàng trong ngày hôm nay
           setSmokingLogLoadingMap((prev) => ({
             ...prev,
             [userInfo.customerId]: true,
@@ -240,9 +273,9 @@ function CoachDashboard() {
           try {
             const smokingLogRes = await api.get(
               `/smoking-log/user/${userInfo.customerId}/day`,
-              { params: { date: today } } // Pass today's date as query parameter
+              { params: { date: today } } // Truyền ngày hôm nay làm tham số truy vấn
             );
-            // Update client's progress with ALL actual smoking log data from Swagger
+            // Cập nhật tiến trình của khách hàng với TẤT CẢ dữ liệu nhật ký hút thuốc thực tế từ Swagger
             clientData.progress = {
               cigarettesToday: smokingLogRes.data.cigarettesToday,
               targetCigarettes: smokingLogRes.data.targetCigarettes,
@@ -262,17 +295,17 @@ function CoachDashboard() {
               daysCompleted: smokingLogRes.data.daysCompleted,
               totalPlanDays: smokingLogRes.data.totalPlanDays,
               targetAchieved: smokingLogRes.data.targetAchieved,
-              // Assuming cigarettesAvoided and cravingIntensity are also present in the API response
+              // Giả sử cigarettesAvoided và cravingIntensity cũng có trong phản hồi API
               cigarettesAvoided: smokingLogRes.data.cigarettesAvoided,
-              moneySaved: smokingLogRes.data.moneySavedToday, // Mapping to moneySavedToday from Swagger
+              moneySaved: smokingLogRes.data.moneySavedToday, // Ánh xạ tới moneySavedToday từ Swagger
               cravingIntensity: smokingLogRes.data.cravingIntensity,
             };
           } catch (smokingLogErr) {
             console.warn(
-              `Failed to fetch smoking log for client ${userInfo.customerId} on ${today}:`,
+              `Không thể tìm nạp nhật ký hút thuốc cho khách hàng ${userInfo.customerId} vào ngày ${today}:`,
               smokingLogErr.response?.data || smokingLogErr.message
             );
-            // Set default/empty progress for ALL fields if smoking log fails or not found
+            // Đặt tiến trình mặc định/rỗng cho TẤT CẢ các trường nếu nhật ký hút thuốc bị lỗi hoặc không tìm thấy
             clientData.progress = {
               cigarettesToday: 0,
               targetCigarettes: 0,
@@ -293,7 +326,7 @@ function CoachDashboard() {
               totalPlanDays: 0,
               targetAchieved: false,
               cigarettesAvoided: 0,
-              moneySaved: 0, // Default for moneySaved
+              moneySaved: 0, // Mặc định cho moneySaved
               cravingIntensity: 0,
             };
           } finally {
@@ -302,38 +335,37 @@ function CoachDashboard() {
               [userInfo.customerId]: false,
             }));
           }
-          return clientData; // Return client data for Promise.all
+          return clientData; // Trả về dữ liệu khách hàng cho Promise.all
         }
-        return null; // Return null for duplicate bookings or invalid user info
+        return null; // Trả về null cho các cuộc hẹn trùng lặp hoặc thông tin người dùng không hợp lệ
       });
 
-      // Wait for all client data and smoking logs to be fetched
+      // Chờ tất cả dữ liệu khách hàng và nhật ký hút thuốc được tìm nạp
       const resolvedClients = (await Promise.all(clientPromises)).filter(
         Boolean
       );
       setClients(resolvedClients);
 
-    const formattedBookings = coachBookings.map((booking) => ({
-      ...booking,
-      key: booking.bookingId,
-      customerName: booking.user.fullName,
-      status: booking.status.toUpperCase(),
-    }));
-    setAllBookings(formattedBookings);
-  } catch (err) {
-    setError("Failed to load dashboard data. Please try again.");
-    console.error("Error fetching dashboard data:", err);
-  } finally {
-    setIsLoading(false);
-  }
-}, [currentUser]);
-
+      const formattedBookings = coachBookings.map((booking) => ({
+        ...booking,
+        key: booking.bookingId,
+        customerName: booking.user.fullName,
+        status: booking.status.toUpperCase(),
+      }));
+      setAllBookings(formattedBookings);
+    } catch (err) {
+      setError("Failed to load dashboard data. Please try again.");
+      console.error("Error fetching dashboard data:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     fetchCoachData();
   }, [fetchCoachData]);
 
-  // Effect to apply filters to the booking list
+  // Hiệu ứng để áp dụng các bộ lọc vào danh sách cuộc hẹn
   useEffect(() => {
     let filteredData = [...allBookings];
     if (filters.keyword) {
@@ -351,7 +383,7 @@ function CoachDashboard() {
     setPagination((p) => ({ ...p, total: filteredData.length, current: 1 }));
   }, [filters, allBookings]);
 
-  // Handlers for the notification modal
+  // Bộ xử lý cho modal thông báo
   const showNotificationModal = (client) => {
     setCurrentTargetClient(client);
     setIsNotificationModalVisible(true);
@@ -368,7 +400,6 @@ function CoachDashboard() {
     console.log("Giá trị form:", values);
 
     if (!currentTargetClient || !currentUser?.id) {
-      // Thay thế message.error bằng toast.error
       toast.error("Không tìm thấy thông tin người gửi hoặc người nhận.");
       console.error("Lỗi: currentUser hoặc currentTargetClient thiếu.");
       return;
@@ -389,8 +420,7 @@ function CoachDashboard() {
       console.log("Payload cuối cùng gửi đến API:", payload);
 
       await api.post("/notifications", payload);
-      console.log("API POST /notifications đã hoàn thành thành công."); // Log khi API call thành công
-      // Thay thế message.success bằng toast.success
+      console.log("API POST /notifications đã hoàn thành thành công."); // Nhật ký khi gọi API thành công
       toast.success(
         `Đã gửi thông báo thành công đến ${currentTargetClient.fullName}`
       );
@@ -399,16 +429,15 @@ function CoachDashboard() {
       console.error(
         "Lỗi khi gửi thông báo:",
         err.response?.data || err.message,
-        err.response // Log toàn bộ response để debug chi tiết từ backend
+        err.response // Nhật ký toàn bộ phản hồi để gỡ lỗi chi tiết từ backend
       );
-      // Thay thế message.error bằng toast.error
       toast.error("Không thể gửi thông báo. Vui lòng thử lại.");
     } finally {
       setIsSending(false);
     }
   };
 
-  // Handlers for table and filters
+  // Bộ xử lý cho bảng và bộ lọc
   const handleTableChange = (pagination) => setPagination(pagination);
   const handleSearch = (value) => setFilters({ ...filters, keyword: value });
   const handleStatusFilterChange = (value) =>
@@ -416,39 +445,37 @@ function CoachDashboard() {
   const viewBookingDetails = (booking) => setViewingBooking(booking);
   const closeBookingDetails = () => setViewingBooking(null);
 
-  // Handler to update booking status
+  // Bộ xử lý để cập nhật trạng thái đặt chỗ
   const handleUpdateStatus = async (bookingId, newStatus) => {
     try {
       await api.put(`/bookings/${bookingId}`, {
         status: newStatus.toLowerCase(),
       });
-      // Thay thế message.success bằng toast.success
       toast.success(`Đã cập nhật trạng thái thành ${newStatus}`);
-      fetchCoachData(); // Refresh data after update
+      fetchCoachData(); // Làm mới dữ liệu sau khi cập nhật
     } catch (error) {
-      console.error("Error updating booking status:", error);
-      // Thay thế message.error bằng toast.error
+      console.error("Lỗi khi cập nhật trạng thái đặt chỗ:", error);
       toast.error("Không thể cập nhật trạng thái. Vui lòng thử lại.");
     }
   };
 
-  // Columns definition for the bookings table
+  // Định nghĩa các cột cho bảng đặt chỗ
   const columns = [
     { title: "ID", dataIndex: "bookingId", key: "bookingId", width: 80 },
-    { title: "Customer", dataIndex: "customerName", key: "customerName" },
+    { title: "Khách hàng", dataIndex: "customerName", key: "customerName" },
     {
-      title: "Date",
+      title: "Ngày",
       dataIndex: "date",
       key: "date",
       render: (text) => new Date(text).toLocaleDateString("vi-VN"),
     },
     {
-      title: "Time",
+      title: "Thời gian",
       key: "time",
       render: (_, record) => `${record.startTime} - ${record.endTime}`,
     },
     {
-      title: "Status",
+      title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       render: (status) => (
@@ -458,7 +485,7 @@ function CoachDashboard() {
       ),
     },
     {
-      title: "Action",
+      title: "Hành động",
       key: "action",
       width: 220,
       render: (_, record) => {
@@ -477,11 +504,11 @@ function CoachDashboard() {
               icon={<EyeOutlined />}
               onClick={() => viewBookingDetails(record)}
             >
-              View
+              Xem
             </Button>
             <Dropdown menu={menuProps}>
               <Button type="primary">
-                Approve <DownOutlined />
+                Phê duyệt <DownOutlined />
               </Button>
             </Dropdown>
           </Space>
@@ -490,12 +517,12 @@ function CoachDashboard() {
     },
   ];
 
-  // Conditional rendering for loading and error states
+  // Hiển thị có điều kiện cho trạng thái tải và lỗi
   if (isLoading && !clients.length && !bookings.length) {
     return (
       <div className="p-8 text-center">
         <Spin size="large" />
-        <p className="mt-2">Đang tải dashboard...</p>
+        <p className="mt-2">Đang tải bảng điều khiển...</p>
       </div>
     );
   }
@@ -515,10 +542,10 @@ function CoachDashboard() {
       <div className="max-w-7xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
-            Client Management
+            Quản lý khách hàng
           </h1>
           <p className="text-gray-500 mt-1">
-            Welcome back ! Here's an overview of your clients.
+            Chào mừng trở lại! Đây là tổng quan về khách hàng của bạn.
           </p>
         </header>
 
@@ -527,8 +554,18 @@ function CoachDashboard() {
             to="/"
             className="px-4 py-2 bg-white border border-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
           >
-            Về Homepage
+            Về trang chủ
           </Link>
+          {coachMeetLink && (
+            <Button
+              type="primary"
+              icon={<VideoCameraOutlined />}
+              onClick={() => window.open(coachMeetLink, "_blank")}
+              className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Tham gia Google Meet
+            </Button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
@@ -543,26 +580,26 @@ function CoachDashboard() {
             ))
           ) : (
             <p className="lg:col-span-2 text-center text-gray-500">
-              No clients to display.
+              Không có khách hàng nào để hiển thị.
             </p>
           )}
         </div>
 
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            My Appointments
+            Các cuộc hẹn của tôi
           </h2>
           <div className="bg-white rounded-xl shadow-md p-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
               <Space wrap>
                 <Input.Search
-                  placeholder="Search by name, ID..."
+                  placeholder="Tìm kiếm theo tên, ID..."
                   onSearch={handleSearch}
                   enterButton={<SearchOutlined />}
                   className="w-full md:w-64"
                 />
                 <Select
-                  placeholder="Filter by status"
+                  placeholder="Lọc theo trạng thái"
                   onChange={handleStatusFilterChange}
                   allowClear
                   className="w-full md:w-52"
@@ -580,7 +617,7 @@ function CoachDashboard() {
                 onClick={fetchCoachData}
                 loading={isLoading}
               >
-                Refresh
+                Làm mới
               </Button>
             </div>
 
@@ -598,7 +635,7 @@ function CoachDashboard() {
         </div>
       </div>
 
-      {/* Modal for sending notifications */}
+      {/* Modal để gửi thông báo */}
       {currentTargetClient && (
         <Modal
           title={`Gửi thông báo đến ${currentTargetClient.fullName}`}
@@ -659,40 +696,40 @@ function CoachDashboard() {
         </Modal>
       )}
 
-      {/* Modal for viewing booking details */}
+      {/* Modal để xem chi tiết đặt chỗ */}
       <Modal
         title={
-          <Title level={4}>Booking Details #{viewingBooking?.bookingId}</Title>
+          <Title level={4}>Chi tiết đặt chỗ #{viewingBooking?.bookingId}</Title>
         }
         open={viewingBooking !== null}
         onCancel={closeBookingDetails}
         footer={[
           <Button key="back" onClick={closeBookingDetails}>
-            Close
+            Đóng
           </Button>,
         ]}
       >
         {viewingBooking && (
           <div>
             <Paragraph>
-              <Text strong>Customer:</Text> {viewingBooking.customerName}
+              <Text strong>Khách hàng:</Text> {viewingBooking.customerName}
             </Paragraph>
             <Paragraph>
-              <Text strong>Date:</Text>{" "}
+              <Text strong>Ngày:</Text>{" "}
               {new Date(viewingBooking.date).toLocaleDateString("vi-VN")}
             </Paragraph>
             <Paragraph>
-              <Text strong>Time:</Text> {viewingBooking.startTime} -{" "}
+              <Text strong>Thời gian:</Text> {viewingBooking.startTime} -{" "}
               {viewingBooking.endTime}
             </Paragraph>
             <Paragraph>
-              <Text strong>Status:</Text>{" "}
+              <Text strong>Trạng thái:</Text>{" "}
               <Tag color={STATUS_COLORS[viewingBooking.status] || "default"}>
                 {viewingBooking.status}
               </Tag>
             </Paragraph>
             <Paragraph>
-              <Text strong>Created At:</Text>{" "}
+              <Text strong>Tạo lúc:</Text>{" "}
               {new Date(viewingBooking.createdAt).toLocaleString("vi-VN")}
             </Paragraph>
           </div>
