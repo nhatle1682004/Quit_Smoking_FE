@@ -197,12 +197,9 @@ function CoachDashboard() {
   const fetchCoachData = useCallback(async () => {
     if (!currentUser?.id) {
       setIsLoading(false);
-      setError("Vui lòng đăng nhập để xem bảng điều khiển.");
-      console.log("Lỗi: currentUser.id không tồn tại."); // Nhật ký gỡ lỗi
+      setError("Please log in to view the dashboard.");
       return;
     }
-
-    console.log("ID người dùng hiện tại (currentUser.id):", currentUser.id); // Nhật ký gỡ lỗi
 
     setIsLoading(true);
     try {
@@ -357,8 +354,8 @@ function CoachDashboard() {
       }));
       setAllBookings(formattedBookings);
     } catch (err) {
-      setError("Không thể tải dữ liệu bảng điều khiển. Vui lòng thử lại.");
-      console.error("Lỗi khi tìm nạp dữ liệu bảng điều khiển:", err); // Sửa lỗi nhật ký
+      setError("Failed to load dashboard data. Please try again.");
+      console.error("Error fetching dashboard data:", err);
     } finally {
       setIsLoading(false);
     }

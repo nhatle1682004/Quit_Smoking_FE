@@ -91,6 +91,7 @@ const Header = () => {
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex space-x-4 lg:space-x-6">
+
               {menuItems.map((item) => (
                 <button
                   key={item.id}
@@ -102,6 +103,7 @@ const Header = () => {
                   {item.label}
                 </button>
               ))}
+
             </nav>
 
             {/* Actions Area */}
@@ -159,6 +161,7 @@ const Header = () => {
           {isOpen && (
             <div className="md:hidden bg-[#2980b9] shadow-lg rounded-lg mt-2 p-4">
               <nav className="flex flex-col space-y-4">
+
                 {menuItems.map((item) => (
                   <button
                     key={item.id}
@@ -172,14 +175,17 @@ const Header = () => {
                   </button>
                 ))}
 
+
                 {user && user.username ? (
                   <>
                     <div className="flex items-center pt-4 border-t border-[#2573a7]">
+
                       <UserAvatar
                         fullName={user.username}
                         avatarUrl={user.avatarUrl}
                         size={32}
                       />
+
                     </div>
                     <button
                       onClick={() => {

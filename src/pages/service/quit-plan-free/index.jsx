@@ -70,11 +70,7 @@ function QuitPlanFree() {
           className="space-y-6"
         >
           <Form.Item
-            label={
-              <span className="font-medium text-gray-700">
-                Ngày bắt đầu kế hoạch *
-              </span>
-            }
+            label={<span className="font-medium text-gray-700">Ngày bắt đầu kế hoạch *</span>}
             name="startDate"
             rules={[
               { required: true, message: "Vui lòng chọn ngày bắt đầu" },
@@ -97,11 +93,7 @@ function QuitPlanFree() {
           </Form.Item>
 
           <Form.Item
-            label={
-              <span className="font-medium text-gray-700">
-                Ngày kết thúc kế hoạch *
-              </span>
-            }
+            label={<span className="font-medium text-gray-700">Ngày kết thúc kế hoạch *</span>}
             name="endDate"
             rules={[
               { required: true, message: "Vui lòng chọn ngày kết thúc" },
@@ -120,9 +112,7 @@ function QuitPlanFree() {
                   }
 
                   if (start && selectedDate.isBefore(start, "day")) {
-                    return Promise.reject(
-                      "Ngày kết thúc không được trước ngày bắt đầu"
-                    );
+                    return Promise.reject("Ngày kết thúc không được trước ngày bắt đầu");
                   }
 
                   return Promise.resolve();
@@ -138,13 +128,9 @@ function QuitPlanFree() {
           </Form.Item>
 
           <Form.Item
-            label={
-              <span className="font-medium text-gray-700">Lý do thúc đẩy</span>
-            }
+            label={<span className="font-medium text-gray-700">Lý do thúc đẩy</span>}
             name="motivationReason"
-            rules={[
-              { required: true, message: "Vui lòng nhập lý do thúc đẩy" },
-            ]}
+            rules={[{ required: true, message: "Vui lòng nhập lý do thúc đẩy" }]}
           >
             <Input.TextArea
               rows={3}

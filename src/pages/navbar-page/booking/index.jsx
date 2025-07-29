@@ -208,6 +208,7 @@ function BookingPage() {
       setSuccess(true);
       setLatestBooking(res.data);
     } catch (err) {
+      console.log(err);
       setError("Đặt lịch thất bại. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);

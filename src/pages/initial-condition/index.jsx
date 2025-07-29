@@ -58,16 +58,20 @@ function InitialCondition() {
               name="cigarettesPerDay"
               label="Số lượng điếu thuốc lá hút mỗi ngày"
               rules={[
+
                 {
                   required: true,
                   message: "Vui lòng nhập số lượng điếu thuốc lá hút mỗi ngày",
                 },
+
                 {
                   type: "number",
                   min: 0,
                   max: 50,
+
                   message:
                     "Số điếu mỗi ngày phải từ 0 đến 50, không được phép là số âm",
+
                 },
               ]}
             >
@@ -95,6 +99,7 @@ function InitialCondition() {
               </Select>
             </Form.Item>
 
+
             <Form.Item
               name="quitReason"
               label="Lý do muốn bỏ thuốc lá"
@@ -107,10 +112,12 @@ function InitialCondition() {
                   message: "Không được bắt đầu bằng khoảng trắng!",
                 },
                 {
+
                   pattern:
                     /.*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*/,
                   message: "Lý do phải chứa ít nhất 5 chữ cái",
                 },
+
               ]}
             >
               <Input.TextArea
@@ -131,10 +138,12 @@ function InitialCondition() {
                   message: "Không được bắt đầu bằng khoảng trắng!",
                 },
                 {
+
                   pattern:
                     /.*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*[a-zA-ZÀ-Ỹà-ỹ].*/,
                   message: "Lý do phải chứa ít nhất 5 chữ cái",
                 },
+
               ]}
             >
               <Input
@@ -171,12 +180,15 @@ function InitialCondition() {
               />
             </Form.Item>
 
+
+
             <Form.Item
               name="hasTriedToQuit"
               label="Bạn đã từng cố bỏ thuốc lá chưa?"
               rules={[{ required: true, message: "Vui lòng chọn" }]}
             >
               <Radio.Group>
+                
                 <Radio value={true}>Có</Radio>
                 <Radio value={false}>Không</Radio>
               </Radio.Group>

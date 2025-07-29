@@ -26,7 +26,6 @@ import UserProfileDropdown from "./components/user-profile-dropdown";
 import OtpVerify from "./pages/auth/otp-verify";
 import CoachManagement from "./pages/dashboard-admin/coach-managerment/index";
 import BookingConsultPage from "./pages/navbar-page/booking/index";
-import ProcessTracking from "./pages/service/process-tracking";
 import Plan from "./pages/navbar-page/my-plan";
 import QuitPlanFree from "./pages/service/quit-plan-free";
 import PackagePage from "./pages/package";
@@ -80,10 +79,6 @@ function App() {
         {
           path: "service/quit-plan-free",
           element: <QuitPlanFree />,
-        },
-        {
-          path: "service/process",
-          element: <ProcessTracking />,
         },
         {
           path: "service/cost-calculator",
