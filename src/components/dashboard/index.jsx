@@ -7,7 +7,7 @@ import {
   LogoutOutlined,
   HomeOutlined,
   AppstoreOutlined,
-  BarChartOutlined
+  BarChartOutlined,
 } from "@ant-design/icons";
 import {
   Breadcrumb,
@@ -128,7 +128,7 @@ const Dashboard = () => {
         <Content style={{ margin: "0 16px" }}>
           <Breadcrumb
             style={{ margin: "16px 0" }}
-            items={[{ title: "User" }, { title: "Bill" }]}
+            items={[{ title: "ROLE" }, { title: "ADMIN" }]}
           />
           <div
             style={{
